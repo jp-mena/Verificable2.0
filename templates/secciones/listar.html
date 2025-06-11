@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Secciones - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Secciones</h1>
+    <a href="{{ url_for('seccion.crear_seccion') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Sección
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if secciones %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Número</th>
+                            <th>Curso</th>
+                            <th>Semestre</th>
+                            <th>Año</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seccion in secciones %}
+                        <tr>
+                            <td>{{ seccion.id }}</td>
+                            <td>{{ seccion.numero }}</td>
+                            <td>{{ seccion.curso_codigo }} - {{ seccion.curso_nombre }}</td>
+                            <td>{{ seccion.semestre }}</td>
+                            <td>{{ seccion.anio }}</td>
+                            <td>
+                                <a href="{{ url_for('seccion.editar_seccion', id=seccion.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form method="POST" action="{{ url_for('seccion.eliminar_seccion', id=seccion.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay secciones registradas.</p>
+                <a href="{{ url_for('seccion.crear_seccion') }}" class="btn btn-primary">
+                    Crear primera sección
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

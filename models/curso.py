@@ -6,6 +6,19 @@ class Curso:
         self.nombre = nombre
         self.requisitos = requisitos
     
+    @classmethod
+    def crear(cls, codigo, nombre, requisitos=None):
+        """Crea un nuevo curso"""
+        query = "INSERT INTO cursos (codigo, nombre, requisitos) VALUES (?, ?, ?)"
+        id_curso = execute_query(query, (codigo, nombre, requisitos))
+        return cls(codigo, nombre, requisitos)
+    
+    @classmethod
+    def obtener_todos(cls):
+        """Obtiene todos los cursos en formato consistente"""
+        query = "SELECT id, codigo, nombre, requisitos FROM cursos ORDER BY codigo"
+        return execute_query(query)
+    
     def save(self):
         """Guarda un nuevo curso en la base de datos"""
         query = "INSERT INTO cursos (codigo, nombre, requisitos) VALUES (?, ?, ?)"
@@ -16,6 +29,19 @@ class Curso:
         """Obtiene todos los cursos"""
         query = "SELECT id, codigo, nombre, requisitos FROM cursos"
         return execute_query(query)
+    
+    # Métodos de compatibilidad con nuevos modelos
+    @classmethod
+    def obtener_todos(cls):
+        """Obtiene todos los cursos (método de compatibilidad)"""
+        return cls.get_all()
+    
+    @classmethod
+    def crear(cls, codigo, nombre, requisitos=None):
+        """Crea un nuevo curso (método de compatibilidad)"""
+        curso = cls(codigo, nombre, requisitos)
+        curso_id = curso.save()
+        return curso
     
     @staticmethod
     def get_by_id(curso_id):

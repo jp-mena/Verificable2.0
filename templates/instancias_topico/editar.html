@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Instancia de Tópico - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Instancia de Tópico</h1>
+    <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre de la Instancia *</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" 
+                       value="{{ instancia.nombre }}" required>
+                <div class="form-text">Ej: Control 1, Tarea 2, Proyecto Final, etc.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="peso" class="form-label">Peso *</label>
+                <input type="number" class="form-control" id="peso" name="peso" 
+                       value="{{ instancia.peso }}" min="0.1" max="100" step="0.1" required>
+                <div class="form-text">Peso dentro de la evaluación (0.1 - 100%)</div>
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="opcional" name="opcional"
+                           {% if instancia.opcional %}checked{% endif %}>
+                    <label class="form-check-label" for="opcional">
+                        Actividad opcional
+                    </label>
+                    <div class="form-text">Si está marcado, esta actividad es opcional para los estudiantes</div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="evaluacion_id" class="form-label">Evaluación *</label>
+                <select class="form-select" id="evaluacion_id" name="evaluacion_id" required>
+                    <option value="">Seleccionar evaluación</option>
+                    {% for evaluacion in evaluaciones %}
+                        <option value="{{ evaluacion.id }}"
+                                {% if evaluacion.id == instancia.evaluacion_id %}selected{% endif %}>
+                            {{ evaluacion.nombre }} ({{ evaluacion.porcentaje }}%) - 
+                            {{ evaluacion.curso_codigo }} Sec.{{ evaluacion.seccion_numero }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="topico_id" class="form-label">Tópico *</label>
+                <select class="form-select" id="topico_id" name="topico_id" required>
+                    <option value="">Seleccionar tópico</option>
+                    {% for topico in topicos %}
+                        <option value="{{ topico.id }}"
+                                {% if topico.id == instancia.topico_id %}selected{% endif %}>
+                            {{ topico.tipo }} - {{ topico.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Actualizar Instancia</button>
+                <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

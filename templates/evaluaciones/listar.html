@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluaciones - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Evaluaciones</h1>
+    <a href="{{ url_for('evaluacion.crear_evaluacion') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Evaluación
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if evaluaciones %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Porcentaje</th>
+                            <th>Sección</th>
+                            <th>Curso</th>
+                            <th>Periodo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evaluacion in evaluaciones %}
+                        <tr>
+                            <td>{{ evaluacion.id }}</td>
+                            <td>{{ evaluacion.nombre }}</td>
+                            <td>{{ evaluacion.porcentaje }}%</td>
+                            <td>{{ evaluacion.seccion_numero }}</td>
+                            <td>{{ evaluacion.curso_codigo }} - {{ evaluacion.curso_nombre }}</td>
+                            <td>{{ evaluacion.semestre }}/{{ evaluacion.anio }}</td>
+                            <td>
+                                <a href="{{ url_for('evaluacion.editar_evaluacion', id=evaluacion.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form method="POST" action="{{ url_for('evaluacion.eliminar_evaluacion', id=evaluacion.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay evaluaciones registradas.</p>
+                <a href="{{ url_for('evaluacion.crear_evaluacion') }}" class="btn btn-primary">
+                    Crear primera evaluación
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

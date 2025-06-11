@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Notas - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Notas</h1>
+    <a href="{{ url_for('nota.crear_nota') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Nota
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if notas %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Alumno</th>
+                            <th>Nota</th>
+                            <th>Instancia</th>
+                            <th>Evaluación</th>
+                            <th>Peso</th>
+                            <th>Curso</th>
+                            <th>Periodo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for nota in notas %}
+                        <tr>
+                            <td>{{ nota.id }}</td>
+                            <td>{{ nota.alumno_nombre }}</td>
+                            <td>
+                                <span class="badge {% if nota.nota >= 4.0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ "%.1f"|format(nota.nota) }}
+                                </span>
+                            </td>
+                            <td>{{ nota.instancia_nombre }}</td>
+                            <td>{{ nota.evaluacion_nombre }}</td>
+                            <td>{{ nota.peso }}%</td>
+                            <td>{{ nota.curso_codigo }}</td>
+                            <td>{{ nota.semestre }}/{{ nota.anio }} - Sec.{{ nota.seccion_numero }}</td>
+                            <td>
+                                <a href="{{ url_for('nota.editar_nota', id=nota.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form method="POST" action="{{ url_for('nota.eliminar_nota', id=nota.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay notas registradas.</p>
+                <a href="{{ url_for('nota.crear_nota') }}" class="btn btn-primary">
+                    Crear primera nota
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

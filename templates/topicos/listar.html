@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Tópicos - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Tópicos</h1>
+    <a href="{{ url_for('topico.crear_topico') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Tópico
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if topicos %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for topico in topicos %}
+                        <tr>
+                            <td>{{ topico.id }}</td>
+                            <td>{{ topico.nombre }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ topico.tipo }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('topico.editar_topico', id=topico.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form method="POST" action="{{ url_for('topico.eliminar_topico', id=topico.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay tópicos registrados.</p>
+                <a href="{{ url_for('topico.crear_topico') }}" class="btn btn-primary">
+                    Crear primer tópico
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

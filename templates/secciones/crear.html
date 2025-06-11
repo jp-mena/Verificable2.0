@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Sección - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Crear Sección</h1>
+    <a href="{{ url_for('seccion.listar_secciones') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="numero" class="form-label">Número de Sección *</label>
+                <input type="number" class="form-control" id="numero" name="numero" min="1" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="instancia_id" class="form-label">Instancia de Curso *</label>
+                <select class="form-select" id="instancia_id" name="instancia_id" required>
+                    <option value="">Seleccionar instancia</option>
+                    {% for instancia in instancias %}
+                        <option value="{{ instancia.id }}">
+                            {{ instancia.curso_codigo }} - {{ instancia.curso_nombre }} 
+                            ({{ instancia.semestre }}/{{ instancia.anio }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Crear Sección</button>
+                <a href="{{ url_for('seccion.listar_secciones') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

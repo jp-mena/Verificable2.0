@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Instancias de Curso - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Instancias de Curso</h1>
+    <a href="{{ url_for('instancia_curso.crear_instancia') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Instancia
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if instancias %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Curso</th>
+                            <th>Semestre</th>
+                            <th>Año</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for instancia in instancias %}
+                        <tr>
+                            <td>{{ instancia.id }}</td>
+                            <td>{{ instancia.curso_codigo }} - {{ instancia.curso_nombre }}</td>
+                            <td>{{ instancia.semestre }}</td>
+                            <td>{{ instancia.anio }}</td>
+                            <td>
+                                <a href="{{ url_for('instancia_curso.editar_instancia', id=instancia.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                <form method="POST" action="{{ url_for('instancia_curso.eliminar_instancia', id=instancia.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay instancias de curso registradas.</p>
+                <a href="{{ url_for('instancia_curso.crear_instancia') }}" class="btn btn-primary">
+                    Crear primera instancia
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

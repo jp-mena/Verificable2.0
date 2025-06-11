@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Nota - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Crear Nota</h1>
+    <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="alumno_id" class="form-label">Alumno *</label>
+                <select class="form-select" id="alumno_id" name="alumno_id" required>
+                    <option value="">Seleccionar alumno</option>
+                    {% for alumno in alumnos %}
+                        <option value="{{ alumno.id }}">
+                            {{ alumno.nombre }} ({{ alumno.correo }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="instancia_topico_id" class="form-label">Instancia de Tópico *</label>
+                <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required>
+                    <option value="">Seleccionar instancia</option>
+                    {% for instancia in instancias_topico %}
+                        <option value="{{ instancia.id }}">
+                            {{ instancia.nombre }} ({{ instancia.peso }}%) - 
+                            {{ instancia.evaluacion_nombre }} - {{ instancia.curso_codigo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="nota" class="form-label">Nota *</label>
+                <input type="number" class="form-control" id="nota" name="nota" 
+                       min="1.0" max="7.0" step="0.1" required>
+                <div class="form-text">Nota en escala de 1.0 a 7.0</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Crear Nota</button>
+                <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

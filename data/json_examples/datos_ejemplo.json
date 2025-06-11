@@ -1,0 +1,149 @@
+{
+  "cursos": [
+    {
+      "codigo": "ICS1113",
+      "nombre": "Programación",
+      "requisitos": ""
+    },
+    {
+      "codigo": "ICS2122", 
+      "nombre": "Algoritmos y Estructuras de Datos",
+      "requisitos": "ICS1113"
+    },
+    {
+      "codigo": "MAT1610",
+      "nombre": "Matemáticas I",
+      "requisitos": ""
+    }
+  ],
+  "profesores": [
+    {
+      "nombre": "Dr. Juan Pérez",
+      "correo": "juan.perez@universidad.cl"
+    },
+    {
+      "nombre": "Dra. María González", 
+      "correo": "maria.gonzalez@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Carlos Ruiz",
+      "correo": "carlos.ruiz@universidad.cl"
+    }
+  ],
+  "alumnos": [
+    {
+      "nombre": "Ana Silva",
+      "correo": "ana.silva@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Carlos Rojas",
+      "correo": "carlos.rojas@student.cl", 
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "María Fernández",
+      "correo": "maria.fernandez@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    }
+  ],
+  "topicos": [
+    {
+      "nombre": "Control",
+      "tipo": "control"
+    },
+    {
+      "nombre": "Tarea",
+      "tipo": "tarea"
+    },
+    {
+      "nombre": "Actividad",
+      "tipo": "actividad"
+    },
+    {
+      "nombre": "Examen",
+      "tipo": "examen"
+    }
+  ],
+  "instancias_curso": [
+    {
+      "semestre": 1,
+      "anio": 2024,
+      "curso_codigo": "ICS1113"
+    },
+    {
+      "semestre": 1,
+      "anio": 2024,
+      "curso_codigo": "MAT1610"
+    },
+    {
+      "semestre": 2,
+      "anio": 2024,
+      "curso_codigo": "ICS2122"
+    }
+  ],
+  "secciones": [
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      }
+    },
+    {
+      "numero": 2,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      }
+    }
+  ],
+  "evaluaciones": [
+    {
+      "nombre": "Controles",
+      "porcentaje": 40,
+      "seccion": {
+        "numero": 1,
+        "instancia_curso": {
+          "semestre": 1,
+          "anio": 2024,
+          "curso_codigo": "ICS1113"
+        }
+      }
+    },
+    {
+      "nombre": "Tareas",
+      "porcentaje": 30,
+      "seccion": {
+        "numero": 1,
+        "instancia_curso": {
+          "semestre": 1,
+          "anio": 2024,
+          "curso_codigo": "ICS1113"
+        }
+      }
+    },
+    {
+      "nombre": "Examen Final",
+      "porcentaje": 30,
+      "seccion": {
+        "numero": 1,
+        "instancia_curso": {
+          "semestre": 1,
+          "anio": 2024,
+          "curso_codigo": "ICS1113"
+        }
+      }
+    }
+  ]
+}

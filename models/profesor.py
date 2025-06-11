@@ -16,6 +16,18 @@ class Profesor:
         query = "SELECT id, nombre, correo FROM profesores"
         return execute_query(query)
     
+    @classmethod
+    def obtener_todos(cls):
+        """Obtiene todos los profesores (método de compatibilidad)"""
+        return cls.get_all()
+    
+    @classmethod
+    def crear(cls, nombre, correo):
+        """Crea un nuevo profesor (método de compatibilidad)"""
+        profesor = cls(nombre, correo)
+        profesor_id = profesor.save()
+        return profesor
+    
     @staticmethod
     def get_by_id(profesor_id):
         """Obtiene un profesor por su ID"""

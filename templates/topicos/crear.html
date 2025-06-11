@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Tópico - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Crear Tópico</h1>
+    <a href="{{ url_for('topico.listar_topicos') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Tópico *</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo *</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="">Seleccionar tipo</option>
+                    <option value="control">Control</option>
+                    <option value="tarea">Tarea</option>
+                    <option value="actividad">Actividad</option>
+                    <option value="proyecto">Proyecto</option>
+                    <option value="examen">Examen</option>
+                    <option value="laboratorio">Laboratorio</option>
+                    <option value="presentacion">Presentación</option>
+                </select>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Crear Tópico</button>
+                <a href="{{ url_for('topico.listar_topicos') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

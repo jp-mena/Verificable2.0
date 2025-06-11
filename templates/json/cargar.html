@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}Cargar Datos JSON - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-upload me-3"></i>Carga Masiva de Datos JSON</h1>
+    <a href="/" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+    </a>
+</div>
+
+<!-- Alertas -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Información sobre el formato -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Información sobre la carga JSON</h5>
+            <p class="mb-2">Puedes cargar datos de las siguientes entidades:</p>
+            <ul class="mb-0">
+                <li><strong>Cursos:</strong> código, nombre, requisitos</li>
+                <li><strong>Profesores:</strong> nombre, correo</li>
+                <li><strong>Alumnos:</strong> nombre, correo, fecha_ingreso</li>
+                <li><strong>Instancias de Curso:</strong> semestre, año, curso_codigo</li>
+                <li><strong>Secciones:</strong> número, instancia de curso</li>
+                <li><strong>Tópicos:</strong> nombre, tipo</li>
+                <li><strong>Evaluaciones:</strong> nombre, porcentaje, sección</li>
+                <li><strong>Notas:</strong> alumno, instancia_topico, nota</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Opciones de carga -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-file-upload me-2"></i>Subir Archivo JSON</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Selecciona un archivo JSON desde tu computadora para cargar datos masivamente.</p>
+                  <form method="POST" action="{{ url_for('json_load.procesar_json') }}" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-3">
+                        <label for="archivo_json" class="form-label">Archivo JSON</label>
+                        <div class="drop-zone" id="dropZone">
+                            <input type="file" class="form-control" id="archivo_json" name="archivo_json" 
+                                   accept=".json" required style="display: none;">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="mb-2">Arrastra y suelta tu archivo JSON aquí</p>
+                                <p class="text-muted small">o <button type="button" class="btn btn-link p-0" onclick="document.getElementById('archivo_json').click()">haz clic para seleccionar</button></p>
+                                <div id="fileName" class="mt-2 text-success" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <div class="form-text">Solo archivos .json son permitidos (máximo 10MB)</div>
+                    </div>                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="validarJSON()" id="validateBtn" disabled>
+                            <i class="fas fa-check-circle me-2"></i>Validar JSON
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="uploadBtn" disabled>
+                            <i class="fas fa-upload me-2"></i>Cargar Archivo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-database me-2"></i>Datos de Ejemplo</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Carga datos de ejemplo predefinidos para probar el sistema rápidamente.</p>
+                
+                <form method="POST" action="{{ url_for('json_load.procesar_json') }}">                    <div class="mb-3">
+                        <p><strong>Se cargarán:</strong></p>
+                        <ul class="small">
+                            <li>10 cursos de ejemplo</li>
+                            <li>10 profesores</li>
+                            <li>10 alumnos</li>
+                            <li>10 instancias de curso</li>
+                            <li>10 secciones</li>
+                            <li>10 tópicos</li>
+                            <li>10 evaluaciones</li>
+                            <li>10 instancias de tópico</li>
+                            <li>10 notas</li>
+                        </ul>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-plus-circle me-2"></i>Cargar Datos de Ejemplo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="accordion" id="formatoAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="formatoHeading">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#formatoCollapse" aria-expanded="false">
+                        Ver Formato JSON Esperado
+                    </button>
+                </h2>
+                <div id="formatoCollapse" class="accordion-collapse collapse" 
+                     data-bs-parent="#formatoAccordion">
+                    <div class="accordion-body">
+                        <pre><code>{
+  "cursos": [
+    {
+      "codigo": "ICS1113",
+      "nombre": "Programación",
+      "requisitos": ""
+    }
+  ],
+  "profesores": [
+    {
+      "nombre": "Dr. Juan Pérez",
+      "correo": "juan.perez@universidad.cl"
+    }
+  ],
+  "alumnos": [
+    {
+      "nombre": "Ana Silva",
+      "correo": "ana.silva@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Documentación y ejemplos -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-code me-2"></i>Formato JSON Esperado</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Estructura básica:</h6>
+                        <pre><code>{
+  "cursos": [
+    {
+      "codigo": "ICS1113",
+      "nombre": "Programación",
+      "requisitos": ""
+    }
+  ],
+  "profesores": [
+    {
+      "nombre": "Dr. Juan Pérez",
+      "correo": "juan.perez@universidad.cl"
+    }
+  ],
+  "alumnos": [
+    {
+      "nombre": "Ana Silva",
+      "correo": "ana.silva@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    }
+  ]
+}</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Entidades avanzadas:</h6>
+                        <pre><code>{
+  "instancias_curso": [
+    {
+      "semestre": 1,
+      "anio": 2024,
+      "curso_codigo": "ICS1113"
+    }
+  ],
+  "secciones": [
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      }
+    }
+  ],
+  "notas": [
+    {
+      "alumno_correo": "ana.silva@student.cl",
+      "instancia_topico_id": 1,
+      "nota": 6.5
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Descargar ejemplos:</h6>
+                    <a href="/static/examples/ejemplo_basico.json" class="btn btn-outline-primary me-2" target="_blank">
+                        <i class="fas fa-download me-2"></i>Ejemplo Básico
+                    </a>
+                    <a href="/static/examples/ejemplo_completo.json" class="btn btn-outline-info me-2" target="_blank">
+                        <i class="fas fa-download me-2"></i>Ejemplo Completo
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="generarEjemplo()">
+                        <i class="fas fa-magic me-2"></i>Generar Ejemplo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progreso de carga -->
+<div class="modal fade" id="loadingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <h5>Procesando datos...</h5>
+                <p class="text-muted">Por favor espera mientras se procesan los datos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funcionalidad de drag & drop
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('archivo_json');
+const fileName = document.getElementById('fileName');
+const uploadBtn = document.getElementById('uploadBtn');
+
+// Estilos para la zona de drop
+const style = document.createElement('style');
+style.textContent = `
+    .drop-zone {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+    .drop-zone:hover {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+    .drop-zone.drag-over {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+        transform: scale(1.02);
+    }
+    .drop-zone.drag-active {
+        border-color: #198754;
+        background-color: #d1e7dd;
+    }
+`;
+document.head.appendChild(style);
+
+// Event listeners para drag & drop
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    dropZone.classList.add('drag-active');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type === 'application/json' || file.name.endsWith('.json')) {
+            fileInput.files = files;
+            mostrarNombreArchivo(file.name);
+            habilitarBoton();
+        } else {
+            alert('Por favor selecciona solo archivos JSON (.json)');
+        }
+    }
+    
+    setTimeout(() => dropZone.classList.remove('drag-active'), 200);
+});
+
+// Event listener para selección manual
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        mostrarNombreArchivo(file.name);
+        habilitarBoton();
+    }
+});
+
+function mostrarNombreArchivo(nombre) {
+    fileName.innerHTML = `<i class="fas fa-file-code me-2"></i>${nombre}`;
+    fileName.style.display = 'block';
+}
+
+function habilitarBoton() {
+    uploadBtn.disabled = false;
+    document.getElementById('validateBtn').disabled = false;
+}
+
+// Mostrar modal de carga al enviar formulario
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    const file = fileInput.files[0];
+    if (file && file.size > 10 * 1024 * 1024) { // 10MB
+        e.preventDefault();
+        alert('El archivo es demasiado grande. Máximo 10MB permitido.');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    modal.show();
+});
+
+// Función para generar ejemplo JSON
+function generarEjemplo() {
+    const ejemplo = {
+        "cursos": [
+            {
+                "codigo": "EJ001",
+                "nombre": "Curso de Ejemplo",
+                "requisitos": ""
+            }
+        ],
+        "profesores": [
+            {
+                "nombre": "Profesor Ejemplo",
+                "correo": "profesor@ejemplo.cl"
+            }
+        ],
+        "alumnos": [
+            {
+                "nombre": "Estudiante Ejemplo",
+                "correo": "estudiante@ejemplo.cl",
+                "fecha_ingreso": "2024-03-01"
+            }
+        ]
+    };
+    
+    // Crear elemento para descargar
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ejemplo, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "ejemplo_generado.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+// Función para validar JSON antes de enviar
+async function validarJSON() {
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Por favor selecciona un archivo JSON primero');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const jsonData = JSON.parse(e.target.result);
+            
+            // Enviar a API de validación
+            const response = await fetch('/api/validar-json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: e.target.result
+            });
+            
+            const result = await response.json();
+            
+            if (result.valido) {
+                alert(`✅ JSON válido!\n\nEntidades encontradas: ${result.entidades_encontradas.join(', ')}\n\nConteos: ${JSON.stringify(result.conteos, null, 2)}`);
+            } else {
+                alert(`❌ JSON inválido:\n\n${result.errores.join('\n')}`);
+            }
+        } catch (error) {
+            alert(`❌ Error de sintaxis JSON: ${error.message}`);
+        }
+    };
+    
+    reader.readAsText(file);
+}
+</script>
+
+{% endblock %}

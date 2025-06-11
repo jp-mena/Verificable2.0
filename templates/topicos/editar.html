@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Tópico - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Editar Tópico</h1>
+    <a href="{{ url_for('topico.listar_topicos') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Tópico *</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" 
+                       value="{{ topico.nombre }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo *</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="">Seleccionar tipo</option>
+                    <option value="control" {% if topico.tipo == 'control' %}selected{% endif %}>Control</option>
+                    <option value="tarea" {% if topico.tipo == 'tarea' %}selected{% endif %}>Tarea</option>
+                    <option value="actividad" {% if topico.tipo == 'actividad' %}selected{% endif %}>Actividad</option>
+                    <option value="proyecto" {% if topico.tipo == 'proyecto' %}selected{% endif %}>Proyecto</option>
+                    <option value="examen" {% if topico.tipo == 'examen' %}selected{% endif %}>Examen</option>
+                    <option value="laboratorio" {% if topico.tipo == 'laboratorio' %}selected{% endif %}>Laboratorio</option>
+                    <option value="presentacion" {% if topico.tipo == 'presentacion' %}selected{% endif %}>Presentación</option>
+                </select>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Actualizar Tópico</button>
+                <a href="{{ url_for('topico.listar_topicos') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

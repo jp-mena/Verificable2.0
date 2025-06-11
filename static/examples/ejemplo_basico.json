@@ -1,0 +1,148 @@
+{
+  "cursos": [
+    {
+      "codigo": "ICS1113",
+      "nombre": "Programación",
+      "requisitos": ""
+    },
+    {
+      "codigo": "MAT1610",
+      "nombre": "Matemáticas I",
+      "requisitos": ""
+    },
+    {
+      "codigo": "ICS2122",
+      "nombre": "Algoritmos y Estructuras de Datos",
+      "requisitos": "ICS1113"
+    },
+    {
+      "codigo": "MAT1620",
+      "nombre": "Matemáticas II",
+      "requisitos": "MAT1610"
+    },
+    {
+      "codigo": "ICS2523",
+      "nombre": "Ingeniería de Software",
+      "requisitos": "ICS2122"
+    },
+    {
+      "codigo": "FIS1500",
+      "nombre": "Física I",
+      "requisitos": "MAT1610"
+    },
+    {
+      "codigo": "QUI1100",
+      "nombre": "Química General",
+      "requisitos": ""
+    },
+    {
+      "codigo": "IEE2153",
+      "nombre": "Circuitos Eléctricos",
+      "requisitos": "FIS1500, MAT1620"
+    },
+    {
+      "codigo": "ICS3413",
+      "nombre": "Base de Datos",
+      "requisitos": "ICS2122"
+    },
+    {
+      "codigo": "MAT2630",
+      "nombre": "Matemáticas III",
+      "requisitos": "MAT1620"
+    }
+  ],
+  "profesores": [
+    {
+      "nombre": "Dr. Juan Pérez",
+      "correo": "juan.perez@universidad.cl"
+    },
+    {
+      "nombre": "Dra. María González",
+      "correo": "maria.gonzalez@universidad.cl"
+    },
+    {
+      "nombre": "Mg. Carlos López",
+      "correo": "carlos.lopez@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Ana Martínez",
+      "correo": "ana.martinez@universidad.cl"
+    },
+    {
+      "nombre": "Ing. Pedro Silva",
+      "correo": "pedro.silva@universidad.cl"
+    },
+    {
+      "nombre": "Dra. Laura Fernández",
+      "correo": "laura.fernandez@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Roberto Morales",
+      "correo": "roberto.morales@universidad.cl"
+    },
+    {
+      "nombre": "Mg. Sofía Castro",
+      "correo": "sofia.castro@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Diego Herrera",
+      "correo": "diego.herrera@universidad.cl"
+    },
+    {
+      "nombre": "Dra. Valentina Torres",
+      "correo": "valentina.torres@universidad.cl"
+    }
+  ],
+  "alumnos": [
+    {
+      "nombre": "Ana Silva",
+      "correo": "ana.silva@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Carlos Rojas",
+      "correo": "carlos.rojas@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "María Fernández",
+      "correo": "maria.fernandez@student.cl",
+      "fecha_ingreso": "2024-08-01"
+    },
+    {
+      "nombre": "Diego Morales",
+      "correo": "diego.morales@student.cl",
+      "fecha_ingreso": "2025-03-01"
+    },
+    {
+      "nombre": "Sofía Chen",
+      "correo": "sofia.chen@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Miguel Torres",
+      "correo": "miguel.torres@student.cl",
+      "fecha_ingreso": "2023-08-01"
+    },
+    {
+      "nombre": "Valentina Silva",
+      "correo": "valentina.silva@student.cl",
+      "fecha_ingreso": "2023-08-01"
+    },
+    {
+      "nombre": "Sebastián Vargas",
+      "correo": "sebastian.vargas@student.cl",
+      "fecha_ingreso": "2024-08-01"
+    },
+    {
+      "nombre": "Catalina Ruiz",
+      "correo": "catalina.ruiz@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Andrés Mendoza",
+      "correo": "andres.mendoza@student.cl",
+      "fecha_ingreso": "2025-03-01"
+    }
+  ]
+}
