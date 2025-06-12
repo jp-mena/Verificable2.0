@@ -30,7 +30,6 @@ def crear_instancia():
             if anio < 2000 or anio > 2030:
                 flash('El año debe estar entre 2000 y 2030', 'error')
                 return redirect(url_for('instancia_curso.crear_instancia'))
-            
             InstanciaCurso.crear(semestre, anio, curso_id)
             flash('Instancia de curso creada exitosamente', 'success')
             return redirect(url_for('instancia_curso.listar_instancias'))
@@ -99,6 +98,66 @@ def eliminar_instancia(id):
     
     return redirect(url_for('instancia_curso.listar_instancias'))
 
+@instancia_curso_bp.route('/instancias-curso/<int:id>/cerrar', methods=['GET', 'POST'])
+def cerrar_instancia(id):
+    """Cierra una instancia de curso y calcula notas finales"""
+    instancia = InstanciaCurso.obtener_por_id(id)
+    if not instancia:
+        flash('Instancia de curso no encontrada', 'error')
+        return redirect(url_for('instancia_curso.listar_instancias'))
+    
+    if instancia.esta_cerrado():
+        flash('Esta instancia de curso ya está cerrada', 'warning')
+        return redirect(url_for('instancia_curso.listar_instancias'))
+    
+    if request.method == 'POST':
+        try:
+            instancia.cerrar_curso()
+            flash(f'Instancia de curso "{instancia.curso_nombre}" {instancia.semestre}-{instancia.anio} cerrada exitosamente. Las notas finales han sido calculadas.', 'success')
+            return redirect(url_for('instancia_curso.listar_instancias'))
+        except Exception as e:
+            flash(f'Error al cerrar la instancia: {str(e)}', 'error')
+    
+    return render_template('instancias_curso/cerrar.html', instancia=instancia)
+
+@instancia_curso_bp.route('/instancias-curso/<int:id>/notas-finales')
+def ver_notas_finales(id):
+    """Muestra las notas finales de una instancia cerrada"""
+    instancia = InstanciaCurso.obtener_por_id(id)
+    if not instancia:
+        flash('Instancia de curso no encontrada', 'error')
+        return redirect(url_for('instancia_curso.listar_instancias'))
+    
+    if not instancia.esta_cerrado():
+        flash('Esta instancia de curso no está cerrada', 'warning')
+        return redirect(url_for('instancia_curso.listar_instancias'))
+    
+    # Obtener notas finales
+    query = """
+    SELECT a.id, a.nombre, a.correo, nf.nota_final, nf.fecha_calculo
+    FROM notas_finales nf
+    JOIN alumnos a ON nf.alumno_id = a.id
+    WHERE nf.instancia_curso_id = ?
+    ORDER BY a.nombre
+    """
+    from db.database import execute_query
+    notas_finales = execute_query(query, (id,))
+    
+    alumnos_notas = [
+        {
+            'alumno_id': fila[0],
+            'nombre': fila[1],
+            'correo': fila[2],
+            'nota_final': fila[3],
+            'fecha_calculo': fila[4]
+        }
+        for fila in notas_finales
+    ]
+    
+    return render_template('instancias_curso/notas_finales.html', 
+                         instancia=instancia, 
+                         alumnos_notas=alumnos_notas)
+
 @instancia_curso_bp.route('/instancias-curso/<int:id>/detalle')
 def detalle_curso(id):
     """Muestra el detalle completo del curso con alumnos y notas"""
@@ -121,29 +180,46 @@ def detalle_curso(id):
         flash(f'Error al obtener el detalle del curso: {str(e)}', 'error')
         return redirect(url_for('instancia_curso.listar_instancias'))
 
-@instancia_curso_bp.route('/instancias-curso/<int:id>/cerrar', methods=['GET', 'POST'])
-def cerrar_instancia(id):
-    """Cierra una instancia de curso y calcula notas finales"""
-    instancia = InstanciaCurso.obtener_por_id(id)
-    if not instancia:
-        flash('Instancia de curso no encontrada', 'error')
-        return redirect(url_for('instancia_curso.listar_instancias'))
-    
-    if instancia.esta_cerrado():
-        flash('Esta instancia de curso ya está cerrada', 'warning')
-        return redirect(url_for('instancia_curso.listar_instancias'))
-    
-    if request.method == 'POST':
-        try:
-            if InstanciaCurso.cerrar_curso(id):
-                flash(f'Instancia de curso "{instancia.curso_nombre}" {instancia.semestre}-{instancia.anio} cerrada exitosamente. Las notas finales han sido calculadas.', 'success')
-            else:
-                flash('Error al cerrar la instancia de curso', 'error')
-            return redirect(url_for('instancia_curso.listar_instancias'))
-        except Exception as e:
-            flash(f'Error al cerrar la instancia: {str(e)}', 'error')
-    
-    return render_template('instancias_curso/cerrar.html', instancia=instancia)
+# API endpoints para funcionalidad de cierre
+@instancia_curso_bp.route('/api/instancias-curso/<int:id>/cerrar', methods=['POST'])
+def api_cerrar_instancia(id):
+    """API para cerrar una instancia de curso"""
+    try:
+        instancia = InstanciaCurso.obtener_por_id(id)
+        if not instancia:
+            return jsonify({'error': 'Instancia de curso no encontrada'}), 404
+        
+        if instancia.esta_cerrado():
+            return jsonify({'error': 'Esta instancia ya está cerrada'}), 400
+        
+        instancia.cerrar_curso()
+        return jsonify({
+            'mensaje': f'Instancia cerrada exitosamente',
+            'instancia_id': id,
+            'fecha_cierre': instancia.fecha_cierre
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@instancia_curso_bp.route('/api/instancias-curso/<int:id>/estado')
+def api_estado_instancia(id):
+    """API para obtener el estado de una instancia"""
+    try:
+        instancia = InstanciaCurso.obtener_por_id(id)        if not instancia:
+            return jsonify({'error': 'Instancia no encontrada'}), 404
+        
+        return jsonify({
+            'id': instancia.id,
+            'semestre': instancia.semestre,
+            'anio': instancia.anio,
+            'curso_nombre': instancia.curso_nombre,
+            'cerrado': instancia.esta_cerrado(),
+            'fecha_cierre': getattr(instancia, 'fecha_cierre', None)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @instancia_curso_bp.route('/instancias-curso/<int:id>/inscribir', methods=['POST'])
 def inscribir_alumno(id):
@@ -211,46 +287,3 @@ def desinscribir_alumno(instancia_id, alumno_id):
         flash(f'Error al desinscribir alumno: {str(e)}', 'error')
     
     return redirect(url_for('instancia_curso.detalle_curso', id=instancia_id))
-
-# API endpoints
-@instancia_curso_bp.route('/api/instancias-curso/<int:id>/cerrar', methods=['POST'])
-def api_cerrar_instancia(id):
-    """API para cerrar una instancia de curso"""
-    try:
-        instancia = InstanciaCurso.obtener_por_id(id)
-        if not instancia:
-            return jsonify({'error': 'Instancia de curso no encontrada'}), 404
-        
-        if instancia.esta_cerrado():
-            return jsonify({'error': 'Esta instancia ya está cerrada'}), 400
-        
-        if InstanciaCurso.cerrar_curso(id):
-            return jsonify({
-                'mensaje': f'Instancia cerrada exitosamente',
-                'instancia_id': id
-            }), 200
-        else:
-            return jsonify({'error': 'Error al cerrar la instancia'}), 500
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@instancia_curso_bp.route('/api/instancias-curso/<int:id>/estado')
-def api_estado_instancia(id):
-    """API para obtener el estado de una instancia"""
-    try:
-        instancia = InstanciaCurso.obtener_por_id(id)
-        if not instancia:
-            return jsonify({'error': 'Instancia no encontrada'}), 404
-        
-        return jsonify({
-            'id': instancia.id,
-            'semestre': instancia.semestre,
-            'anio': instancia.anio,
-            'curso_nombre': getattr(instancia, 'curso_nombre', ''),
-            'cerrado': instancia.esta_cerrado(),
-            'fecha_cierre': getattr(instancia, 'fecha_cierre', None)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500

@@ -6,9 +6,7 @@ class Nota:
         self.id = id
         self.alumno_id = alumno_id
         self.instancia_topico_id = instancia_topico_id
-        self.nota = nota
-
-    @classmethod
+        self.nota = nota    @classmethod
     def crear(cls, alumno_id, instancia_topico_id, nota):
         """Crea una nueva nota"""
         query = "INSERT INTO notas (alumno_id, instancia_topico_id, nota) VALUES (?, ?, ?)"
@@ -23,7 +21,7 @@ class Nota:
                a.nombre as alumno_nombre, a.correo as alumno_correo,
                it.nombre as instancia_nombre, it.peso,
                e.nombre as evaluacion_nombre, t.nombre as topico_nombre,
-               s.numero, ic.semestre, ic.anio, c.codigo
+               s.numero, ic.semestre, ic.anio, c.codigo, ic.cerrado
         FROM notas n
         JOIN alumnos a ON n.alumno_id = a.id
         JOIN instancias_topico it ON n.instancia_topico_id = it.id
@@ -50,7 +48,8 @@ class Nota:
                 'seccion_numero': fila[10],
                 'semestre': fila[11],
                 'anio': fila[12],
-                'curso_codigo': fila[13]
+                'curso_codigo': fila[13],
+                'curso_cerrado': bool(fila[14]) if fila[14] is not None else False
             }
             for fila in resultados
         ]

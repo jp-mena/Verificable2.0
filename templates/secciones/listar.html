@@ -14,32 +14,44 @@
     <div class="card-body">
         {% if secciones %}
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+                <table class="table table-striped">                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Número</th>
                             <th>Curso</th>
                             <th>Semestre</th>
                             <th>Año</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for seccion in secciones %}
-                        <tr>
-                            <td>{{ seccion.id }}</td>
+                        <tr>                            <td>{{ seccion.id }}</td>
                             <td>{{ seccion.numero }}</td>
                             <td>{{ seccion.curso_codigo }} - {{ seccion.curso_nombre }}</td>
                             <td>{{ seccion.semestre }}</td>
                             <td>{{ seccion.anio }}</td>
                             <td>
-                                <a href="{{ url_for('seccion.editar_seccion', id=seccion.id) }}" 
-                                   class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form method="POST" action="{{ url_for('seccion.eliminar_seccion', id=seccion.id) }}" 
-                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                </form>
+                                {% if seccion.curso_cerrado %}
+                                    <span class="badge bg-danger">Cerrado</span>
+                                {% else %}
+                                    <span class="badge bg-success">Abierto</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not seccion.curso_cerrado %}
+                                    <a href="{{ url_for('seccion.editar_seccion', id=seccion.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Editar</a>
+                                    <form method="POST" action="{{ url_for('seccion.eliminar_seccion', id=seccion.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i> Curso cerrado
+                                    </span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

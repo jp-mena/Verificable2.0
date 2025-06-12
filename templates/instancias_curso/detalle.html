@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle del Curso - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ resumen.instancia.curso_codigo }} - {{ resumen.instancia.curso_nombre }}</h1>
+        <p class="text-muted mb-0">
+            {{ resumen.instancia.semestre }}° Semestre {{ resumen.instancia.anio }}
+            {% if resumen.instancia.cerrado %}
+                <span class="badge bg-danger ms-2">Curso Cerrado</span>
+                {% if resumen.instancia.fecha_cierre %}
+                    <small class="text-muted ms-2">
+                        Cerrado el {{ resumen.instancia.fecha_cierre.strftime('%d/%m/%Y %H:%M') if resumen.instancia.fecha_cierre else 'N/A' }}
+                    </small>
+                {% endif %}
+            {% else %}
+                <span class="badge bg-success ms-2">Curso Abierto</span>
+            {% endif %}
+        </p>
+    </div>
+    <div>
+        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Lista
+        </a>
+        {% if not resumen.instancia.cerrado %}
+            <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#cerrarCursoModal">
+                <i class="fas fa-lock"></i> Cerrar Curso
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Resumen del curso -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">{{ resumen.alumnos|length }}</h3>
+                <p class="card-text">Alumnos Inscritos</p>
+            </div>
+        </div>
+    </div>
+    {% if resumen.instancia.cerrado %}
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">{{ resumen.alumnos|selectattr('nota_final')|list|length }}</h3>
+                <p class="card-text">Notas Finales Calculadas</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Lista de alumnos y notas -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-users"></i> Alumnos y Notas
+            {% if resumen.instancia.cerrado %}
+                <span class="badge bg-info ms-2">Notas Finales</span>
+            {% else %}
+                <span class="badge bg-warning ms-2">Vista Previa</span>
+            {% endif %}
+        </h5>
+        {% if not resumen.instancia.cerrado and alumnos_disponibles %}
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inscribirAlumnoModal">
+            <i class="fas fa-user-plus"></i> Inscribir Alumno
+        </button>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if resumen.alumnos %}
+            {% for alumno in resumen.alumnos %}
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">
+                            <i class="fas fa-user"></i> 
+                            {{ alumno.nombre }}
+                        </h6>
+                        <small class="text-muted">
+                            Email: {{ alumno.correo }} | 
+                            Ingreso: {{ alumno.fecha_ingreso }} |
+                            Inscrito: {{ alumno.fecha_inscripcion }}
+                        </small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if resumen.instancia.cerrado and alumno.nota_final %}
+                            <span class="badge bg-success fs-6">
+                                Nota Final: {{ "%.2f"|format(alumno.nota_final.nota_final) }}
+                            </span>
+                        {% elif alumno.nota_final_temporal is defined %}
+                            <span class="badge bg-warning fs-6">
+                                Nota Calculada: {{ "%.2f"|format(alumno.nota_final_temporal) }}
+                            </span>
+                        {% endif %}
+                        {% if not resumen.instancia.cerrado %}
+                        <form method="POST" action="{{ url_for('instancia_curso.desinscribir_alumno', instancia_id=resumen.instancia.id, alumno_id=alumno.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                    onclick="return confirm('¿Está seguro que desea desinscribir a este alumno? Se eliminarán todas sus notas.')">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if alumno.notas %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Evaluación</th>
+                                        <th>Tópico</th>
+                                        <th>Instancia</th>
+                                        <th>Nota</th>
+                                        <th>Peso Tópico</th>
+                                        <th>Peso Evaluación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for nota in alumno.notas %}
+                                    <tr>
+                                        <td>{{ nota.evaluacion }}</td>
+                                        <td>
+                                            {{ nota.topico_nombre }}
+                                            <small class="text-muted">({{ nota.topico_tipo }})</small>
+                                        </td>
+                                        <td>{{ nota.instancia_topico }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if nota.nota >= 4.0 %}success{% else %}danger{% endif %}">
+                                                {{ "%.2f"|format(nota.nota) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ nota.peso_topico }}%</td>
+                                        <td>{{ nota.peso_evaluacion }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No hay notas registradas para este alumno.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-3">No hay alumnos inscritos en este curso.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para confirmar cierre del curso -->
+{% if not resumen.instancia.cerrado %}
+<div class="modal fade" id="cerrarCursoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Confirmar Cierre del Curso
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>¿Está seguro que desea cerrar este curso?</strong></p>
+                <div class="alert alert-warning">
+                    <ul class="mb-0">
+                        <li>Se calcularán automáticamente las notas finales de todos los alumnos</li>
+                        <li>No se podrán modificar más notas</li>
+                        <li>No se podrán agregar o eliminar evaluaciones</li>
+                        <li>No se podrán inscribir o eliminar alumnos</li>
+                        <li><strong>Esta acción no se puede deshacer</strong></li>
+                    </ul>
+                </div>
+                <p>Curso: <strong>{{ resumen.instancia.curso_codigo }} - {{ resumen.instancia.curso_nombre }}</strong></p>
+                <p>Período: <strong>{{ resumen.instancia.semestre }}° Semestre {{ resumen.instancia.anio }}</strong></p>
+                <p>Alumnos afectados: <strong>{{ resumen.alumnos|length }}</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('instancia_curso.cerrar_instancia', id=resumen.instancia.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-lock"></i> Sí, Cerrar Curso
+                    </button>
+                </form>
+            </div>
+        </div>    </div>
+</div>
+{% endif %}
+
+<!-- Modal para inscribir alumno -->
+{% if not resumen.instancia.cerrado and alumnos_disponibles %}
+<div class="modal fade" id="inscribirAlumnoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus text-success"></i>
+                    Inscribir Alumno
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('instancia_curso.inscribir_alumno', id=resumen.instancia.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="alumno_id" class="form-label">Seleccionar Alumno</label>
+                        <select class="form-select" id="alumno_id" name="alumno_id" required>
+                            <option value="">Seleccione un alumno...</option>
+                            {% for alumno in alumnos_disponibles %}
+                            <option value="{{ alumno.id }}">
+                                {{ alumno.nombre }} ({{ alumno.correo }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Información:</strong> El alumno será inscrito en este curso y podrá recibir notas en las evaluaciones.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> Inscribir Alumno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

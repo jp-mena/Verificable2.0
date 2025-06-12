@@ -6,9 +6,7 @@ class Evaluacion:
         self.id = id
         self.nombre = nombre
         self.porcentaje = porcentaje
-        self.seccion_id = seccion_id
-
-    @classmethod
+        self.seccion_id = seccion_id    @classmethod
     def crear(cls, nombre, porcentaje, seccion_id):
         """Crea una nueva evaluación"""
         query = "INSERT INTO evaluaciones (nombre, porcentaje, seccion_id) VALUES (?, ?, ?)"
@@ -20,7 +18,7 @@ class Evaluacion:
         """Obtiene todas las evaluaciones"""
         query = """
         SELECT e.id, e.nombre, e.porcentaje, e.seccion_id, s.numero, 
-               ic.semestre, ic.anio, c.codigo, c.nombre
+               ic.semestre, ic.anio, c.codigo, c.nombre, ic.cerrado
         FROM evaluaciones e
         JOIN secciones s ON e.seccion_id = s.id
         JOIN instancias_curso ic ON s.instancia_id = ic.id
@@ -38,7 +36,8 @@ class Evaluacion:
                 'semestre': fila[5],
                 'anio': fila[6],
                 'curso_codigo': fila[7],
-                'curso_nombre': fila[8]
+                'curso_nombre': fila[8],
+                'curso_cerrado': bool(fila[9])
             }
             for fila in resultados
         ]

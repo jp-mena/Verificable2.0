@@ -14,13 +14,13 @@
     <div class="card-body">
         {% if instancias %}
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+                <table class="table table-striped">                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Curso</th>
                             <th>Semestre</th>
                             <th>Año</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -32,12 +32,41 @@
                             <td>{{ instancia.semestre }}</td>
                             <td>{{ instancia.anio }}</td>
                             <td>
-                                <a href="{{ url_for('instancia_curso.editar_instancia', id=instancia.id) }}" 
-                                   class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form method="POST" action="{{ url_for('instancia_curso.eliminar_instancia', id=instancia.id) }}" 
-                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                </form>
+                                {% if instancia.cerrado %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-lock me-1"></i>Cerrado
+                                    </span>
+                                    {% if instancia.fecha_cierre %}
+                                    <br><small class="text-muted">{{ instancia.fecha_cierre }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-unlock me-1"></i>Abierto
+                                    </span>
+                                {% endif %}
+                            </td>                            <td>
+                                <a href="{{ url_for('instancia_curso.detalle_curso', id=instancia.id) }}" 
+                                   class="btn btn-sm btn-outline-info me-1">
+                                    <i class="fas fa-eye"></i> Ver Detalle
+                                </a>
+                                {% if instancia.cerrado %}
+                                    <!-- Curso cerrado: solo ver detalle -->
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i> Curso cerrado
+                                    </span>
+                                {% else %}
+                                    <!-- Curso abierto: editar o eliminar -->
+                                    <a href="{{ url_for('instancia_curso.editar_instancia', id=instancia.id) }}" 
+                                       class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <form method="POST" action="{{ url_for('instancia_curso.eliminar_instancia', id=instancia.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </button>
+                                    </form>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

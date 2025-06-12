@@ -14,8 +14,7 @@
     <div class="card-body">
         {% if instancias %}
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+                <table class="table table-striped">                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
@@ -25,6 +24,7 @@
                             <th>Tópico</th>
                             <th>Curso</th>
                             <th>Periodo</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -44,17 +44,29 @@
                             <td>{{ instancia.evaluacion_nombre }}</td>
                             <td>
                                 <span class="badge bg-info">{{ instancia.topico_tipo }}</span>
-                                {{ instancia.topico_nombre }}
-                            </td>
+                                {{ instancia.topico_nombre }}                            </td>
                             <td>{{ instancia.curso_codigo }}</td>
                             <td>{{ instancia.semestre }}/{{ instancia.anio }} - Sec.{{ instancia.seccion_numero }}</td>
                             <td>
-                                <a href="{{ url_for('instancia_topico.editar_instancia', id=instancia.id) }}" 
-                                   class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form method="POST" action="{{ url_for('instancia_topico.eliminar_instancia', id=instancia.id) }}" 
-                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                </form>
+                                {% if instancia.curso_cerrado %}
+                                    <span class="badge bg-danger">Cerrado</span>
+                                {% else %}
+                                    <span class="badge bg-success">Abierto</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not instancia.curso_cerrado %}
+                                    <a href="{{ url_for('instancia_topico.editar_instancia', id=instancia.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Editar</a>
+                                    <form method="POST" action="{{ url_for('instancia_topico.eliminar_instancia', id=instancia.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i> Curso cerrado
+                                    </span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

@@ -8,9 +8,7 @@ class InstanciaTopico:
         self.peso = peso  # peso individual dentro de la evaluación
         self.opcional = opcional  # boolean
         self.evaluacion_id = evaluacion_id
-        self.topico_id = topico_id
-
-    @classmethod
+        self.topico_id = topico_id    @classmethod
     def crear(cls, nombre, peso, opcional, evaluacion_id, topico_id):
         """Crea una nueva instancia de tópico"""
         query = "INSERT INTO instancias_topico (nombre, peso, opcional, evaluacion_id, topico_id) VALUES (?, ?, ?, ?, ?)"
@@ -23,7 +21,7 @@ class InstanciaTopico:
         query = """
         SELECT it.id, it.nombre, it.peso, it.opcional, it.evaluacion_id, it.topico_id,
                e.nombre as evaluacion_nombre, t.nombre as topico_nombre, t.tipo,
-               s.numero, ic.semestre, ic.anio, c.codigo
+               s.numero, ic.semestre, ic.anio, c.codigo, ic.cerrado
         FROM instancias_topico it
         JOIN evaluaciones e ON it.evaluacion_id = e.id
         JOIN topicos t ON it.topico_id = t.id
@@ -47,7 +45,8 @@ class InstanciaTopico:
                 'seccion_numero': fila[9],
                 'semestre': fila[10],
                 'anio': fila[11],
-                'curso_codigo': fila[12]
+                'curso_codigo': fila[12],
+                'curso_cerrado': bool(fila[13])
             }
             for fila in resultados
         ]

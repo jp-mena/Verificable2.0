@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Cerrar Instancia de Curso - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-lock me-3"></i>Cerrar Instancia de Curso</h1>
+    <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver a Instancias
+    </a>
+</div>
+
+<!-- Alertas -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Información de la instancia -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>¿Está seguro que desea cerrar esta instancia?</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Información de la Instancia:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Curso:</strong> {{ instancia.curso_codigo }} - {{ instancia.curso_nombre }}</li>
+                            <li><strong>Período:</strong> {{ instancia.semestre }}° Semestre {{ instancia.anio }}</li>
+                            <li><strong>Estado:</strong> <span class="badge bg-success">Abierto</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>¿Qué sucederá al cerrar?</h6>
+                        <ul class="text-muted">
+                            <li>Se calcularán automáticamente las notas finales de todos los alumnos</li>
+                            <li>No se podrán editar notas existentes</li>
+                            <li>No se podrán agregar nuevas notas</li>
+                            <li>No se podrán inscribir nuevos alumnos</li>
+                            <li><strong>Esta acción no se puede deshacer</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de confirmación -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-danger mb-4">⚠️ Esta acción es irreversible</h5>
+                
+                <form method="POST" id="cerrarForm">
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmar" required>
+                            <label class="form-check-label" for="confirmar">
+                                Confirmo que deseo cerrar esta instancia de curso y calcular las notas finales
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger" id="btnCerrar" disabled>
+                            <i class="fas fa-lock me-2"></i>Cerrar Instancia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Habilitar botón solo cuando se confirme
+document.getElementById('confirmar').addEventListener('change', function() {
+    document.getElementById('btnCerrar').disabled = !this.checked;
+});
+
+// Confirmación adicional antes de enviar
+document.getElementById('cerrarForm').addEventListener('submit', function(e) {
+    if (!confirm('¿Está absolutamente seguro? Esta acción no se puede deshacer.')) {
+        e.preventDefault();
+    }
+});
+</script>
+
+{% endblock %}

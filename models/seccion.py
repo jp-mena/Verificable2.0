@@ -5,9 +5,7 @@ class Seccion:
     def __init__(self, id=None, numero=None, instancia_id=None):
         self.id = id
         self.numero = numero
-        self.instancia_id = instancia_id
-
-    @classmethod
+        self.instancia_id = instancia_id    @classmethod
     def crear(cls, numero, instancia_id):
         """Crea una nueva sección"""
         query = "INSERT INTO secciones (numero, instancia_id) VALUES (?, ?)"
@@ -18,7 +16,7 @@ class Seccion:
     def obtener_todos(cls):
         """Obtiene todas las secciones"""
         query = """
-        SELECT s.id, s.numero, s.instancia_id, ic.semestre, ic.anio, c.codigo, c.nombre
+        SELECT s.id, s.numero, s.instancia_id, ic.semestre, ic.anio, c.codigo, c.nombre, ic.cerrado
         FROM secciones s
         JOIN instancias_curso ic ON s.instancia_id = ic.id
         JOIN cursos c ON ic.curso_id = c.id
@@ -33,7 +31,8 @@ class Seccion:
                 'semestre': fila[3],
                 'anio': fila[4],
                 'curso_codigo': fila[5],
-                'curso_nombre': fila[6]
+                'curso_nombre': fila[6],
+                'curso_cerrado': bool(fila[7])
             }
             for fila in resultados
         ]

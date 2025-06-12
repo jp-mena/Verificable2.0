@@ -122,27 +122,31 @@ class InstanciaCurso:
         SET cerrado = 1, fecha_cierre = ?
         WHERE id = ?
         """
-        execute_query(query_cerrar, (datetime.now(), instancia_id))        
+        execute_query(query_cerrar, (datetime.now(), instancia_id))
+        
         return True
 
     @classmethod
     def obtener_alumnos_curso(cls, instancia_id):
-        """Obtiene todos los alumnos inscritos en un curso a través de la tabla inscripciones"""
+        """Obtiene todos los alumnos inscritos en un curso"""
         query = """
-        SELECT a.id, a.nombre, a.correo, a.fecha_ingreso, i.fecha_inscripcion
+        SELECT DISTINCT a.id, a.rut, a.nombre, a.apellido, a.email
         FROM alumnos a
-        JOIN inscripciones i ON a.id = i.alumno_id
-        WHERE i.instancia_curso_id = ?
-        ORDER BY a.nombre
+        JOIN notas n ON a.id = n.alumno_id
+        JOIN instancias_topico it ON n.instancia_topico_id = it.id
+        JOIN evaluaciones e ON it.evaluacion_id = e.id
+        JOIN secciones s ON e.seccion_id = s.id
+        WHERE s.instancia_id = ?
+        ORDER BY a.apellido, a.nombre
         """
         resultados = execute_query(query, (instancia_id,))
         return [
             {
                 'id': fila[0],
-                'nombre': fila[1],
-                'correo': fila[2],
-                'fecha_ingreso': fila[3],
-                'fecha_inscripcion': fila[4]
+                'rut': fila[1],
+                'nombre': fila[2],
+                'apellido': fila[3],
+                'email': fila[4]
             }
             for fila in resultados
         ]

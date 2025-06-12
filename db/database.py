@@ -42,14 +42,15 @@ def init_database():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    
-    # Tabla Instancias de Curso
+      # Tabla Instancias de Curso
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS instancias_curso (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             semestre INTEGER NOT NULL,
             anio INTEGER NOT NULL,
             curso_id INTEGER NOT NULL,
+            cerrado BOOLEAN DEFAULT 0,
+            fecha_cierre TIMESTAMP NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (curso_id) REFERENCES cursos (id) ON DELETE CASCADE
         )
@@ -116,7 +117,45 @@ def init_database():
             UNIQUE(alumno_id, instancia_topico_id)
         )
     ''')
+      # Tabla Inscripciones
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS inscripciones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alumno_id INTEGER NOT NULL,
+            instancia_curso_id INTEGER NOT NULL,
+            fecha_inscripcion DATE DEFAULT CURRENT_DATE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (alumno_id) REFERENCES alumnos (id) ON DELETE CASCADE,
+            FOREIGN KEY (instancia_curso_id) REFERENCES instancias_curso (id) ON DELETE CASCADE,
+            UNIQUE(alumno_id, instancia_curso_id)
+        )
+    ''')
+
+    # Tabla Notas Finales (calculadas al cerrar curso)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS notas_finales (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alumno_id INTEGER NOT NULL,
+            instancia_curso_id INTEGER NOT NULL,
+            nota_final REAL NOT NULL,
+            fecha_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (alumno_id) REFERENCES alumnos (id) ON DELETE CASCADE,
+            FOREIGN KEY (instancia_curso_id) REFERENCES instancias_curso (id) ON DELETE CASCADE,
+            UNIQUE(alumno_id, instancia_curso_id)
+        )
+    ''')
     
+    # Agregar campos a tablas existentes si no existen
+    try:
+        cursor.execute('ALTER TABLE instancias_curso ADD COLUMN cerrado BOOLEAN DEFAULT 0')
+    except sqlite3.OperationalError:
+        pass  # El campo ya existe
+    
+    try:
+        cursor.execute('ALTER TABLE instancias_curso ADD COLUMN fecha_cierre TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # El campo ya existe
+
     conn.commit()
     conn.close()
 

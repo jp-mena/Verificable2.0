@@ -14,8 +14,7 @@
     <div class="card-body">
         {% if evaluaciones %}
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+                <table class="table table-striped">                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
@@ -23,12 +22,12 @@
                             <th>Sección</th>
                             <th>Curso</th>
                             <th>Periodo</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for evaluacion in evaluaciones %}
-                        <tr>
+                        {% for evaluacion in evaluaciones %}                        <tr>
                             <td>{{ evaluacion.id }}</td>
                             <td>{{ evaluacion.nombre }}</td>
                             <td>{{ evaluacion.porcentaje }}%</td>
@@ -36,12 +35,25 @@
                             <td>{{ evaluacion.curso_codigo }} - {{ evaluacion.curso_nombre }}</td>
                             <td>{{ evaluacion.semestre }}/{{ evaluacion.anio }}</td>
                             <td>
-                                <a href="{{ url_for('evaluacion.editar_evaluacion', id=evaluacion.id) }}" 
-                                   class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form method="POST" action="{{ url_for('evaluacion.eliminar_evaluacion', id=evaluacion.id) }}" 
-                                      class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                </form>
+                                {% if evaluacion.curso_cerrado %}
+                                    <span class="badge bg-danger">Cerrado</span>
+                                {% else %}
+                                    <span class="badge bg-success">Abierto</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not evaluacion.curso_cerrado %}
+                                    <a href="{{ url_for('evaluacion.editar_evaluacion', id=evaluacion.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Editar</a>
+                                    <form method="POST" action="{{ url_for('evaluacion.eliminar_evaluacion', id=evaluacion.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('¿Estás seguro?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i> Curso cerrado
+                                    </span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
