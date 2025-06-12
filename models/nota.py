@@ -6,7 +6,9 @@ class Nota:
         self.id = id
         self.alumno_id = alumno_id
         self.instancia_topico_id = instancia_topico_id
-        self.nota = nota    @classmethod
+        self.nota = nota
+
+    @classmethod
     def crear(cls, alumno_id, instancia_topico_id, nota):
         """Crea una nueva nota"""
         query = "INSERT INTO notas (alumno_id, instancia_topico_id, nota) VALUES (?, ?, ?)"

@@ -5,7 +5,9 @@ class Seccion:
     def __init__(self, id=None, numero=None, instancia_id=None):
         self.id = id
         self.numero = numero
-        self.instancia_id = instancia_id    @classmethod
+        self.instancia_id = instancia_id
+
+    @classmethod
     def crear(cls, numero, instancia_id):
         """Crea una nueva sección"""
         query = "INSERT INTO secciones (numero, instancia_id) VALUES (?, ?)"

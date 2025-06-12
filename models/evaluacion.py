@@ -6,7 +6,9 @@ class Evaluacion:
         self.id = id
         self.nombre = nombre
         self.porcentaje = porcentaje
-        self.seccion_id = seccion_id    @classmethod
+        self.seccion_id = seccion_id
+
+    @classmethod
     def crear(cls, nombre, porcentaje, seccion_id):
         """Crea una nueva evaluación"""
         query = "INSERT INTO evaluaciones (nombre, porcentaje, seccion_id) VALUES (?, ?, ?)"

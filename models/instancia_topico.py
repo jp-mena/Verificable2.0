@@ -8,7 +8,9 @@ class InstanciaTopico:
         self.peso = peso  # peso individual dentro de la evaluación
         self.opcional = opcional  # boolean
         self.evaluacion_id = evaluacion_id
-        self.topico_id = topico_id    @classmethod
+        self.topico_id = topico_id
+
+    @classmethod
     def crear(cls, nombre, peso, opcional, evaluacion_id, topico_id):
         """Crea una nueva instancia de tópico"""
         query = "INSERT INTO instancias_topico (nombre, peso, opcional, evaluacion_id, topico_id) VALUES (?, ?, ?, ?, ?)"
