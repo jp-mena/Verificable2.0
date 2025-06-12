@@ -1,0 +1,562 @@
+{
+  "cursos": [
+    {
+      "codigo": "ICS1113",
+      "nombre": "Programación",
+      "requisitos": ""
+    },
+    {
+      "codigo": "ICS2122",
+      "nombre": "Algoritmos y Estructuras de Datos",
+      "requisitos": "ICS1113"
+    },
+    {
+      "codigo": "MAT1610",
+      "nombre": "Matemáticas I",
+      "requisitos": ""
+    },
+    {
+      "codigo": "MAT1620",
+      "nombre": "Matemáticas II",
+      "requisitos": "MAT1610"
+    },
+    {
+      "codigo": "ICS2523",
+      "nombre": "Ingeniería de Software",
+      "requisitos": "ICS2122"
+    },
+    {
+      "codigo": "FIS1500",
+      "nombre": "Física I",
+      "requisitos": "MAT1610"
+    },
+    {
+      "codigo": "QUI1100",
+      "nombre": "Química General",
+      "requisitos": ""
+    },
+    {
+      "codigo": "IEE2153",
+      "nombre": "Circuitos Eléctricos",
+      "requisitos": "FIS1500, MAT1620"
+    },
+    {
+      "codigo": "ICS3413",
+      "nombre": "Base de Datos",
+      "requisitos": "ICS2122"
+    },
+    {
+      "codigo": "MAT2630",
+      "nombre": "Matemáticas III",
+      "requisitos": "MAT1620"
+    }
+  ],  "profesores": [
+    {
+      "nombre": "Dr. Juan Pérez",
+      "correo": "juan.perez@universidad.cl"
+    },
+    {
+      "nombre": "Dra. María González",
+      "correo": "maria.gonzalez@universidad.cl"
+    },
+    {
+      "nombre": "Mg. Carlos López",
+      "correo": "carlos.lopez@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Ana Martínez",
+      "correo": "ana.martinez@universidad.cl"
+    },
+    {
+      "nombre": "Ing. Pedro Silva",
+      "correo": "pedro.silva@universidad.cl"
+    },
+    {
+      "nombre": "Dra. Laura Fernández",
+      "correo": "laura.fernandez@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Roberto Morales",
+      "correo": "roberto.morales@universidad.cl"
+    },
+    {
+      "nombre": "Mg. Sofía Castro",
+      "correo": "sofia.castro@universidad.cl"
+    },
+    {
+      "nombre": "Dr. Diego Herrera",
+      "correo": "diego.herrera@universidad.cl"
+    },
+    {
+      "nombre": "Dra. Valentina Torres",
+      "correo": "valentina.torres@universidad.cl"
+    }
+  ],  "alumnos": [
+    {
+      "nombre": "Ana Silva",
+      "correo": "ana.silva@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Carlos Rojas",
+      "correo": "carlos.rojas@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "María Fernández",
+      "correo": "maria.fernandez@student.cl",
+      "fecha_ingreso": "2024-08-01"
+    },
+    {
+      "nombre": "Diego Morales",
+      "correo": "diego.morales@student.cl",
+      "fecha_ingreso": "2025-03-01"
+    },
+    {
+      "nombre": "Sofía Chen",
+      "correo": "sofia.chen@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Miguel Torres",
+      "correo": "miguel.torres@student.cl",
+      "fecha_ingreso": "2023-08-01"
+    },
+    {
+      "nombre": "Valentina Silva",
+      "correo": "valentina.silva@student.cl",
+      "fecha_ingreso": "2023-08-01"
+    },
+    {
+      "nombre": "Sebastián Vargas",
+      "correo": "sebastian.vargas@student.cl",
+      "fecha_ingreso": "2024-08-01"
+    },
+    {
+      "nombre": "Catalina Ruiz",
+      "correo": "catalina.ruiz@student.cl",
+      "fecha_ingreso": "2024-03-01"
+    },
+    {
+      "nombre": "Andrés Mendoza",
+      "correo": "andres.mendoza@student.cl",
+      "fecha_ingreso": "2025-03-01"
+    }
+  ],  "instancias_curso": [
+    {
+      "semestre": 1,
+      "anio": 2024,
+      "curso_codigo": "ICS1113"
+    },
+    {
+      "semestre": 1,
+      "anio": 2024,
+      "curso_codigo": "MAT1610"
+    },
+    {
+      "semestre": 2,
+      "anio": 2024,
+      "curso_codigo": "ICS2122"
+    },
+    {
+      "semestre": 2,
+      "anio": 2024,
+      "curso_codigo": "MAT1620"
+    },
+    {
+      "semestre": 1,
+      "anio": 2025,
+      "curso_codigo": "ICS2523"
+    },
+    {
+      "semestre": 1,
+      "anio": 2025,
+      "curso_codigo": "FIS1500"
+    },
+    {
+      "semestre": 2,
+      "anio": 2024,
+      "curso_codigo": "QUI1100"
+    },
+    {
+      "semestre": 1,
+      "anio": 2025,
+      "curso_codigo": "IEE2153"
+    },
+    {
+      "semestre": 2,
+      "anio": 2025,
+      "curso_codigo": "ICS3413"
+    },
+    {
+      "semestre": 1,
+      "anio": 2025,
+      "curso_codigo": "MAT2630"
+    }
+  ],  "secciones": [
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      }
+    },
+    {
+      "numero": 2,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      }
+    },
+    {
+      "numero": 2,
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "MAT1620"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2025,
+        "curso_codigo": "ICS2523"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2025,
+        "curso_codigo": "FIS1500"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "QUI1100"
+      }
+    },
+    {
+      "numero": 1,
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2025,
+        "curso_codigo": "IEE2153"
+      }
+    }
+  ],  "topicos": [
+    {
+      "nombre": "Variables y Tipos de Datos",
+      "descripcion": "Introducción a variables y tipos de datos en programación"
+    },
+    {
+      "nombre": "Estructuras de Control",
+      "descripcion": "If, while, for y estructuras de control"
+    },
+    {
+      "nombre": "Funciones",
+      "descripcion": "Definición y uso de funciones"
+    },
+    {
+      "nombre": "Límites",
+      "descripcion": "Cálculo de límites matemáticos"
+    },
+    {
+      "nombre": "Derivadas",
+      "descripcion": "Cálculo diferencial y derivadas"
+    },
+    {
+      "nombre": "Algoritmos de Ordenamiento",
+      "descripcion": "Bubble sort, merge sort, quick sort"
+    },
+    {
+      "nombre": "Estructuras de Datos Lineales",
+      "descripcion": "Listas, pilas y colas"
+    },
+    {
+      "nombre": "Árboles Binarios",
+      "descripcion": "Estructuras de datos jerárquicas"
+    },
+    {
+      "nombre": "Grafos",
+      "descripcion": "Teoría de grafos y algoritmos"
+    },
+    {
+      "nombre": "Complejidad Algoritmica",
+      "descripcion": "Análisis de tiempo y espacio"
+    }
+  ],  "evaluaciones": [
+    {
+      "nombre": "Controles",
+      "tipo": "CO",
+      "porcentaje": 40
+    },
+    {
+      "nombre": "Tareas",
+      "tipo": "TA", 
+      "porcentaje": 30
+    },
+    {
+      "nombre": "Examen",
+      "tipo": "EX",
+      "porcentaje": 30
+    },
+    {
+      "nombre": "Laboratorios",
+      "tipo": "LA",
+      "porcentaje": 20
+    },
+    {
+      "nombre": "Proyecto Final",
+      "tipo": "PF",
+      "porcentaje": 25
+    },
+    {
+      "nombre": "Participación",
+      "tipo": "PA",
+      "porcentaje": 10
+    },
+    {
+      "nombre": "Quiz",
+      "tipo": "QZ",
+      "porcentaje": 15
+    },
+    {
+      "nombre": "Ensayo",
+      "tipo": "EN",
+      "porcentaje": 20
+    },
+    {
+      "nombre": "Presentación",
+      "tipo": "PR",
+      "porcentaje": 15
+    },
+    {
+      "nombre": "Investigación",
+      "tipo": "IN",
+      "porcentaje": 25
+    }
+  ],  "instancias_topico": [
+    {
+      "topico_nombre": "Variables y Tipos de Datos",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "evaluacion_nombre": "Controles"
+    },
+    {
+      "topico_nombre": "Estructuras de Control",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "evaluacion_nombre": "Tareas"
+    },
+    {
+      "topico_nombre": "Funciones",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "evaluacion_nombre": "Examen"
+    },
+    {
+      "topico_nombre": "Límites",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      },
+      "evaluacion_nombre": "Controles"
+    },
+    {
+      "topico_nombre": "Derivadas",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      },
+      "evaluacion_nombre": "Tareas"
+    },
+    {
+      "topico_nombre": "Algoritmos de Ordenamiento",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "evaluacion_nombre": "Laboratorios"
+    },
+    {
+      "topico_nombre": "Estructuras de Datos Lineales",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "evaluacion_nombre": "Proyecto Final"
+    },
+    {
+      "topico_nombre": "Árboles Binarios",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "evaluacion_nombre": "Quiz"
+    },
+    {
+      "topico_nombre": "Grafos",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "evaluacion_nombre": "Ensayo"
+    },
+    {
+      "topico_nombre": "Complejidad Algoritmica",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "evaluacion_nombre": "Investigación"
+    }
+  ],  "notas": [
+    {
+      "alumno_correo": "ana.silva@student.cl",
+      "topico_nombre": "Variables y Tipos de Datos",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "nota": 6.5
+    },
+    {
+      "alumno_correo": "carlos.rojas@student.cl",
+      "topico_nombre": "Variables y Tipos de Datos",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "nota": 5.8
+    },
+    {
+      "alumno_correo": "maria.fernandez@student.cl",
+      "topico_nombre": "Estructuras de Control",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "nota": 6.2
+    },
+    {
+      "alumno_correo": "sofia.chen@student.cl",
+      "topico_nombre": "Funciones",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "ICS1113"
+      },
+      "nota": 6.8
+    },
+    {
+      "alumno_correo": "miguel.torres@student.cl",
+      "topico_nombre": "Límites",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      },
+      "nota": 5.5
+    },
+    {
+      "alumno_correo": "valentina.silva@student.cl",
+      "topico_nombre": "Derivadas",
+      "instancia_curso": {
+        "semestre": 1,
+        "anio": 2024,
+        "curso_codigo": "MAT1610"
+      },
+      "nota": 6.0
+    },
+    {
+      "alumno_correo": "sebastian.vargas@student.cl",
+      "topico_nombre": "Algoritmos de Ordenamiento",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "nota": 6.7
+    },
+    {
+      "alumno_correo": "catalina.ruiz@student.cl",
+      "topico_nombre": "Estructuras de Datos Lineales",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "nota": 6.3
+    },
+    {
+      "alumno_correo": "andres.mendoza@student.cl",
+      "topico_nombre": "Árboles Binarios",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "nota": 5.9
+    },
+    {
+      "alumno_correo": "diego.morales@student.cl",
+      "topico_nombre": "Grafos",
+      "instancia_curso": {
+        "semestre": 2,
+        "anio": 2024,
+        "curso_codigo": "ICS2122"
+      },
+      "nota": 6.4
+    }
+  ]
+}
