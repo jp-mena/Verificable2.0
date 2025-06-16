@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Alumnos - SGA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gestión de Alumnos</h1>
+    <a href="{{ url_for('alumno.crear_alumno') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Alumno
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if alumnos %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Fecha de Ingreso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alumno in alumnos %}                        <tr>
+                            <td>{{ alumno.id }}</td>
+                            <td>{{ alumno.nombre }}</td>
+                            <td>{{ alumno.correo }}</td>
+                            <td>{{ alumno.fecha_ingreso }}</td>
+                            <td>
+                                <a href="{{ url_for('alumno.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="post" action="{{ url_for('alumno.eliminar_alumno', alumno_id=alumno.id) }}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Está seguro de que desea eliminar este alumno?')">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay alumnos registrados</h4>
+                <p class="text-muted">Registra el primer alumno para comenzar</p>
+                <a href="{{ url_for('alumno.crear_alumno') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Registrar Primer Alumno
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

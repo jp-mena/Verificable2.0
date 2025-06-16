@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Alumno - SGA{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Crear Nuevo Alumno
+                    </h4>
+                    <a href="{{ url_for('alumno.listar_alumnos') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a la Lista
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        Nombre Completo *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           name="nombre" 
+                                           required 
+                                           maxlength="100"
+                                           placeholder="Ingrese el nombre completo del alumno">
+                                    <div class="form-text">Máximo 100 caracteres</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="correo" class="form-label">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        Correo Electrónico *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="correo" 
+                                           name="correo" 
+                                           required 
+                                           maxlength="100"
+                                           placeholder="ejemplo@estudiante.cl">
+                                    <div class="form-text">Debe ser un correo válido y único</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_ingreso" class="form-label">
+                                        <i class="fas fa-calendar me-2"></i>
+                                        Fecha de Ingreso *
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           id="fecha_ingreso" 
+                                           name="fecha_ingreso" 
+                                           required>
+                                    <div class="form-text">Fecha en que el alumno ingresó a la universidad</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>
+                                        Crear Alumno
+                                    </button>
+                                    <a href="{{ url_for('alumno.listar_alumnos') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del formulario
+    const form = document.querySelector('form');
+    const nombre = document.getElementById('nombre');
+    const correo = document.getElementById('correo');
+    const fecha_ingreso = document.getElementById('fecha_ingreso');
+    
+    // Establecer fecha máxima como hoy
+    const today = new Date().toISOString().split('T')[0];
+    fecha_ingreso.max = today;
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validar nombre
+        if (!nombre.value.trim()) {
+            nombre.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nombre.classList.remove('is-invalid');
+            nombre.classList.add('is-valid');
+        }
+        
+        // Validar correo
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!correo.value.trim() || !emailRegex.test(correo.value)) {
+            correo.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            correo.classList.remove('is-invalid');
+            correo.classList.add('is-valid');
+        }
+        
+        // Validar fecha
+        if (!fecha_ingreso.value) {
+            fecha_ingreso.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            fecha_ingreso.classList.remove('is-invalid');
+            fecha_ingreso.classList.add('is-valid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    
+    // Validación en tiempo real
+    nombre.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+    
+    correo.addEventListener('input', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (this.value.trim() && emailRegex.test(this.value)) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+    
+    fecha_ingreso.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+});
+</script>
+{% endblock %}

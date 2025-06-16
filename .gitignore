@@ -1,2 +1,30 @@
-venv
-db/sga.db
+
+venv/
+
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+*.db
+*.sqlite
+sga/db/sga.db
+
+.env
+*.key
+
+# Logs
+*.log
+
+*.tmp
+*.temp
+
+*.bak
+*.backup
+
+.DS_Store      # macOS
+Thumbs.db      # Windows
+
+.vscode/
+.idea/
