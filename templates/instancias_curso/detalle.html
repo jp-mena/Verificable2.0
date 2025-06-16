@@ -7,23 +7,40 @@
     <div>
         <h1>{{ resumen.instancia.curso_codigo }} - {{ resumen.instancia.curso_nombre }}</h1>
         <p class="text-muted mb-0">
-            {{ resumen.instancia.semestre }}° Semestre {{ resumen.instancia.anio }}
-            {% if resumen.instancia.cerrado %}
+            {{ resumen.instancia.semestre }}° Semestre {{ resumen.instancia.anio }}            {% if resumen.instancia.cerrado %}
                 <span class="badge bg-danger ms-2">Curso Cerrado</span>
                 {% if resumen.instancia.fecha_cierre %}
                     <small class="text-muted ms-2">
-                        Cerrado el {{ resumen.instancia.fecha_cierre.strftime('%d/%m/%Y %H:%M') if resumen.instancia.fecha_cierre else 'N/A' }}
+                        Cerrado el {{ resumen.instancia.fecha_cierre }}
                     </small>
                 {% endif %}
             {% else %}
                 <span class="badge bg-success ms-2">Curso Abierto</span>
             {% endif %}
         </p>
-    </div>
-    <div>
+    </div>    <div>
         <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver a Lista
         </a>
+        {% if resumen.instancia.cerrado %}
+            <div class="btn-group ms-2" role="group">
+                <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('reporte.reporte_notas_finales_seccion') }}">
+                        <i class="fas fa-graduation-cap me-2"></i>Notas Finales de Sección
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('reporte.reporte_instancia_topico') }}">
+                        <i class="fas fa-tasks me-2"></i>Notas por Tópico
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('reporte.index_reportes') }}">
+                        <i class="fas fa-chart-line me-2"></i>Todos los Reportes
+                    </a></li>
+                </ul>
+            </div>
+        {% endif %}
         {% if not resumen.instancia.cerrado %}
             <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#cerrarCursoModal">
                 <i class="fas fa-lock"></i> Cerrar Curso
@@ -41,13 +58,23 @@
                 <p class="card-text">Alumnos Inscritos</p>
             </div>
         </div>
-    </div>
-    {% if resumen.instancia.cerrado %}
+    </div>    {% if resumen.instancia.cerrado %}
     <div class="col-md-3">
         <div class="card bg-success text-white">
             <div class="card-body text-center">
                 <h3 class="card-title">{{ resumen.alumnos|selectattr('nota_final')|list|length }}</h3>
                 <p class="card-text">Notas Finales Calculadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                <p class="card-text mb-2">Reportes Disponibles</p>
+                <a href="{{ url_for('reporte.index_reportes') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-external-link-alt"></i> Ver Reportes
+                </a>
             </div>
         </div>
     </div>

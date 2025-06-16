@@ -10,16 +10,33 @@ from routes.topico_routes import topico_bp
 from routes.instancia_topico_routes import instancia_topico_bp
 from routes.nota_routes import nota_bp
 from routes.json_routes import json_bp
+from routes.reporte_routes import reporte_bp
 from config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
 
 def create_app():
     """Factory function para crear la aplicación Flask"""
     app = Flask(__name__)
-    app.secret_key = 'clave-secreta-para-desarrollo'  # En producción usar variable de entorno
-      # Ruta principal que sirve la interfaz web
+    app.secret_key = 'clave-secreta-para-desarrollo'  # En producción usar variable de entorno    # Ruta principal que sirve la interfaz web
     @app.route('/')
     def index():
-        return render_template('index.html')
+        # Obtener estadísticas para el dashboard
+        from models.curso import Curso
+        from models.profesor import Profesor  
+        from models.alumno import Alumno
+        from models.instancia_curso import InstanciaCurso
+        from models.seccion import Seccion
+        from models.evaluacion import Evaluacion
+        stats = {
+            'total_cursos': len(Curso.obtener_todos()),
+            'total_profesores': len(Profesor.obtener_todos()),
+            'total_alumnos': len(Alumno.obtener_todos()),
+            'instancias_activas': len([ic for ic in InstanciaCurso.obtener_todos() if not ic.get('fecha_cierre')]),
+            'cursos_cerrados': len([ic for ic in InstanciaCurso.obtener_todos() if ic.get('fecha_cierre')]),
+            'total_secciones': len(Seccion.obtener_todos()),
+            'total_evaluaciones': len(Evaluacion.obtener_todos())
+        }
+        
+        return render_template('index.html', stats=stats)
     
     # Ruta de bienvenida para la API (mantener compatibilidad)
     @app.route('/api')
@@ -33,8 +50,7 @@ def create_app():
                 'alumnos': '/api/alumnos'
             },
             'documentacion': 'Ver README.md para más información'
-        })
-      # Registrar blueprints
+        })    # Registrar blueprints
     app.register_blueprint(curso_bp, url_prefix='/api')
     app.register_blueprint(profesor_bp, url_prefix='/api')
     app.register_blueprint(alumno_bp, url_prefix='/api')
@@ -45,6 +61,7 @@ def create_app():
     app.register_blueprint(instancia_topico_bp)
     app.register_blueprint(nota_bp)
     app.register_blueprint(json_bp)
+    app.register_blueprint(reporte_bp)
     
     return app
 

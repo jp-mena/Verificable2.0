@@ -1,0 +1,109 @@
+<!-- filepath: templates/reportes/instancia_topico.html -->
+{% extends "base.html" %}
+
+{% block title %}Reporte de Instancia de Tópico{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.index_reportes') }}">Reportes</a></li>
+                    <li class="breadcrumb-item active">Notas de Instancia de Tópico</li>
+                </ol>
+            </nav>
+            
+            <h2><i class="fas fa-list-alt"></i> Reporte A: Notas de Instancia de Tópico</h2>
+            <p class="text-muted">Selecciona una instancia de tópico para ver todas las notas de los alumnos</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Seleccionar Instancia de Tópico</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="instancia_topico_id">Instancia de Tópico:</label>
+                            <select class="form-control" id="instancia_topico_id" name="instancia_topico_id" required>
+                                <option value="">Selecciona una instancia de tópico</option>
+                                {% for instancia in instancias_disponibles %}
+                                <option value="{{ instancia.id }}">
+                                    {{ instancia.display_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Formato: Código Período - Sección - Evaluación - Instancia
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="formato">Formato de salida:</label>
+                            <select class="form-control" id="formato" name="formato">
+                                <option value="html">Ver en pantalla (HTML)</option>
+                                <option value="csv">Descargar archivo (CSV)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-alt"></i> Generar Reporte
+                        </button>
+                        <a href="{{ url_for('reporte.index_reportes') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Información</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>¿Qué incluye este reporte?</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Información del curso y sección</li>
+                        <li><i class="fas fa-check text-success"></i> Datos de la evaluación</li>
+                        <li><i class="fas fa-check text-success"></i> Lista de alumnos con sus notas</li>
+                        <li><i class="fas fa-check text-success"></i> Peso de la instancia de tópico</li>
+                    </ul>
+                    
+                    <p class="mt-3"><strong>Ejemplo:</strong></p>
+                    <p class="text-muted small">
+                        "Notas de la Entrega 2 del Proyecto, de la sección 1 del curso ICC5130 202501"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not instancias_disponibles %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Sin datos disponibles</h5>
+                <p class="mb-0">No hay instancias de tópico disponibles para generar reportes. 
+                Asegúrate de haber creado evaluaciones con instancias de tópico y que tengan notas asignadas.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mejorar la experiencia del select con búsqueda
+    const select = document.getElementById('instancia_topico_id');
+    if (select.options.length > 10) {
+        select.setAttribute('data-live-search', 'true');
+    }
+});
+</script>
+{% endblock %}

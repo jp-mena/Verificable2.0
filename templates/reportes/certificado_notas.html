@@ -1,0 +1,112 @@
+<!-- filepath: templates/reportes/certificado_notas.html -->
+{% extends "base.html" %}
+
+{% block title %}Certificado de Notas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.index_reportes') }}">Reportes</a></li>
+                    <li class="breadcrumb-item active">Certificado de Notas</li>
+                </ol>
+            </nav>
+            
+            <h2><i class="fas fa-certificate"></i> Reporte C: Certificado de Notas</h2>
+            <p class="text-muted">Genera un certificado con todas las notas finales de cursos cerrados de un alumno</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Seleccionar Alumno</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="alumno_id">Alumno:</label>
+                            <select class="form-control" id="alumno_id" name="alumno_id" required>
+                                <option value="">Selecciona un alumno</option>                                {% for alumno in alumnos_disponibles %}
+                                <option value="{{ alumno[0] }}">
+                                    {{ alumno[1] }} ({{ alumno[2] }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Solo se muestran alumnos que tienen cursos cerrados
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="formato">Formato de salida:</label>
+                            <select class="form-control" id="formato" name="formato">
+                                <option value="html">Ver en pantalla (HTML)</option>
+                                <option value="csv">Descargar archivo (CSV)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-certificate"></i> Generar Certificado
+                        </button>
+                        <a href="{{ url_for('reporte.index_reportes') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Información</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>¿Qué incluye este certificado?</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Datos del alumno</li>
+                        <li><i class="fas fa-check text-success"></i> Todos los cursos cerrados</li>
+                        <li><i class="fas fa-check text-success"></i> Notas finales obtenidas</li>
+                        <li><i class="fas fa-check text-success"></i> Período y sección de cada curso</li>
+                        <li><i class="fas fa-check text-success"></i> Estado (Aprobado/Reprobado)</li>
+                    </ul>
+                    
+                    <div class="alert alert-info mt-3">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> Solo se incluyen cursos que han sido cerrados.
+                            La nota mínima de aprobación es 4.0.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not alumnos_disponibles %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Sin datos disponibles</h5>
+                <p class="mb-0">No hay alumnos con cursos cerrados disponibles para generar certificados. 
+                Los alumnos aparecerán aquí una vez que hayan completado al menos un curso cerrado.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mejorar la experiencia del select con búsqueda
+    const select = document.getElementById('alumno_id');
+    if (select.options.length > 10) {
+        select.setAttribute('data-live-search', 'true');
+    }
+});
+</script>
+{% endblock %}

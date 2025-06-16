@@ -1,0 +1,115 @@
+<!-- filepath: templates/reportes/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Generación de Reportes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fas fa-chart-bar"></i> Generación de Reportes</h2>
+            <p class="text-muted">Selecciona el tipo de reporte que deseas generar</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Reporte A: Notas de Instancia de Tópico -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list-alt"></i> Reporte A
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Notas de Instancia de Tópico</h6>
+                    <p class="card-text">
+                        Obtén las notas de una evaluación específica, como las notas de la "Entrega 2" del proyecto 
+                        de una sección particular.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Por instancia de tópico</li>
+                        <li><i class="fas fa-check text-success"></i> Filtrado por sección</li>
+                        <li><i class="fas fa-check text-success"></i> Exportable a CSV</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reporte.reporte_instancia_topico') }}" class="btn btn-primary btn-block">
+                        <i class="fas fa-file-alt"></i> Generar Reporte
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte B: Notas Finales de Sección -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-graduation-cap"></i> Reporte B
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Notas Finales de Sección</h6>
+                    <p class="card-text">
+                        Obtén las notas finales de una sección específica de un curso cerrado. 
+                        Solo disponible para cursos que han sido cerrados.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Solo cursos cerrados</li>
+                        <li><i class="fas fa-check text-success"></i> Notas finales calculadas</li>
+                        <li><i class="fas fa-check text-success"></i> Por sección específica</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reporte.reporte_notas_finales_seccion') }}" class="btn btn-success btn-block">
+                        <i class="fas fa-file-alt"></i> Generar Reporte
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte C: Certificado de Notas -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-certificate"></i> Reporte C
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Certificado de Notas</h6>
+                    <p class="card-text">
+                        Genera un certificado completo con todas las notas finales de los cursos cerrados 
+                        que ha tomado un alumno específico.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Por alumno específico</li>
+                        <li><i class="fas fa-check text-success"></i> Todos los cursos cerrados</li>
+                        <li><i class="fas fa-check text-success"></i> Certificado oficial</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('reporte.reporte_certificado_notas') }}" class="btn btn-info btn-block">
+                        <i class="fas fa-certificate"></i> Generar Certificado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> Información Importante</h5>
+                <ul class="mb-0">
+                    <li><strong>Reporte A:</strong> Puede generar reportes de cualquier instancia de tópico, independientemente del estado del curso</li>
+                    <li><strong>Reporte B:</strong> Solo funciona con cursos que han sido cerrados y tienen notas finales calculadas</li>
+                    <li><strong>Reporte C:</strong> Muestra el historial académico completo del alumno en cursos cerrados</li>
+                    <li><strong>Exportación:</strong> Todos los reportes se pueden exportar a formato CSV para análisis adicional</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

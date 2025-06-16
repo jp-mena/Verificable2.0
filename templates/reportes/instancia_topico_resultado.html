@@ -1,0 +1,169 @@
+<!-- filepath: templates/reportes/instancia_topico_resultado.html -->
+{% extends "base.html" %}
+
+{% block title %}Resultado - Notas de Instancia de Tópico{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.index_reportes') }}">Reportes</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.reporte_instancia_topico') }}">Instancia de Tópico</a></li>
+                    <li class="breadcrumb-item active">Resultado</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Información del Reporte -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list-alt"></i> Reporte de Notas - {{ contexto.instancia_topico_nombre }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Curso:</strong> {{ contexto.curso_codigo }} - {{ contexto.curso_nombre }}</p>
+                            <p><strong>Período:</strong> {{ contexto.anio }}{{ "%02d"|format(contexto.semestre) }}</p>
+                            <p><strong>Sección:</strong> {{ contexto.seccion_numero }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Evaluación:</strong> {{ contexto.evaluacion_nombre }} ({{ contexto.porcentaje_evaluacion }}%)</p>
+                            <p><strong>Tópico:</strong> {{ contexto.topico_nombre }}</p>
+                            <p><strong>Peso:</strong> {{ contexto.peso_topico }}%</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Total de alumnos:</strong> {{ notas|length }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Estado del curso:</strong> 
+                                {% if contexto.cerrado %}
+                                    <span class="badge badge-danger">Cerrado</span>
+                                {% else %}
+                                    <span class="badge badge-success">Abierto</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <form method="POST" action="{{ url_for('reporte.reporte_instancia_topico') }}" style="display: inline;">
+                <input type="hidden" name="instancia_topico_id" value="{{ notas[0].instancia_topico_id if notas else '' }}">
+                <input type="hidden" name="formato" value="csv">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-file-csv"></i> Descargar CSV
+                </button>
+            </form>
+            <a href="{{ url_for('reporte.reporte_instancia_topico') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Nueva Consulta
+            </a>
+            <button onclick="window.print()" class="btn btn-info">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Resultados -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Notas de los Alumnos</h5>
+                </div>
+                <div class="card-body">
+                    {% if notas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Alumno</th>
+                                    <th>Correo</th>
+                                    <th class="text-center">Nota</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for nota in notas %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ nota.alumno_nombre }}</td>
+                                    <td>{{ nota.alumno_correo }}</td>
+                                    <td class="text-center">
+                                        <span class="badge {% if nota.nota >= 4.0 %}badge-success{% else %}badge-danger{% endif %} badge-lg">
+                                            {{ nota.nota }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estadísticas básicas -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Estadísticas:</h6>
+                                    {% set notas_valores = notas | map(attribute='nota') | list %}
+                                    {% set promedio = (notas_valores | sum) / (notas_valores | length) %}
+                                    {% set aprobados = notas | selectattr('nota', '>=', 4.0) | list | length %}
+                                    {% set reprobados = (notas | length) - aprobados %}
+                                    
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Promedio:</strong> {{ "%.2f"|format(promedio) }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Nota más alta:</strong> {{ notas_valores | max }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Nota más baja:</strong> {{ notas_valores | min }}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Aprobados:</strong> {{ aprobados }} / {{ notas | length }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No se encontraron notas para la instancia de tópico seleccionada.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .breadcrumb {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+    }
+}
+.badge-lg {
+    font-size: 1em;
+    padding: 8px 12px;
+}
+</style>
+{% endblock %}

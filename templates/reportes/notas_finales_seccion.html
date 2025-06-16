@@ -1,0 +1,160 @@
+<!-- filepath: templates/reportes/notas_finales_seccion.html -->
+{% extends "base.html" %}
+
+{% block title %}Reporte de Notas Finales{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.index_reportes') }}">Reportes</a></li>
+                    <li class="breadcrumb-item active">Notas Finales de Sección</li>
+                </ol>
+            </nav>
+            
+            <h2><i class="fas fa-graduation-cap"></i> Reporte B: Notas Finales de Sección</h2>
+            <p class="text-muted">Selecciona un curso cerrado y una sección para ver las notas finales calculadas</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Seleccionar Curso y Sección</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="reporteForm">
+                        <div class="form-group">
+                            <label for="instancia_curso_id">Curso Cerrado:</label>
+                            <select class="form-control" id="instancia_curso_id" name="instancia_curso_id" required>
+                                <option value="">Selecciona un curso cerrado</option>
+                                {% for curso in cursos_cerrados %}
+                                <option value="{{ curso.id }}" data-secciones="{{ curso.total_secciones }}">
+                                    {{ curso.display_name }} ({{ curso.total_secciones }} sección(es))
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Solo se muestran cursos que han sido cerrados
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="seccion_numero">Sección:</label>
+                            <select class="form-control" id="seccion_numero" name="seccion_numero" required disabled>
+                                <option value="">Primero selecciona un curso</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Las secciones se cargarán automáticamente al seleccionar un curso
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="formato">Formato de salida:</label>
+                            <select class="form-control" id="formato" name="formato">
+                                <option value="html">Ver en pantalla (HTML)</option>
+                                <option value="csv">Descargar archivo (CSV)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success" id="btnGenerar" disabled>
+                            <i class="fas fa-file-alt"></i> Generar Reporte
+                        </button>
+                        <a href="{{ url_for('reporte.index_reportes') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Información</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>¿Qué incluye este reporte?</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Información del curso y sección</li>
+                        <li><i class="fas fa-check text-success"></i> Notas finales calculadas</li>
+                        <li><i class="fas fa-check text-success"></i> Fecha de cierre del curso</li>
+                        <li><i class="fas fa-check text-success"></i> Lista completa de alumnos</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <small>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Importante:</strong> Solo funciona con cursos que han sido cerrados.
+                            Las notas finales se calculan automáticamente al cerrar el curso.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not cursos_cerrados %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Sin cursos cerrados</h5>
+                <p class="mb-0">No hay cursos cerrados disponibles para generar este reporte. 
+                Para generar notas finales, primero debes cerrar un curso desde la vista de detalle.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cursoSelect = document.getElementById('instancia_curso_id');
+    const seccionSelect = document.getElementById('seccion_numero');
+    const btnGenerar = document.getElementById('btnGenerar');
+
+    cursoSelect.addEventListener('change', async function() {
+        const cursoId = this.value;
+        
+        // Limpiar secciones
+        seccionSelect.innerHTML = '<option value="">Cargando secciones...</option>';
+        seccionSelect.disabled = true;
+        btnGenerar.disabled = true;
+
+        if (!cursoId) {
+            seccionSelect.innerHTML = '<option value="">Primero selecciona un curso</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/reportes/secciones/${cursoId}`);
+            const secciones = await response.json();
+
+            seccionSelect.innerHTML = '<option value="">Selecciona una sección</option>';
+            
+            if (secciones.length === 0) {
+                seccionSelect.innerHTML = '<option value="">No hay secciones disponibles</option>';
+            } else {
+                secciones.forEach(seccion => {
+                    const option = document.createElement('option');
+                    option.value = seccion.numero;
+                    option.textContent = `Sección ${seccion.numero} (${seccion.total_alumnos} alumno(s))`;
+                    seccionSelect.appendChild(option);
+                });
+                seccionSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error al cargar secciones:', error);
+            seccionSelect.innerHTML = '<option value="">Error al cargar secciones</option>';
+        }
+    });
+
+    seccionSelect.addEventListener('change', function() {
+        btnGenerar.disabled = !this.value;
+    });
+});
+</script>
+{% endblock %}

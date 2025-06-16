@@ -1,0 +1,153 @@
+<!-- filepath: templates/reportes/notas_finales_resultado.html -->
+{% extends "base.html" %}
+
+{% block title %}Notas Finales - Resultados{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Reporte B: Notas Finales de Sección</h2>
+            <div>
+                <a href="{{ url_for('reporte.reporte_notas_finales_seccion') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>                {% if notas %}
+                <form method="POST" action="{{ url_for('reporte.reporte_notas_finales_seccion') }}" class="d-inline">
+                    <input type="hidden" name="instancia_curso_id" value="{{ seccion_info.instancia_curso_id }}">
+                    <input type="hidden" name="seccion_numero" value="{{ seccion_info.seccion_numero }}">
+                    <input type="hidden" name="formato" value="csv">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download"></i> Descargar CSV
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información de la sección -->
+        {% if seccion_info %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Información de la Sección</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Curso:</strong> {{ seccion_info.curso_codigo }} - {{ seccion_info.curso_nombre }}</p>
+                        <p><strong>Sección:</strong> {{ seccion_info.numero }}</p>
+                        <p><strong>Período:</strong> {{ seccion_info.anio }}/{{ seccion_info.semestre }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Estado:</strong> 
+                            <span class="badge bg-{{ 'success' if seccion_info.cerrado else 'warning' }}">
+                                {{ 'Cerrado' if seccion_info.cerrado else 'Abierto' }}
+                            </span>
+                        </p>
+                        {% if estadisticas %}
+                        <p><strong>Total estudiantes:</strong> {{ estadisticas.total_estudiantes }}</p>
+                        <p><strong>Promedio:</strong> {{ "%.2f"|format(estadisticas.promedio) if estadisticas.promedio else 'N/A' }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Estadísticas -->
+        {% if estadisticas %}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <h5>{{ estadisticas.total_estudiantes }}</h5>
+                        <p class="mb-0">Total Estudiantes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <h5>{{ "%.2f"|format(estadisticas.promedio) if estadisticas.promedio else 'N/A' }}</h5>
+                        <p class="mb-0">Promedio</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <h5>{{ estadisticas.aprobados }}</h5>
+                        <p class="mb-0">Aprobados (≥4.0)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <h5>{{ estadisticas.reprobados }}</h5>
+                        <p class="mb-0">Reprobados (<4.0)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resultados -->
+        {% if notas %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Notas Finales</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID Alumno</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Nota Final</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nota in notas %}
+                            <tr>
+                                <td>{{ nota.alumno_id }}</td>
+                                <td>{{ nota.alumno_nombre }}</td>
+                                <td>{{ nota.alumno_correo }}</td>
+                                <td>
+                                    {% if nota.nota_final is not none %}
+                                        <span class="badge bg-{{ 'success' if nota.nota_final >= 4.0 else 'danger' }} fs-6">
+                                            {{ "%.2f"|format(nota.nota_final) }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Sin nota</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if nota.nota_final is not none %}
+                                        {% if nota.nota_final >= 4.0 %}
+                                            <span class="badge bg-success">Aprobado</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Reprobado</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            No se encontraron notas para esta sección o el curso no está cerrado.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

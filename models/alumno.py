@@ -49,6 +49,19 @@ class Alumno:
         results = execute_query(query, (alumno_id,))
         return results[0] if results else None
     
+    @classmethod
+    def obtener_por_id(cls, alumno_id):
+        """Obtiene un alumno por su ID (método de compatibilidad)"""
+        result = cls.get_by_id(alumno_id)
+        if result:
+            return {
+                'id': result[0],
+                'nombre': result[1], 
+                'correo': result[2],
+                'fecha_ingreso': result[3]
+            }
+        return None
+    
     @staticmethod
     def get_by_correo(correo):
         """Obtiene un alumno por su correo"""
