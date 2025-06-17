@@ -19,6 +19,7 @@
                             <th>ID</th>
                             <th>Número</th>
                             <th>Curso</th>
+                            <th>Profesor</th>
                             <th>Semestre</th>
                             <th>Año</th>
                             <th>Estado</th>
@@ -27,9 +28,17 @@
                     </thead>
                     <tbody>
                         {% for seccion in secciones %}
-                        <tr>                            <td>{{ seccion.id }}</td>
+                        <tr>
+                            <td>{{ seccion.id }}</td>
                             <td>{{ seccion.numero }}</td>
                             <td>{{ seccion.curso_codigo }} - {{ seccion.curso_nombre }}</td>
+                            <td>
+                                {% if seccion.profesor_nombre and seccion.profesor_nombre != 'Sin asignar' %}
+                                    <span class="text-success">{{ seccion.profesor_nombre }}</span>
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </td>
                             <td>{{ seccion.semestre }}</td>
                             <td>{{ seccion.anio }}</td>
                             <td>

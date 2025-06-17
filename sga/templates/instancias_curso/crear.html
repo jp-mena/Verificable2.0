@@ -14,12 +14,11 @@
     <div class="card-body">
         <form method="POST">
             <div class="mb-3">
-                <label for="curso_id" class="form-label">Curso *</label>
-                <select class="form-select" id="curso_id" name="curso_id" required>
+                <label for="curso_id" class="form-label">Curso *</label>                <select class="form-select" id="curso_id" name="curso_id" required>
                     <option value="">Seleccionar curso</option>
                     {% for curso in cursos %}
-                        <option value="{{ curso[0] }}">
-                            {{ curso[1] }} - {{ curso[2] }}
+                        <option value="{{ curso.id }}">
+                            {{ curso.codigo }} - {{ curso.nombre }}
                         </option>
                     {% endfor %}
                 </select>

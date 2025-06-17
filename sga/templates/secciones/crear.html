@@ -14,12 +14,20 @@
     <div class="card-body">
         <form method="POST">
             <div class="mb-3">
-                <label for="numero" class="form-label">Número de Sección *</label>
-                <input type="number" class="form-control" id="numero" name="numero" min="1" required>
+                <label for="numero" class="form-label">
+                    <i class="fas fa-hashtag me-2"></i>
+                    Número de Sección *
+                </label>
+                <input type="number" class="form-control" id="numero" name="numero" 
+                       min="1" max="99" required placeholder="Ej: 1">
+                <div class="form-text">Número único para esta instancia de curso</div>
             </div>
             
             <div class="mb-3">
-                <label for="instancia_id" class="form-label">Instancia de Curso *</label>
+                <label for="instancia_id" class="form-label">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Instancia de Curso *
+                </label>
                 <select class="form-select" id="instancia_id" name="instancia_id" required>
                     <option value="">Seleccionar instancia</option>
                     {% for instancia in instancias %}
@@ -29,13 +37,62 @@
                         </option>
                     {% endfor %}
                 </select>
+                <div class="form-text">Solo se muestran instancias abiertas</div>
+            </div>
+              <div class="mb-3">
+                <label for="profesor_id" class="form-label">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                    Profesor Asignado (Opcional)
+                </label>
+                <select class="form-select" id="profesor_id" name="profesor_id">
+                    <option value="">Sin asignar</option>
+                    {% for profesor in profesores %}
+                        <option value="{{ profesor.id }}">
+                            {{ profesor.nombre }} ({{ profesor.correo }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Puedes asignar un profesor ahora o dejarlo sin asignar para asignarlo después
+                </div>
             </div>
             
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Crear Sección</button>
-                <a href="{{ url_for('seccion.listar_secciones') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Sección
+                </button>
+                <a href="{{ url_for('seccion.listar_secciones') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del formulario
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const numero = document.getElementById('numero').value;
+        const instancia = document.getElementById('instancia_id').value;
+        
+        if (!numero || numero < 1) {
+            e.preventDefault();
+            alert('Por favor ingresa un número de sección válido (mayor a 0)');
+            return;
+        }
+        
+        if (!instancia) {
+            e.preventDefault();
+            alert('Por favor selecciona una instancia de curso');
+            return;
+        }
+    });
+});
+</script>
 {% endblock %}

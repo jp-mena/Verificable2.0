@@ -2,6 +2,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from sga.models.seccion import Seccion
 from sga.models.instancia_curso import InstanciaCurso
+from sga.models.profesor import Profesor
 from sga.db.database import execute_query
 
 seccion_bp = Blueprint('seccion', __name__)
@@ -27,6 +28,8 @@ def crear_seccion():
         try:
             numero = int(request.form['numero'])
             instancia_id = int(request.form['instancia_id'])
+            profesor_id = request.form.get('profesor_id')
+            profesor_id = int(profesor_id) if profesor_id else None
             
             # Verificar que la instancia de curso no esté cerrada
             if _verificar_instancia_curso_cerrada(instancia_id):
@@ -38,7 +41,14 @@ def crear_seccion():
                 flash('El número de sección debe ser mayor a 0', 'error')
                 return redirect(url_for('seccion.crear_seccion'))
             
-            Seccion.crear(numero, instancia_id)
+            # Verificar que no exista otra sección con el mismo número en la misma instancia
+            secciones_existentes = Seccion.obtener_todos()
+            for seccion in secciones_existentes:
+                if seccion['instancia_id'] == instancia_id and seccion['numero'] == numero:
+                    flash('Ya existe una sección con ese número para esta instancia de curso', 'error')
+                    return redirect(url_for('seccion.crear_seccion'))
+            
+            Seccion.crear(numero, instancia_id, profesor_id)
             flash('Sección creada exitosamente', 'success')
             return redirect(url_for('seccion.listar_secciones'))
             
@@ -46,10 +56,16 @@ def crear_seccion():
             flash('Error en los datos ingresados', 'error')
         except Exception as e:
             flash(f'Error al crear la sección: {str(e)}', 'error')
-      # Filtrar instancias de curso que estén abiertas
+    
+    # Filtrar instancias de curso que estén abiertas
     todas_instancias = InstanciaCurso.obtener_todos()
     instancias = [inst for inst in todas_instancias if not inst['cerrado']]
-    return render_template('secciones/crear.html', instancias=instancias)
+    
+    # Obtener todos los profesores para el dropdown inicial
+    profesores = Profesor.get_all()
+    profesores_list = [{'id': p[0], 'nombre': p[1], 'correo': p[2]} for p in profesores]
+    
+    return render_template('secciones/crear.html', instancias=instancias, profesores=profesores_list)
 
 @seccion_bp.route('/secciones/<int:id>/editar', methods=['GET', 'POST'])
 def editar_seccion(id):
@@ -68,6 +84,10 @@ def editar_seccion(id):
         try:
             seccion.numero = int(request.form['numero'])
             nueva_instancia_id = int(request.form['instancia_id'])
+            
+            # Manejar profesor_id
+            profesor_id = request.form.get('profesor_id')
+            seccion.profesor_id = int(profesor_id) if profesor_id else None
             
             # Verificar que la nueva instancia de curso no esté cerrada
             if _verificar_instancia_curso_cerrada(nueva_instancia_id):
@@ -89,10 +109,16 @@ def editar_seccion(id):
             flash('Error en los datos ingresados', 'error')
         except Exception as e:
             flash(f'Error al actualizar la sección: {str(e)}', 'error')
-      # Filtrar instancias de curso que estén abiertas (todas para poder mover a abierta)
+    
+    # Filtrar instancias de curso que estén abiertas (todas para poder mover a abierta)
     todas_instancias = InstanciaCurso.obtener_todos()
     instancias = [inst for inst in todas_instancias if not inst['cerrado']]
-    return render_template('secciones/editar.html', seccion=seccion, instancias=instancias)
+    
+    # Obtener todos los profesores para el dropdown
+    profesores = Profesor.get_all()
+    profesores_list = [{'id': p[0], 'nombre': p[1], 'correo': p[2]} for p in profesores]
+    
+    return render_template('secciones/editar.html', seccion=seccion, instancias=instancias, profesores=profesores_list)
 
 @seccion_bp.route('/secciones/<int:id>/eliminar', methods=['POST'])
 def eliminar_seccion(id):
@@ -115,3 +141,12 @@ def eliminar_seccion(id):
         flash(f'Error al eliminar la sección: {str(e)}', 'error')
     
     return redirect(url_for('seccion.listar_secciones'))
+
+@seccion_bp.route('/api/secciones/profesores-disponibles/<int:instancia_id>')
+def obtener_profesores_disponibles(instancia_id):
+    """API para obtener profesores disponibles para una instancia"""
+    try:
+        profesores_disponibles = Seccion.obtener_profesores_disponibles(instancia_id)
+        return jsonify({'profesores': profesores_disponibles}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

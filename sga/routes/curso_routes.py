@@ -17,7 +17,8 @@ def listar_cursos():
                 'id': curso[0],
                 'codigo': curso[1],
                 'nombre': curso[2],
-                'requisitos': curso[3] if curso[3] else ''
+                'creditos': curso[3],
+                'requisitos': curso[4] if curso[4] else ''
             })
         return render_template('cursos/listar.html', cursos=cursos_list)
     except Exception as e:
@@ -30,27 +31,35 @@ def crear_curso():
     """Crea un nuevo curso"""
     if request.method == 'POST':
         # Extraer datos del formulario de forma segura
-        data = safe_form_data(request.form, ['codigo', 'nombre', 'requisitos'])
+        data = safe_form_data(request.form, ['codigo', 'nombre', 'creditos'])
         
         # Validar campos requeridos
-        validate_required_fields(data, ['codigo', 'nombre'])
+        validate_required_fields(data, ['codigo', 'nombre', 'creditos'])
         
         # Validar formato de cada campo
         codigo = validate_text_field(data['codigo'], 'Código', min_length=3, max_length=20)
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=3, max_length=100)
-        requisitos = data['requisitos'] if data['requisitos'] else None
+        creditos = safe_int_conversion(data['creditos'], 'Créditos')
+        if creditos is None or creditos < 1 or creditos > 12:
+            raise ValidationError("Los créditos deben ser un número entre 1 y 12")
         
-        if requisitos:
-            requisitos = validate_text_field(requisitos, 'Requisitos', min_length=0, max_length=500)
+        # Obtener requisitos seleccionados (pueden ser múltiples)
+        requisitos_list = request.form.getlist('requisitos')
+        
+        # Validar requisitos
+        if requisitos_list:
+            Curso.validate_requisitos(requisitos_list, codigo)
         
         # Crear el curso
-        curso = Curso(codigo, nombre, requisitos)
+        curso = Curso(codigo, nombre, creditos, requisitos_list)
         curso_id = curso.save()
         
         flash('Curso creado exitosamente', 'success')
         return redirect(url_for('curso.listar_cursos'))
     
-    return render_template('cursos/crear.html')
+    # Para GET, obtener cursos disponibles como prerrequisitos
+    cursos_disponibles = Curso.get_prerequisitos_disponibles()
+    return render_template('cursos/crear.html', cursos_disponibles=cursos_disponibles)
 
 @curso_bp.route('/cursos/<int:id>/editar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
@@ -66,21 +75,27 @@ def editar_curso(id):
     
     if request.method == 'POST':
         # Extraer datos del formulario de forma segura
-        data = safe_form_data(request.form, ['codigo', 'nombre', 'requisitos'])
+        data = safe_form_data(request.form, ['codigo', 'nombre', 'creditos'])
         
         # Validar campos requeridos
-        validate_required_fields(data, ['codigo', 'nombre'])
+        validate_required_fields(data, ['codigo', 'nombre', 'creditos'])
         
         # Validar formato de cada campo
         codigo = validate_text_field(data['codigo'], 'Código', min_length=3, max_length=20)
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=3, max_length=100)
-        requisitos = data['requisitos'] if data['requisitos'] else None
+        creditos = safe_int_conversion(data['creditos'], 'Créditos')
+        if creditos is None or creditos < 1 or creditos > 12:
+            raise ValidationError("Los créditos deben ser un número entre 1 y 12")
         
-        if requisitos:
-            requisitos = validate_text_field(requisitos, 'Requisitos', min_length=0, max_length=500)
+        # Obtener requisitos seleccionados (pueden ser múltiples)
+        requisitos_list = request.form.getlist('requisitos')
+        
+        # Validar requisitos (no puede ser prerrequisito de sí mismo)
+        if requisitos_list:
+            Curso.validate_requisitos(requisitos_list, codigo)
         
         # Actualizar el curso
-        Curso.update(curso_id, codigo, nombre, requisitos)
+        Curso.update(curso_id, codigo, nombre, creditos, requisitos_list)
         
         flash('Curso actualizado exitosamente', 'success')
         return redirect(url_for('curso.listar_cursos'))
@@ -90,10 +105,17 @@ def editar_curso(id):
         'id': curso_data[0],
         'codigo': curso_data[1],
         'nombre': curso_data[2],
-        'requisitos': curso_data[3] if curso_data[3] else ''
+        'creditos': curso_data[3],
+        'requisitos': curso_data[4] if curso_data[4] else ''
     }
+      # Obtener cursos disponibles (igual que en crear) pero filtrar el curso actual
+    todos_los_cursos = Curso.get_prerequisitos_disponibles()
+    cursos_disponibles = [c for c in todos_los_cursos if c['codigo'] != curso['codigo']]
+    requisitos_actuales = Curso.get_requisitos_as_list(curso['requisitos'])
     
-    return render_template('cursos/editar.html', curso=curso)
+    return render_template('cursos/editar.html', curso=curso, 
+                         cursos_disponibles=cursos_disponibles, 
+                         requisitos_actuales=requisitos_actuales)
 
 @curso_bp.route('/cursos/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error

@@ -10,10 +10,15 @@ class Topico:
             self.tipo = self._validate_tipo(tipo)
         else:
             self.tipo = None
+            
     def _validate_tipo(self, tipo):
         """Valida el tipo de tópico"""
         tipo = validate_required_string(tipo, "tipo")
-        tipos_validos = ['control', 'tarea', 'actividad', 'proyecto', 'examen', 'quiz']
+        tipos_validos = [
+            'control', 'tarea', 'actividad', 'proyecto', 'examen', 'quiz',
+            'laboratorio', 'practica', 'ensayo', 'presentacion', 'seminario',
+            'informe', 'investigacion', 'parcial', 'final'
+        ]
         if tipo.lower() not in tipos_validos:
             raise ValidationError(f"Tipo debe ser uno de: {', '.join(tipos_validos)}")
         return tipo.lower()

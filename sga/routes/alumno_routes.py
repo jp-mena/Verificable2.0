@@ -13,12 +13,14 @@ def listar_alumnos():
         alumnos = Alumno.get_all()
         alumnos_list = []
         for alumno in alumnos:
-            alumnos_list.append({
+            alumno_dict = {
                 'id': alumno[0],
                 'nombre': alumno[1],
                 'correo': alumno[2],
                 'fecha_ingreso': alumno[3]
-            })
+            }
+            alumnos_list.append(alumno_dict)
+        
         return render_template('alumnos/listar.html', alumnos=alumnos_list)
     except Exception as e:
         flash('Error al cargar la lista de alumnos', 'error')

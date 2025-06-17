@@ -25,19 +25,27 @@
     .stats-icon {
         font-size: 3rem;
         margin-bottom: 1rem;
-    }
-    .btn-dashboard {
+    }    .btn-dashboard {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
         border-radius: 25px;
-        padding: 10px 25px;
-        color: white;
-        transition: all 0.3s;
+        padding: 12px 30px;
+        color: white !important;
+        text-decoration: none;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        display: inline-block;
     }
     .btn-dashboard:hover {
         background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        transform: translateY(-2px);
-        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white !important;
+        text-decoration: none;
+    }
+    .btn-dashboard:active {
+        transform: translateY(-1px);
     }
 </style>
 {% endblock %}
@@ -89,56 +97,64 @@
                         <i class="fas fa-calendar-alt me-2"></i>
                         Gestión Académica
                     </h5>
-                </div>
-                <div class="card-body">
+                </div>                <div class="card-body">
                     <div class="list-group list-group-flush">
                         <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-calendar-alt me-2"></i>
-                            Instancias de Curso
+                            <strong>1.</strong> Instancias de Curso
+                            <small class="text-muted d-block">Crear ofertas de cursos por semestre</small>
                         </a>
                         <a href="{{ url_for('seccion.listar_secciones') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-users me-2"></i>
-                            Secciones
+                            <strong>2.</strong> Secciones
+                            <small class="text-muted d-block">Asignar profesores a instancias</small>
+                        </a>                        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-plus me-2"></i>
+                            <strong>3.</strong> Inscripciones
+                            <small class="text-muted d-block">Inscribir alumnos en instancias (desde detalle de instancia)</small>
                         </a>
                         <a href="{{ url_for('evaluacion.listar_evaluaciones') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-clipboard-check me-2"></i>
-                            Evaluaciones
+                            <strong>4.</strong> Evaluaciones
+                            <small class="text-muted d-block">Definir evaluaciones por sección</small>
+                        </a>
+                        <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tasks me-2"></i>
+                            <strong>5.</strong> Instancias de Tópico
+                            <small class="text-muted d-block">Asociar tópicos a evaluaciones</small>
                         </a>
                         <a href="{{ url_for('nota.listar_notas') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-star me-2"></i>
-                            Notas
+                            <strong>6.</strong> Notas
+                            <small class="text-muted d-block">Asignar calificaciones finales</small>
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-md-6 mb-4">
+        </div>        <div class="col-md-6 mb-4">
             <div class="card dashboard-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-tools me-2"></i>
-                        Herramientas y Reportes
+                        <i class="fas fa-cogs me-2"></i>
+                        Configuración y Datos Maestros
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <a href="{{ url_for('reporte.index_reportes') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-chart-bar me-2"></i>
-                            Reportes Académicos
-                            <small class="text-muted d-block">Notas, certificados y estadísticas</small>
-                        </a>
                         <a href="{{ url_for('topico.listar_topicos') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-tags me-2"></i>
                             Tópicos
-                        </a>
-                        <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-tasks me-2"></i>
-                            Instancias de Tópico
+                            <small class="text-muted d-block">Gestionar tipos de evaluaciones</small>
                         </a>
                         <a href="{{ url_for('json_load.mostrar_carga') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-upload me-2"></i>
                             Cargar JSON
+                            <small class="text-muted d-block">Importar datos masivamente</small>
+                        </a>
+                        <a href="{{ url_for('reporte.index_reportes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Reportes Académicos
+                            <small class="text-muted d-block">Notas, certificados y estadísticas</small>
                         </a>
                     </div>
                 </div>

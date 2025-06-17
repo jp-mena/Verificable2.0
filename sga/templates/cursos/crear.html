@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Curso - SGA{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-book-plus me-2"></i>
+                        Crear Nuevo Curso
+                    </h4>
+                    <a href="{{ url_for('curso.listar_cursos') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a la Lista
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="codigo" class="form-label">
+                                        <i class="fas fa-barcode me-2"></i>
+                                        Código del Curso *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="codigo" 
+                                           name="codigo" 
+                                           required 
+                                           minlength="3"
+                                           maxlength="20"
+                                           placeholder="Ej: ICC5130"
+                                           style="text-transform: uppercase;">
+                                    <div class="form-text">Entre 3 y 20 caracteres. Se convertirá a mayúsculas automáticamente.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">
+                                        <i class="fas fa-book me-2"></i>
+                                        Nombre del Curso *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           name="nombre" 
+                                           required 
+                                           minlength="3"
+                                           maxlength="100"
+                                           placeholder="Ej: Diseño de Software Verificable">
+                                    <div class="form-text">Entre 3 y 100 caracteres</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="creditos" class="form-label">
+                                        <i class="fas fa-star me-2"></i>
+                                        Créditos *
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="creditos" 
+                                           name="creditos" 
+                                           required 
+                                           min="1"
+                                           max="12"
+                                           value="4"
+                                           placeholder="4">
+                                    <div class="form-text">Entre 1 y 12 créditos. Valor por defecto: 4</div>
+                                </div>
+                            </div>
+                        </div>
+                          <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="requisitos" class="form-label">
+                                        <i class="fas fa-list me-2"></i>
+                                        Prerrequisitos (Opcional)
+                                    </label>
+                                    <select class="form-select" 
+                                            id="requisitos" 
+                                            name="requisitos" 
+                                            multiple 
+                                            size="6">
+                                        {% for curso in cursos_disponibles %}
+                                        <option value="{{ curso.codigo }}">{{ curso.codigo }} - {{ curso.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">
+                                        Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples cursos.
+                                        Solo se guardarán los códigos de los cursos seleccionados.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>
+                                        Crear Curso
+                                    </button>
+                                    <a href="{{ url_for('curso.listar_cursos') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del formulario
+    const form = document.querySelector('form');
+    const codigo = document.getElementById('codigo');
+    const nombre = document.getElementById('nombre');
+    const requisitos = document.getElementById('requisitos');
+    
+    // Convertir código a mayúsculas automáticamente
+    codigo.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+        
+        // Validar formato del código
+        const codigoRegex = /^[A-Z]{3}\d{4}$/;
+        if (this.value.length >= 3) {
+            if (codigoRegex.test(this.value)) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else if (this.value.length === 7) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validar código
+        const codigoRegex = /^[A-Z]{3}\d{4}$/;
+        if (!codigo.value.trim() || !codigoRegex.test(codigo.value)) {
+            codigo.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            codigo.classList.remove('is-invalid');
+            codigo.classList.add('is-valid');
+        }
+        
+        // Validar nombre
+        if (!nombre.value.trim() || nombre.value.length < 3) {
+            nombre.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nombre.classList.remove('is-invalid');
+            nombre.classList.add('is-valid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    
+    // Validación en tiempo real
+    nombre.addEventListener('input', function() {
+        if (this.value.trim() && this.value.length >= 3) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+    
+    // Contador de caracteres para requisitos
+    requisitos.addEventListener('input', function() {
+        const maxLength = 500;
+        const currentLength = this.value.length;
+        const remaining = maxLength - currentLength;
+        
+        // Buscar o crear el contador
+        let counter = this.parentNode.querySelector('.char-counter');
+        if (!counter) {
+            counter = document.createElement('small');
+            counter.className = 'char-counter text-muted';
+            this.parentNode.appendChild(counter);
+        }
+        
+        counter.textContent = `${remaining} caracteres restantes`;
+        
+        if (remaining < 50) {
+            counter.className = 'char-counter text-warning';
+        } else if (remaining < 20) {
+            counter.className = 'char-counter text-danger';
+        } else {
+            counter.className = 'char-counter text-muted';
+        }
+    });
+});
+</script>
+{% endblock %}

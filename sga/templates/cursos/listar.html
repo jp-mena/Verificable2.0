@@ -15,8 +15,7 @@
         {% if cursos %}
             <div class="table-responsive">
                 <table class="table table-striped">
-                    <thead>
-                        <tr>
+                    <thead>                        <tr>
                             <th>ID</th>
                             <th>Código</th>
                             <th>Nombre</th>
@@ -25,12 +24,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for curso in cursos %}
-                        <tr>
+                        {% for curso in cursos %}                        <tr>
                             <td>{{ curso.id }}</td>
-                            <td>{{ curso.codigo }}</td>
+                            <td><span class="badge bg-primary">{{ curso.codigo }}</span></td>
                             <td>{{ curso.nombre }}</td>
-                            <td>{{ curso.creditos }}</td>
+                            <td><span class="badge bg-success">{{ curso.creditos }} créditos</span></td>
                             <td>
                                 <a href="{{ url_for('curso.editar_curso', id=curso.id) }}" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i>

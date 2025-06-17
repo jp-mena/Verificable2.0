@@ -18,8 +18,7 @@
                 <input type="number" class="form-control" id="numero" name="numero" 
                        value="{{ seccion.numero }}" min="1" required>
             </div>
-            
-            <div class="mb-3">
+              <div class="mb-3">
                 <label for="instancia_id" class="form-label">Instancia de Curso *</label>
                 <select class="form-select" id="instancia_id" name="instancia_id" required>
                     <option value="">Seleccionar instancia</option>
@@ -31,6 +30,25 @@
                         </option>
                     {% endfor %}
                 </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="profesor_id" class="form-label">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                    Profesor Asignado (Opcional)
+                </label>
+                <select class="form-select" id="profesor_id" name="profesor_id">
+                    <option value="">Sin asignar</option>
+                    {% for profesor in profesores %}
+                        <option value="{{ profesor.id }}" 
+                                {% if profesor.id == seccion.profesor_id %}selected{% endif %}>
+                            {{ profesor.nombre }} ({{ profesor.correo }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Puedes cambiar el profesor asignado o dejarlo sin asignar
+                </div>
             </div>
             
             <div class="d-flex gap-2">

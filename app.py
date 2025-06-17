@@ -70,21 +70,20 @@ def create_app():
             from sga.models.alumno import Alumno
             from sga.models.instancia_curso import InstanciaCurso
             from sga.models.seccion import Seccion
-            from sga.models.evaluacion import Evaluacion
-            
+            from sga.models.evaluacion import Evaluacion            
             # Cargar estadísticas una por una para identificar el error específico
             try:
-                stats['total_cursos'] = len(Curso.obtener_todos() or [])
+                stats['total_cursos'] = len(Curso.get_all() or [])
             except Exception as e:
                 print(f"Error cargando cursos: {e}")
                 
             try:
-                stats['total_profesores'] = len(Profesor.obtener_todos() or [])
+                stats['total_profesores'] = len(Profesor.get_all() or [])
             except Exception as e:
                 print(f"Error cargando profesores: {e}")
                 
             try:
-                stats['total_alumnos'] = len(Alumno.obtener_todos() or [])
+                stats['total_alumnos'] = len(Alumno.get_all() or [])
             except Exception as e:
                 print(f"Error cargando alumnos: {e}")
                 

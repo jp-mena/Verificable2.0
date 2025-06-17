@@ -28,12 +28,11 @@
                             <td>{{ alumno.id }}</td>
                             <td>{{ alumno.nombre }}</td>
                             <td>{{ alumno.correo }}</td>
-                            <td>{{ alumno.fecha_ingreso }}</td>
-                            <td>
-                                <a href="{{ url_for('alumno.editar_alumno', alumno_id=alumno.id) }}" class="btn btn-sm btn-warning">
+                            <td>{{ alumno.fecha_ingreso }}</td>                            <td>
+                                <a href="{{ url_for('alumno.editar_alumno', id=alumno.id) }}" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form method="post" action="{{ url_for('alumno.eliminar_alumno', alumno_id=alumno.id) }}" 
+                                <form method="post" action="{{ url_for('alumno.eliminar_alumno', id=alumno.id) }}" 
                                       style="display: inline;" 
                                       onsubmit="return confirm('¿Está seguro de que desea eliminar este alumno?')">
                                     <button type="submit" class="btn btn-sm btn-danger">
