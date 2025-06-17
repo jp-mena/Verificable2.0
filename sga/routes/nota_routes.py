@@ -234,8 +234,7 @@ def eliminar_nota(id):
         if not nota:
             flash('Nota no encontrada', 'error')
             return redirect(url_for('nota.listar_notas'))
-        
-        # Verificar si la instancia de curso está cerrada
+          # Verificar si la instancia de curso está cerrada
         if _verificar_instancia_cerrada(nota.instancia_topico_id):
             flash('No se pueden eliminar notas de un curso que ya ha sido cerrado', 'error')
             return redirect(url_for('nota.listar_notas'))
@@ -246,8 +245,3 @@ def eliminar_nota(id):
         flash(f'Error al eliminar la nota: {str(e)}', 'error')
     
     return redirect(url_for('nota.listar_notas'))
-
-@nota_bp.route('/test-api')
-def test_api_page():
-    """Página de test para el API"""
-    return render_template('test_api.html')
