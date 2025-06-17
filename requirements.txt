@@ -1,1 +1,27 @@
+# Framework web principal
 Flask==2.3.3
+
+# ORM para base de datos
+SQLAlchemy==2.0.23
+
+# Extensión Flask para SQLAlchemy
+Flask-SQLAlchemy==3.1.1
+
+# Herramientas de desarrollo y debugging
+Werkzeug==2.3.7
+
+# Templating engine (incluido con Flask)
+Jinja2==3.1.2
+
+# Utilidades para fechas
+python-dateutil==2.8.2
+
+# Para validación de datos
+marshmallow==3.20.1
+
+# Para testing (opcional)
+pytest==7.4.3
+pytest-flask==1.3.0
+
+# Para formateo de código (opcional)
+black==23.10.1

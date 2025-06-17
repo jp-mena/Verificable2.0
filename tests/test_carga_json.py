@@ -106,7 +106,7 @@ def limpiar_datos_prueba():
     print("\n=== Limpiando Datos de Prueba ===")
     
     try:
-        from db.database import execute_query
+        from sga.db.database import execute_query
         
         # Eliminar datos de prueba
         queries = [

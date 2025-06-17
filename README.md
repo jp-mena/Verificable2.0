@@ -1,268 +1,104 @@
 # Sistema de Gestión Académica (SGA)
 
-Un sistema web completo para gestionar cursos, profesores, alumnos, evaluaciones y notas universitarias. Desarrollado con Flask, SQLite y Bootstrap.
+Sistema web para gestionar cursos, profesores, alumnos, evaluaciones y notas universitarias. Desarrollado con Flask y SQLite.
 
 ## 🚀 Características
 
-- **Gestión de Cursos**: Crear, editar y eliminar cursos
-- **Gestión de Profesores**: Administrar información de profesores
-- **Gestión de Alumnos**: Registrar y mantener datos de estudiantes
-- **Instancias de Curso**: Manejar semestres y años académicos
-- **Secciones**: Organizar estudiantes por secciones
-- **Evaluaciones**: Configurar diferentes tipos de evaluaciones
-- **Tópicos**: Definir tipos de actividades académicas
-- **Notas**: Registrar y consultar calificaciones
-- **Carga Masiva**: Importar datos desde archivos JSON
-- **Interfaz Web**: Dashboard intuitivo con Bootstrap
+- **CRUD completo** para todas las entidades (cursos, profesores, alumnos, secciones, etc.)
+- **Sistema de notas** con cálculo automático de notas finales por ponderación
+- **Carga masiva** de datos desde archivos JSON
+- **Interfaz web** intuitiva con Bootstrap
 
-## Estructura del Proyecto
+## 🛠️ Instalación y Ejecución
 
-```
-SGA/
-├── app.py                    # Archivo principal de la aplicación
-├── requirements.txt          # Dependencias del proyecto
-├── plan.md                  # Plan de desarrollo del proyecto
-├── config/
-│   └── settings.py          # Configuración de la aplicación
-├── db/
-│   ├── database.py          # Configuración y conexión a la base de datos
-│   └── sga.db              # Base de datos SQLite
-├── models/                  # Modelos de datos
-│   ├── curso.py
-│   ├── profesor.py
-│   ├── alumno.py
-│   ├── instancia_curso.py
-│   ├── seccion.py
-│   ├── evaluacion.py
-│   ├── topico.py
-│   ├── instancia_topico.py
-│   └── nota.py
-├── routes/                  # Rutas de la aplicación
-│   ├── curso_routes.py
-│   ├── profesor_routes.py
-│   ├── alumno_routes.py
-│   ├── instancia_curso_routes.py
-│   ├── seccion_routes.py
-│   ├── evaluacion_routes.py
-│   ├── topico_routes.py
-│   ├── instancia_topico_routes.py
-│   ├── nota_routes.py
-│   └── json_routes.py
-├── templates/               # Plantillas HTML
-│   ├── base.html
-│   ├── index.html
-│   ├── instancias_curso/
-│   ├── secciones/
-│   ├── evaluaciones/
-│   ├── topicos/
-│   ├── instancias_topico/
-│   ├── notas/
-│   └── json/
-├── static/
-│   └── js/
-│       └── app.js
-└── data/
-    └── json_examples/
-        └── datos_ejemplo.json
+### 1. Preparar entorno
+```bash
+# Crear y activar entorno virtual
+python -m venv venv
+
+# Windows
+.\venv\Scripts\Activate.ps1
+
+# macOS/Linux  
+source venv/bin/activate
 ```
 
-## Instalación y Ejecución
-
-1. **Clonar el repositorio o descargar los archivos**
-
-2. **Instalar las dependencias:**
+### 2. Instalar dependencias
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Ejecutar la aplicación:**
+### 3. Ejecutar aplicación
 ```bash
 python app.py
 ```
 
-4. **Acceder a la aplicación:**
-   - Interfaz Web: http://127.0.0.1:5000
-   - API REST: http://127.0.0.1:5000/api
+La aplicación estará disponible en: **http://127.0.0.1:5000**
 
-## 🌐 Funcionalidades Web
+## 🎯 Flujo de Uso de la Aplicación
 
-### Dashboard Principal
-- Acceso rápido a todas las secciones
-- Estadísticas básicas del sistema
-- Navegación intuitiva
+### Para el evaluador: Dónde encontrar la funcionalidad
 
-### Gestión de Entidades
-- **Instancias de Curso**: Administrar semestres y años académicos
-- **Secciones**: Organizar cursos por secciones
-- **Evaluaciones**: Configurar evaluaciones con porcentajes
-- **Tópicos**: Definir tipos de actividades (controles, tareas, proyectos, etc.)
-- **Instancias de Tópico**: Configurar actividades específicas con pesos
-- **Notas**: Registrar calificaciones de estudiantes
+**1. Dashboard Principal (`/`)**
+- Acceso a todas las funcionalidades principales
+- Navegación por menús organizados
 
-### Carga Masiva de Datos
-- Importar datos desde archivos JSON
-- Cargar datos de ejemplo predefinidos
-- Validaciones automáticas de integridad
+**2. Gestión CRUD - Menús principales:**
+- **Cursos** (`/cursos`) - Crear, listar, editar, eliminar cursos
+- **Profesores** (`/profesores`) - Gestión completa de profesores  
+- **Alumnos** (`/alumnos`) - Registro y gestión de estudiantes
+- **Instancias de Curso** (`/instancias-curso`) - Semestres/años con asignación de profesores
+- **Secciones** (`/secciones`) - Organización de estudiantes e inscripciones
+- **Evaluaciones** (`/evaluaciones`) - Tipos de evaluación con porcentajes
+- **Tópicos** (`/topicos`) - Temas/unidades de curso
+- **Instancias de Tópico** (`/instancias-topico`) - Configuración de pesos por tópico
+- **Notas** (`/notas`) - Sistema de calificaciones con cálculo automático
 
-## 📊 API REST
+**3. Funcionalidades especiales:**
+- **Carga JSON** (`/cargar-json`) - Importación masiva de datos
+- **API REST** (`/api/*`) - Endpoints para todas las entidades
 
-### Cursos
-- `GET /api/cursos` - Obtener todos los cursos
-- `POST /api/cursos` - Crear un nuevo curso
-- `GET /api/cursos/<id>` - Obtener un curso específico
-- `PUT /api/cursos/<id>` - Actualizar un curso
-- `DELETE /api/cursos/<id>` - Eliminar un curso
+### Flujo recomendado para pruebas:
 
-### Profesores
-- `GET /api/profesores` - Obtener todos los profesores
-- `POST /api/profesores` - Crear un nuevo profesor
-- `GET /api/profesores/<id>` - Obtener un profesor específico
-- `PUT /api/profesores/<id>` - Actualizar un profesor
-- `DELETE /api/profesores/<id>` - Eliminar un profesor
+1. **Cargar datos de ejemplo**: `/cargar-json` → "Cargar datos de ejemplo"
+2. **Explorar entidades**: Usar los menús para ver CRUDs funcionando
+3. **Crear notas**: Ir a "Notas" → "Crear" (formulario simple, sin wizard)
+4. **Ver cálculos**: Las notas finales se calculan automáticamente con ponderación real
 
-### Alumnos
-- `GET /api/alumnos` - Obtener todos los alumnos
-- `POST /api/alumnos` - Crear un nuevo alumno
-- `GET /api/alumnos/<id>` - Obtener un alumno específico
-- `PUT /api/alumnos/<id>` - Actualizar un alumno
-- `DELETE /api/alumnos/<id>` - Eliminar un alumno
+### Características del sistema de notas:
+- **Cálculo automático** por peso de evaluaciones y tópicos
+- **Validaciones** de integridad en todos los formularios  
+- **Formulario simple** de creación (wizard eliminado)
+- **Precisión** de 1 decimal en notas finales
 
-## Ejemplos de Uso
+## 📁 Estructura del Proyecto
 
-### Crear un curso:
-```json
-POST /api/cursos
-{
-    "codigo": "ICC5130",
-    "nombre": "Ingeniería de Software",
-    "requisitos": "ICC2000, ICC3000"
-}
+```
+Verificable2.0/
+├── app.py                    # Archivo principal Flask
+├── requirements.txt          # Dependencias
+└── sga/                     # Paquete principal
+    ├── config/              # Configuración
+    ├── db/                  # Base de datos SQLite
+    ├── models/              # Modelos de datos
+    ├── routes/              # Rutas (Blueprint)
+    ├── templates/           # Plantillas HTML
+    ├── static/              # Archivos estáticos
+    └── utils/               # Utilidades
 ```
 
-### Crear un profesor:
-```json
-POST /api/profesores
-{
-    "nombre": "Juan Pérez",
-    "correo": "juan.perez@universidad.cl"
-}
+## 🔧 Solución de Problemas
+
+### Error de permisos en Windows:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Crear un alumno:
-```json
-POST /api/alumnos
-{
-    "nombre": "María González",
-    "correo": "maria.gonzalez@estudiante.cl",
-    "fecha_ingreso": "2024-03-01"
-}
-```
-
-## Funcionalidad de Carga Masiva JSON
-
-### Interfaz Web
-Accede a `/cargar-json` para usar la interfaz de carga masiva que incluye:
-
-- **Carga por archivo**: Sube archivos JSON desde tu computadora
-- **Drag & Drop**: Arrastra archivos directamente a la zona de carga
-- **Datos de ejemplo**: Carga datos predefinidos para testing
-- **Validación**: Valida la estructura JSON antes de cargar
-- **Archivos de ejemplo**: Descarga plantillas JSON
-
-### API REST para Carga JSON
-
-#### Cargar datos
+### Error "Module not found":
 ```bash
-POST /api/cargar-json
-Content-Type: application/json
-
-{
-  "cursos": [...],
-  "profesores": [...],
-  "alumnos": [...]
-}
+# Verificar entorno virtual activo (debe aparecer "(venv)")
+pip install -r requirements.txt
 ```
 
-#### Validar estructura JSON
-```bash
-POST /api/validar-json
-Content-Type: application/json
-
-# Retorna información sobre la validez del JSON
-```
-
-### Formato JSON Soportado
-
-El sistema acepta las siguientes entidades en el JSON:
-
-```json
-{
-  "cursos": [
-    {
-      "codigo": "ICS1113",
-      "nombre": "Programación", 
-      "requisitos": ""
-    }
-  ],
-  "profesores": [
-    {
-      "nombre": "Dr. Juan Pérez",
-      "correo": "juan.perez@universidad.cl"
-    }
-  ],
-  "alumnos": [
-    {
-      "nombre": "Ana Silva",
-      "correo": "ana.silva@student.cl",
-      "fecha_ingreso": "2024-03-01"
-    }
-  ],
-  "instancias_curso": [
-    {
-      "semestre": 1,
-      "anio": 2024,
-      "curso_codigo": "ICS1113"
-    }
-  ],
-  "secciones": [
-    {
-      "numero": 1,
-      "instancia_curso": {
-        "semestre": 1,
-        "anio": 2024,
-        "curso_codigo": "ICS1113"
-      }
-    }
-  ],
-  "topicos": [
-    {
-      "nombre": "Variables y Tipos de Datos",
-      "descripcion": "Introducción a variables"
-    }
-  ],
-  "evaluaciones": [
-    {
-      "nombre": "Controles",
-      "tipo": "CO",
-      "porcentaje": 40
-    }
-  ],
-  "notas": [
-    {
-      "alumno_correo": "ana.silva@student.cl",
-      "topico_nombre": "Variables y Tipos de Datos",
-      "instancia_curso": {
-        "semestre": 1,
-        "anio": 2024,
-        "curso_codigo": "ICS1113"
-      },
-      "nota": 6.5
-    }
-  ]
-}
-```
-
-### Archivos de Ejemplo
-
-- `static/examples/ejemplo_basico.json` - Datos básicos (cursos, profesores, alumnos)
-- `static/examples/ejemplo_completo.json` - Todas las entidades con relaciones
+### Puerto ocupado:
+Cambiar puerto en `app.py`: `app.run(debug=True, port=5001)`
