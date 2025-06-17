@@ -41,8 +41,7 @@ class Inscripcion:
                 'curso_codigo': fila[6],
                 'curso_nombre': fila[7],
                 'semestre': fila[8],
-                'anio': fila[9]
-            }
+                'anio': fila[9]            }
             for fila in resultados
         ]
 
@@ -51,7 +50,7 @@ class Inscripcion:
         """Obtiene todas las inscripciones de un curso específico"""
         query = """
         SELECT i.id, i.alumno_id, i.fecha_inscripcion,
-               a.nombre as alumno_nombre, a.correo as alumno_correo
+               a.nombre, a.correo
         FROM inscripciones i
         JOIN alumnos a ON i.alumno_id = a.id
         WHERE i.instancia_curso_id = ?
@@ -63,8 +62,10 @@ class Inscripcion:
                 'id': fila[0],
                 'alumno_id': fila[1],
                 'fecha_inscripcion': fila[2],
-                'alumno_nombre': fila[3],
-                'alumno_correo': fila[4]
+                'nombre': fila[3],
+                'apellido': '',  # No existe en BD, campo vacío por compatibilidad
+                'rut': '',       # No existe en BD, campo vacío por compatibilidad
+                'email': fila[4]
             }
             for fila in resultados
         ]
@@ -81,7 +82,7 @@ class Inscripcion:
             WHERE i.instancia_curso_id = ?
         )
         ORDER BY a.nombre
-        """
+        """        
         resultados = execute_query(query, (instancia_curso_id,))
         return [
             {

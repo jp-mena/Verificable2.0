@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Nota - Formulario Simple{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle text-primary me-2"></i>
+                        Crear Nueva Nota - Formulario Simple
+                    </h3>
+                    <p class="mb-0 text-muted">Complete todos los campos para asignar una nota</p>
+                </div>
+                <div class="card-body">
+                    {% if not instancias_curso %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No hay instancias de curso abiertas disponibles para crear notas.
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Notas
+                            </a>
+                        </div>
+                    {% else %}
+                        <form method="POST" id="form-crear-nota">
+                            <div class="row">
+                                <!-- Columna Izquierda: Curso y Alumno -->
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-graduation-cap text-primary me-2"></i>
+                                                Curso y Alumno
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Instancia de Curso -->
+                                            <div class="mb-3">
+                                                <label for="instancia_curso_id" class="form-label">
+                                                    <i class="fas fa-book me-2"></i>Instancia de Curso
+                                                </label>
+                                                <select class="form-select" id="instancia_curso_id" name="instancia_curso_id" required>
+                                                    <option value="">Seleccione una instancia de curso...</option>
+                                                    {% for instancia in instancias_curso %}
+                                                        <option value="{{ instancia.id }}" 
+                                                                data-curso="{{ instancia.curso_codigo }}" 
+                                                                data-nombre="{{ instancia.curso_nombre }}"
+                                                                data-semestre="{{ instancia.semestre }}" 
+                                                                data-anio="{{ instancia.anio }}">
+                                                            {{ instancia.curso_codigo }} - {{ instancia.curso_nombre }} 
+                                                            (S{{ instancia.semestre }}/{{ instancia.anio }})
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="form-text">
+                                                    Solo se muestran instancias abiertas.
+                                                </div>
+                                            </div>
+
+                                            <!-- Alumno -->
+                                            <div class="mb-3">
+                                                <label for="alumno_id" class="form-label">
+                                                    <i class="fas fa-user-graduate me-2"></i>Alumno Inscrito
+                                                </label>
+                                                <select class="form-select" id="alumno_id" name="alumno_id" required disabled>
+                                                    <option value="">Primero seleccione una instancia de curso</option>
+                                                </select>
+                                                <div class="form-text">
+                                                    Solo alumnos inscritos en la instancia seleccionada.
+                                                </div>
+                                            </div>
+
+                                            <!-- Info del curso seleccionado -->
+                                            <div id="info-curso" class="alert alert-light d-none">
+                                                <h6 class="alert-heading">Información del Curso</h6>
+                                                <p class="mb-1"><strong>Código:</strong> <span id="info-codigo">-</span></p>
+                                                <p class="mb-1"><strong>Nombre:</strong> <span id="info-nombre">-</span></p>
+                                                <p class="mb-0"><strong>Período:</strong> <span id="info-periodo">-</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Columna Derecha: Evaluación y Nota -->
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-clipboard-check text-success me-2"></i>
+                                                Evaluación y Nota
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Instancia de Tópico -->
+                                            <div class="mb-3">
+                                                <label for="instancia_topico_id" class="form-label">
+                                                    <i class="fas fa-tasks me-2"></i>Evaluación
+                                                </label>
+                                                <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required disabled>
+                                                    <option value="">Primero seleccione una instancia de curso</option>
+                                                </select>
+                                                <div class="form-text">
+                                                    Evaluaciones disponibles para la instancia seleccionada.
+                                                </div>
+                                            </div>
+
+                                            <!-- Nota -->
+                                            <div class="mb-3">
+                                                <label for="nota" class="form-label">
+                                                    <i class="fas fa-star me-2"></i>Nota
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="nota" name="nota" 
+                                                           min="1.0" max="7.0" step="0.1" placeholder="Ej: 6.5" required>
+                                                    <span class="input-group-text">/7.0</span>
+                                                </div>
+                                                <div class="form-text">
+                                                    La nota debe estar entre 1.0 y 7.0
+                                                </div>
+                                            </div>
+
+                                            <!-- Info de la evaluación seleccionada -->
+                                            <div id="info-evaluacion" class="alert alert-light d-none">
+                                                <h6 class="alert-heading">Información de la Evaluación</h6>
+                                                <p class="mb-1"><strong>Evaluación:</strong> <span id="eval-nombre">-</span></p>
+                                                <p class="mb-0"><strong>Peso:</strong> <span id="eval-peso">-</span>%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de la Nota a Crear -->
+                            <div id="resumen-nota" class="card mt-4 d-none">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Resumen de la Nota a Crear
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Curso:</strong><br>
+                                            <span id="resumen-curso">-</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Alumno:</strong><br>
+                                            <span id="resumen-alumno">-</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Evaluación:</strong><br>
+                                            <span id="resumen-evaluacion">-</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Nota:</strong><br>
+                                            <span id="resumen-nota-valor" class="fs-4 text-success">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contador de Notas Faltantes -->
+                            <div id="contador-notas" class="alert alert-info mt-4 d-none">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Progreso de Notas
+                                </h6>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div id="progress-bar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small>
+                                    <span id="notas-existentes">0</span> de <span id="notas-totales">0</span> notas asignadas
+                                    (<span id="notas-faltantes">0</span> pendientes)
+                                </small>
+                            </div>                            <div class="d-flex justify-content-between mt-4">
+                                <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success" id="btn-crear" disabled>
+                                    <i class="fas fa-save me-2"></i>Crear Nota
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectInstancia = document.getElementById('instancia_curso_id');
+    const selectAlumno = document.getElementById('alumno_id');
+    const selectEvaluacion = document.getElementById('instancia_topico_id');
+    const inputNota = document.getElementById('nota');
+    const btnCrear = document.getElementById('btn-crear');
+    
+    // Elementos de información
+    const infoCurso = document.getElementById('info-curso');
+    const infoEvaluacion = document.getElementById('info-evaluacion');
+    const resumenNota = document.getElementById('resumen-nota');
+    const contadorNotas = document.getElementById('contador-notas');
+    
+    // Elementos de datos
+    const infoCodigo = document.getElementById('info-codigo');
+    const infoNombre = document.getElementById('info-nombre');
+    const infoPeriodo = document.getElementById('info-periodo');
+    const evalNombre = document.getElementById('eval-nombre');
+    const evalPeso = document.getElementById('eval-peso');
+    
+    // Elementos del resumen
+    const resumenCurso = document.getElementById('resumen-curso');
+    const resumenAlumno = document.getElementById('resumen-alumno');
+    const resumenEvaluacion = document.getElementById('resumen-evaluacion');
+    const resumenNotaValor = document.getElementById('resumen-nota-valor');
+    
+    // Elementos del contador
+    const progressBar = document.getElementById('progress-bar');
+    const notasExistentes = document.getElementById('notas-existentes');
+    const notasTotales = document.getElementById('notas-totales');
+    const notasFaltantes = document.getElementById('notas-faltantes');
+    
+    function actualizarFormulario() {
+        const instanciaSeleccionada = selectInstancia.value;
+        const alumnoSeleccionado = selectAlumno.value;
+        const evaluacionSeleccionada = selectEvaluacion.value;
+        const notaIngresada = inputNota.value;
+        
+        // Habilitar/deshabilitar botón
+        if (instanciaSeleccionada && alumnoSeleccionado && evaluacionSeleccionada && notaIngresada) {
+            btnCrear.disabled = false;
+            actualizarResumen();
+        } else {
+            btnCrear.disabled = true;
+            resumenNota.classList.add('d-none');
+        }
+    }
+    
+    function actualizarResumen() {
+        const instanciaOption = selectInstancia.options[selectInstancia.selectedIndex];
+        const alumnoOption = selectAlumno.options[selectAlumno.selectedIndex];
+        const evaluacionOption = selectEvaluacion.options[selectEvaluacion.selectedIndex];
+        
+        if (instanciaOption.value && alumnoOption.value && evaluacionOption.value && inputNota.value) {
+            resumenCurso.textContent = instanciaOption.dataset.curso;
+            resumenAlumno.textContent = alumnoOption.text.split(' (')[0];
+            resumenEvaluacion.textContent = evaluacionOption.text.split(' (')[0];
+            resumenNotaValor.textContent = inputNota.value;
+            
+            resumenNota.classList.remove('d-none');
+        }
+    }
+    
+    function cargarAlumnos(instanciaCursoId) {
+        selectAlumno.disabled = true;
+        selectAlumno.innerHTML = '<option value="">Cargando alumnos...</option>';
+        
+        fetch(`/api/notas/alumnos-inscritos/${instanciaCursoId}?t=${Date.now()}`)
+            .then(response => response.json())
+            .then(data => {
+                selectAlumno.innerHTML = '<option value="">Seleccione un alumno...</option>';
+                
+                if (data.alumnos && data.alumnos.length > 0) {
+                    data.alumnos.forEach(alumno => {
+                        const option = document.createElement('option');
+                        option.value = alumno.alumno_id;
+                        option.textContent = `${alumno.nombre} (${alumno.email})`;
+                        selectAlumno.appendChild(option);
+                    });
+                    selectAlumno.disabled = false;
+                } else {
+                    selectAlumno.innerHTML = '<option value="">No hay alumnos inscritos</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando alumnos:', error);
+                selectAlumno.innerHTML = '<option value="">Error cargando alumnos</option>';
+            });
+    }
+    
+    function cargarEvaluaciones(instanciaCursoId) {
+        selectEvaluacion.disabled = true;
+        selectEvaluacion.innerHTML = '<option value="">Cargando evaluaciones...</option>';
+        
+        fetch(`/api/notas/instancias-topico/${instanciaCursoId}?t=${Date.now()}`)
+            .then(response => response.json())
+            .then(data => {
+                selectEvaluacion.innerHTML = '<option value="">Seleccione una evaluación...</option>';
+                
+                if (data.instancias_topico && data.instancias_topico.length > 0) {
+                    data.instancias_topico.forEach(it => {
+                        const option = document.createElement('option');
+                        option.value = it.id;
+                        option.dataset.peso = it.peso;
+                        option.dataset.evaluacion = it.evaluacion_nombre;
+                        option.textContent = `${it.evaluacion_nombre} - ${it.nombre} (Peso: ${it.peso}%)`;
+                        selectEvaluacion.appendChild(option);
+                    });
+                    selectEvaluacion.disabled = false;
+                } else {
+                    selectEvaluacion.innerHTML = '<option value="">No hay evaluaciones disponibles</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando evaluaciones:', error);
+                selectEvaluacion.innerHTML = '<option value="">Error cargando evaluaciones</option>';
+            });
+    }
+    
+    // Event listeners
+    selectInstancia.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            // Mostrar información del curso
+            infoCodigo.textContent = selectedOption.dataset.curso;
+            infoNombre.textContent = selectedOption.dataset.nombre;
+            infoPeriodo.textContent = `S${selectedOption.dataset.semestre}/${selectedOption.dataset.anio}`;
+            infoCurso.classList.remove('d-none');
+            
+            // Cargar alumnos y evaluaciones
+            cargarAlumnos(selectedOption.value);
+            cargarEvaluaciones(selectedOption.value);
+            
+            // Resetear otros campos
+            selectAlumno.value = '';
+            selectEvaluacion.value = '';
+            inputNota.value = '';
+            infoEvaluacion.classList.add('d-none');
+            resumenNota.classList.add('d-none');
+        } else {
+            infoCurso.classList.add('d-none');
+            selectAlumno.disabled = true;
+            selectEvaluacion.disabled = true;
+            selectAlumno.innerHTML = '<option value="">Primero seleccione una instancia de curso</option>';
+            selectEvaluacion.innerHTML = '<option value="">Primero seleccione una instancia de curso</option>';
+        }
+        
+        actualizarFormulario();
+    });
+    
+    selectAlumno.addEventListener('change', actualizarFormulario);
+    
+    selectEvaluacion.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            evalNombre.textContent = selectedOption.dataset.evaluacion || '-';
+            evalPeso.textContent = selectedOption.dataset.peso || '-';
+            infoEvaluacion.classList.remove('d-none');
+        } else {
+            infoEvaluacion.classList.add('d-none');
+        }
+        
+        actualizarFormulario();
+    });
+    
+    inputNota.addEventListener('input', function() {
+        // Validar rango
+        const valor = parseFloat(this.value);
+        if (valor < 1.0 || valor > 7.0) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+        
+        actualizarFormulario();
+    });
+    
+    // Validación en tiempo real de la nota
+    inputNota.addEventListener('blur', function() {
+        const valor = parseFloat(this.value);
+        if (this.value && (isNaN(valor) || valor < 1.0 || valor > 7.0)) {
+            this.classList.add('is-invalid');
+            const feedback = this.parentNode.querySelector('.invalid-feedback') || document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = 'La nota debe estar entre 1.0 y 7.0';
+            if (!this.parentNode.querySelector('.invalid-feedback')) {
+                this.parentNode.appendChild(feedback);
+            }
+        } else {
+            this.classList.remove('is-invalid');
+            const feedback = this.parentNode.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.remove();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

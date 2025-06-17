@@ -9,8 +9,19 @@ class Nota:
         self.nota = nota
 
     @classmethod
+    def existe_nota(cls, alumno_id, instancia_topico_id):
+        """Verifica si ya existe una nota para un alumno en una instancia de tópico"""
+        query = "SELECT COUNT(*) FROM notas WHERE alumno_id = ? AND instancia_topico_id = ?"
+        resultado = execute_query(query, (alumno_id, instancia_topico_id))
+        return resultado[0][0] > 0
+
+    @classmethod
     def crear(cls, alumno_id, instancia_topico_id, nota):
-        """Crea una nueva nota"""
+        """Crea una nueva nota después de validar que no existe duplicado"""
+        # Verificar si ya existe una nota
+        if cls.existe_nota(alumno_id, instancia_topico_id):
+            raise ValueError("Ya existe una nota para este alumno en esta evaluación")
+        
         query = "INSERT INTO notas (alumno_id, instancia_topico_id, nota) VALUES (?, ?, ?)"
         id_nota = execute_query(query, (alumno_id, instancia_topico_id, nota))
         return cls(id_nota, alumno_id, instancia_topico_id, nota)

@@ -4,10 +4,11 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Notas</h1>
-    <a href="{{ url_for('nota.crear_nota') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Nueva Nota
-    </a>
+    <h1>Notas</h1>    <div class="btn-group" role="group">
+        <a href="{{ url_for('nota.crear_nota_simple') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nueva Nota
+        </a>
+    </div>
 </div>
 
 <div class="card">
@@ -77,11 +78,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        {% else %}
+            </div>        {% else %}
             <div class="text-center py-5">
                 <p class="text-muted">No hay notas registradas.</p>
-                <a href="{{ url_for('nota.crear_nota') }}" class="btn btn-primary">
+                <a href="{{ url_for('nota.crear_nota_simple') }}" class="btn btn-primary">
                     Crear primera nota
                 </a>
             </div>

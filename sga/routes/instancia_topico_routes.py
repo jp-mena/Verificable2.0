@@ -42,7 +42,6 @@ def crear_instancia():
     if request.method == 'POST':
         try:
             nombre = request.form['nombre'].strip()
-            peso = float(request.form['peso'])
             opcional = 'opcional' in request.form
             evaluacion_id = int(request.form['evaluacion_id'])
             topico_id = int(request.form['topico_id'])
@@ -51,17 +50,15 @@ def crear_instancia():
             if _verificar_evaluacion_cerrada(evaluacion_id):
                 flash('No se pueden crear instancias de tópico en un curso que ya ha sido cerrado', 'error')
                 return redirect(url_for('instancia_topico.crear_instancia'))
-              # Validaciones básicas
+            
+            # Validaciones básicas
             if not nombre:
                 flash('El nombre de la instancia es requerido', 'error')
                 return redirect(url_for('instancia_topico.crear_instancia'))
             
-            if peso <= 0 or peso > 100:
-                flash('El peso debe estar entre 0 y 100', 'error')
-                return redirect(url_for('instancia_topico.crear_instancia'))
-            
-            InstanciaTopico.crear(nombre, peso, opcional, evaluacion_id, topico_id)
-            flash('Instancia de tópico creada exitosamente', 'success')
+            # Crear instancia (el peso se toma automáticamente de la evaluación)
+            InstanciaTopico.crear(nombre, opcional, evaluacion_id, topico_id)
+            flash('Instancia de tópico creada exitosamente. El peso se asignó automáticamente desde la evaluación.', 'success')
             return redirect(url_for('instancia_topico.listar_instancias'))
             
         except ValueError:
@@ -86,16 +83,14 @@ def editar_instancia(id):
     if not instancia:
         flash('Instancia de tópico no encontrada', 'error')
         return redirect(url_for('instancia_topico.listar_instancias'))
-    
-    # Verificar si la evaluación actual pertenece a un curso cerrado
+      # Verificar si la evaluación actual pertenece a un curso cerrado
     if _verificar_evaluacion_cerrada(instancia.evaluacion_id):
         flash('No se pueden editar instancias de tópico de un curso que ya ha sido cerrado', 'error')
         return redirect(url_for('instancia_topico.listar_instancias'))
-    
+
     if request.method == 'POST':
         try:
             instancia.nombre = request.form['nombre'].strip()
-            instancia.peso = float(request.form['peso'])
             instancia.opcional = 'opcional' in request.form
             nueva_evaluacion_id = int(request.form['evaluacion_id'])
             instancia.topico_id = int(request.form['topico_id'])
@@ -106,17 +101,15 @@ def editar_instancia(id):
                 return redirect(url_for('instancia_topico.editar_instancia', id=id))
             
             instancia.evaluacion_id = nueva_evaluacion_id
-              # Validaciones básicas
+            
+            # Validaciones básicas
             if not instancia.nombre:
                 flash('El nombre de la instancia es requerido', 'error')
                 return redirect(url_for('instancia_topico.editar_instancia', id=id))
             
-            if instancia.peso <= 0 or instancia.peso > 100:
-                flash('El peso debe estar entre 0 y 100', 'error')
-                return redirect(url_for('instancia_topico.editar_instancia', id=id))
-            
+            # Actualizar (el peso se ajustará automáticamente desde la evaluación)
             instancia.actualizar()
-            flash('Instancia de tópico actualizada exitosamente', 'success')
+            flash('Instancia de tópico actualizada exitosamente. El peso se ajustó automáticamente.', 'success')
             return redirect(url_for('instancia_topico.listar_instancias'))
             
         except ValueError:

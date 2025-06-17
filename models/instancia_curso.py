@@ -1,6 +1,6 @@
 # filepath: models/instancia_curso.py
-from sga.db.database import execute_query
-from sga.utils.validators import ValidationError
+from db.database import execute_query
+from utils.validators import ValidationError
 
 class InstanciaCurso:
     def __init__(self, id=None, semestre=None, anio=None, curso_id=None):
@@ -85,7 +85,9 @@ class InstanciaCurso:
             query = "UPDATE instancias_curso SET semestre = ?, anio = ?, curso_id = ? WHERE id = ?"
             execute_query(query, (self.semestre, self.anio, self.curso_id, self.id))
         except Exception as e:
-            raise ValidationError(f"Error al actualizar la instancia de curso: {str(e)}")    @classmethod
+            raise ValidationError(f"Error al actualizar la instancia de curso: {str(e)}")
+
+    @classmethod
     def eliminar(cls, id):
         """Elimina una instancia de curso"""
         try:
@@ -99,9 +101,7 @@ class InstanciaCurso:
 
     def esta_cerrado(self):
         """Verifica si la instancia de curso está cerrada"""
-        return getattr(self, 'cerrado', False)
-
-    @classmethod
+        return getattr(self, 'cerrado', False)    @classmethod
     def obtener_nota_final_alumno(cls, instancia_id, alumno_id):
         """Obtiene la nota final de un alumno en una instancia cerrada"""
         try:
@@ -231,7 +231,8 @@ class InstanciaCurso:
                     'evaluacion': fila[3],
                     'peso_evaluacion': fila[4],
                     'topico_nombre': fila[5],
-                    'topico_tipo': fila[6]                }
+                    'topico_tipo': fila[6]
+                }
                 for fila in resultados
             ]
         except Exception as e:
@@ -240,19 +241,22 @@ class InstanciaCurso:
 
     @classmethod
     def calcular_nota_final_alumno(cls, instancia_id, alumno_id):
-        """Calcula la nota final de un alumno específico usando ponderación por peso de instancias de tópico"""
+        """Calcula la nota final de un alumno específico"""
         try:
             if not instancia_id or not alumno_id:
                 return 0.0
             
-            # Obtener todas las evaluaciones con su porcentaje
-            query_evaluaciones = """
-            SELECT DISTINCT e.id, e.porcentaje
+            # Obtener todas las evaluaciones y sus ponderaciones
+            query = """
+            SELECT e.id, e.porcentaje, AVG(n.nota) as promedio_evaluacion
             FROM evaluaciones e
             JOIN secciones s ON e.seccion_id = s.id
-            WHERE s.instancia_id = ?
+            JOIN instancias_topico it ON it.evaluacion_id = e.id
+            JOIN notas n ON n.instancia_topico_id = it.id
+            WHERE s.instancia_id = ? AND n.alumno_id = ?
+            GROUP BY e.id, e.porcentaje
             """
-            evaluaciones = execute_query(query_evaluaciones, (instancia_id,))
+            evaluaciones = execute_query(query, (instancia_id, alumno_id))
             
             if not evaluaciones:
                 return 0.0
@@ -261,39 +265,17 @@ class InstanciaCurso:
             total_porcentaje = 0.0
             
             for evaluacion in evaluaciones:
-                evaluacion_id = evaluacion[0]
-                porcentaje_evaluacion = evaluacion[1] or 0
+                porcentaje = evaluacion[1] or 0
+                promedio = evaluacion[2] or 0
                 
-                # Obtener todas las instancias de tópico de esta evaluación con sus notas y pesos
-                query_instancias = """
-                SELECT it.peso, n.nota
-                FROM instancias_topico it
-                JOIN notas n ON n.instancia_topico_id = it.id
-                WHERE it.evaluacion_id = ? AND n.alumno_id = ?
-                """
-                instancias = execute_query(query_instancias, (evaluacion_id, alumno_id))
-                
-                if instancias:
-                    # Calcular el promedio ponderado de la evaluación
-                    suma_ponderada = 0.0
-                    suma_pesos = 0.0
-                    
-                    for instancia in instancias:
-                        peso = instancia[0] or 0
-                        nota = instancia[1] or 0
-                        suma_ponderada += (nota * peso)
-                        suma_pesos += peso
-                    
-                    # Promedio ponderado de la evaluación
-                    if suma_pesos > 0:
-                        promedio_evaluacion = suma_ponderada / suma_pesos
-                        nota_final += (promedio_evaluacion * porcentaje_evaluacion / 100.0)
-                        total_porcentaje += porcentaje_evaluacion
-              # Normalizar si el total de porcentajes no es 100%
+                nota_final += (promedio * porcentaje / 100.0)
+                total_porcentaje += porcentaje
+            
+            # Normalizar si el total de porcentajes no es 100%
             if total_porcentaje > 0 and total_porcentaje != 100:
                 nota_final = (nota_final * 100.0) / total_porcentaje
             
-            return round(nota_final, 1)  # Redondear a 1 decimal para notas finales
+            return round(nota_final, 2)
             
         except Exception as e:
             print(f"Error al calcular nota final del alumno {alumno_id} en instancia {instancia_id}: {e}")

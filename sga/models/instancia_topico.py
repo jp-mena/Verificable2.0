@@ -11,8 +11,13 @@ class InstanciaTopico:
         self.topico_id = topico_id
 
     @classmethod
-    def crear(cls, nombre, peso, opcional, evaluacion_id, topico_id):
+    def crear(cls, nombre, opcional, evaluacion_id, topico_id):
         """Crea una nueva instancia de tópico"""
+        # Obtener el peso de la evaluación automáticamente
+        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        resultado_peso = execute_query(query_peso, (evaluacion_id,))
+        peso = float(resultado_peso[0][0]) if resultado_peso else 0.0
+        
         query = "INSERT INTO instancias_topico (nombre, peso, opcional, evaluacion_id, topico_id) VALUES (?, ?, ?, ?, ?)"
         id_instancia = execute_query(query, (nombre, peso, opcional, evaluacion_id, topico_id))
         return cls(id_instancia, nombre, peso, opcional, evaluacion_id, topico_id)
@@ -65,6 +70,12 @@ class InstanciaTopico:
 
     def actualizar(self):
         """Actualiza la instancia de tópico"""
+        # Actualizar el peso automáticamente desde la evaluación
+        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        resultado_peso = execute_query(query_peso, (self.evaluacion_id,))
+        if resultado_peso:
+            self.peso = float(resultado_peso[0][0])
+        
         query = "UPDATE instancias_topico SET nombre = ?, peso = ?, opcional = ?, evaluacion_id = ?, topico_id = ? WHERE id = ?"
         execute_query(query, (self.nombre, self.peso, self.opcional, self.evaluacion_id, self.topico_id, self.id))
 
@@ -73,3 +84,12 @@ class InstanciaTopico:
         """Elimina una instancia de tópico"""
         query = "DELETE FROM instancias_topico WHERE id = ?"
         execute_query(query, (id,))
+
+    def obtener_peso_de_evaluacion(self):
+        """Obtiene el peso de la evaluación asociada"""
+        if not self.evaluacion_id:
+            return 0.0
+        
+        query = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        resultado = execute_query(query, (self.evaluacion_id,))
+        return float(resultado[0][0]) if resultado else 0.0

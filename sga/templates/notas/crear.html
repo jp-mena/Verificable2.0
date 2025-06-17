@@ -1,55 +1,193 @@
 {% extends "base.html" %}
 
-{% block title %}Crear Nota - SGA{% endblock %}
+{% block title %}Crear Nota{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Crear Nota</h1>
-    <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle text-primary me-2"></i>
+                        Crear Nueva Nota
+                    </h3>
+                </div>                <div class="card-body text-center">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Crear Nueva Nota
+                        </h5>
+                        <p class="mb-0">Utilice el formulario simple con dropdowns inteligentes para crear notas de manera rápida y eficiente.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <i class="fas fa-clipboard-list text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    
+                    <p class="text-muted mb-4">
+                        El formulario incluye validación en tiempo real y dropdowns que se actualizan automáticamente.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a Notas
+                        </a>
+                        <a href="{{ url_for('nota.crear_nota_simple') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus me-2"></i>Crear Nota
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <form method="POST">
-            <div class="mb-3">
-                <label for="alumno_id" class="form-label">Alumno *</label>
-                <select class="form-select" id="alumno_id" name="alumno_id" required>
-                    <option value="">Seleccionar alumno</option>
-                    {% for alumno in alumnos %}
-                        <option value="{{ alumno.id }}">
-                            {{ alumno.nombre }} ({{ alumno.correo }})
-                        </option>
-                    {% endfor %}
+
                 </select>
+                <div class="form-text" id="alumno-info">
+                    Solo se mostrarán alumnos inscritos en la instancia seleccionada
+                </div>
             </div>
             
             <div class="mb-3">
-                <label for="instancia_topico_id" class="form-label">Instancia de Tópico *</label>
-                <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required>
-                    <option value="">Seleccionar instancia</option>
-                    {% for instancia in instancias_topico %}
-                        <option value="{{ instancia.id }}">
-                            {{ instancia.nombre }} ({{ instancia.peso }}%) - 
-                            {{ instancia.evaluacion_nombre }} - {{ instancia.curso_codigo }}
-                        </option>
-                    {% endfor %}
+                <label for="instancia_topico_id" class="form-label">
+                    <i class="fas fa-tasks me-2"></i>
+                    Instancia de Tópico (Evaluación) *
+                </label>
+                <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required disabled>
+                    <option value="">Seleccionar instancia de curso primero</option>
                 </select>
-            </div>
-            
+                <div class="form-text" id="topico-info">
+                    Solo se mostrarán evaluaciones de la instancia seleccionada
+                </div>            
             <div class="mb-3">
-                <label for="nota" class="form-label">Nota *</label>
+                <label for="nota" class="form-label">
+                    <i class="fas fa-star me-2"></i>
+                    Nota *
+                </label>
                 <input type="number" class="form-control" id="nota" name="nota" 
                        min="1.0" max="7.0" step="0.1" required>
                 <div class="form-text">Nota en escala de 1.0 a 7.0</div>
             </div>
             
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Crear Nota</button>
-                <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Nota
+                </button>
+                <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const instanciaCursoSelect = document.getElementById('instancia_curso_id');
+    const alumnoSelect = document.getElementById('alumno_id');
+    const topicoSelect = document.getElementById('instancia_topico_id');
+    const submitBtn = document.getElementById('submit-btn');
+    const alumnoInfo = document.getElementById('alumno-info');
+    const topicoInfo = document.getElementById('topico-info');
+    
+    function checkFormCompletion() {
+        const allSelected = instanciaCursoSelect.value && 
+                           alumnoSelect.value && 
+                           topicoSelect.value &&
+                           document.getElementById('nota').value;
+        submitBtn.disabled = !allSelected;
+    }
+    
+    instanciaCursoSelect.addEventListener('change', function() {
+        const instanciaCursoId = this.value;
+        
+        // Reset dependent selects
+        alumnoSelect.innerHTML = '<option value="">Cargando alumnos...</option>';
+        topicoSelect.innerHTML = '<option value="">Cargando evaluaciones...</option>';
+        alumnoSelect.disabled = true;
+        topicoSelect.disabled = true;
+        submitBtn.disabled = true;
+        
+        if (!instanciaCursoId) {
+            alumnoSelect.innerHTML = '<option value="">Seleccionar instancia de curso primero</option>';
+            topicoSelect.innerHTML = '<option value="">Seleccionar instancia de curso primero</option>';
+            return;
+        }        // Cargar alumnos inscritos
+        console.log(`Cargando alumnos para instancia: ${instanciaCursoId}`);
+        fetch(`/api/notas/alumnos-inscritos/${instanciaCursoId}?t=${Date.now()}`)
+            .then(response => {
+                console.log('Respuesta recibida:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos de alumnos recibidos:', data);                alumnoSelect.innerHTML = '<option value="">Seleccionar alumno</option>';
+                if (data.alumnos && data.alumnos.length > 0) {
+                    data.alumnos.forEach(alumno => {
+                        const option = document.createElement('option');
+                        option.value = alumno.alumno_id;
+                        option.textContent = `${alumno.alumno_nombre} (${alumno.alumno_correo})`;
+                        alumnoSelect.appendChild(option);
+                    });
+                    alumnoSelect.disabled = false;
+                    alumnoSelect.removeAttribute('disabled'); // Forzar desbloqueado
+                    console.log('Dropdown de alumnos desbloqueado');
+                    alumnoInfo.textContent = `${data.alumnos.length} alumno${data.alumnos.length > 1 ? 's' : ''} inscrito${data.alumnos.length > 1 ? 's' : ''} disponible${data.alumnos.length > 1 ? 's' : ''}`;
+                    alumnoInfo.className = 'form-text text-success';
+                } else {
+                    console.log('No hay alumnos disponibles');
+                    alumnoInfo.textContent = 'No hay alumnos inscritos en esta instancia';
+                    alumnoInfo.className = 'form-text text-warning';
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando alumnos:', error);
+                alumnoSelect.innerHTML = '<option value="">Error al cargar alumnos</option>';
+                alumnoInfo.textContent = `Error al cargar alumnos: ${error.message}`;
+                alumnoInfo.className = 'form-text text-danger';
+            });
+        
+        // Cargar instancias de tópico
+        fetch(`/api/notas/instancias-topico/${instanciaCursoId}`)
+            .then(response => response.json())
+            .then(data => {
+                topicoSelect.innerHTML = '<option value="">Seleccionar evaluación</option>';
+                if (data.instancias_topico && data.instancias_topico.length > 0) {
+                    data.instancias_topico.forEach(instancia => {
+                        const option = document.createElement('option');
+                        option.value = instancia.id;
+                        option.textContent = `${instancia.nombre} (${instancia.peso}%) - ${instancia.evaluacion_nombre}`;
+                        topicoSelect.appendChild(option);
+                    });
+                    topicoSelect.disabled = false;
+                    topicoInfo.textContent = `${data.instancias_topico.length} evaluación${data.instancias_topico.length > 1 ? 'es' : ''} disponible${data.instancias_topico.length > 1 ? 's' : ''}`;
+                    topicoInfo.className = 'form-text text-success';
+                } else {
+                    topicoInfo.textContent = 'No hay evaluaciones disponibles en esta instancia';
+                    topicoInfo.className = 'form-text text-warning';
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando evaluaciones:', error);
+                topicoSelect.innerHTML = '<option value="">Error al cargar evaluaciones</option>';
+                topicoInfo.textContent = 'Error al cargar evaluaciones';
+                topicoInfo.className = 'form-text text-danger';
+            });
+    });
+    
+    // Add event listeners for form completion check
+    [alumnoSelect, topicoSelect, document.getElementById('nota')].forEach(element => {
+        element.addEventListener('change', checkFormCompletion);
+        element.addEventListener('input', checkFormCompletion);
+    });
+});
+</script>
 {% endblock %}

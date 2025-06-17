@@ -1,57 +1,316 @@
 {% extends "base.html" %}
 
-{% block title %}Editar Nota - SGA{% endblock %}
+{% block title %}Editar Nota{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Editar Nota</h1>
-    <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        Editar Nota
+                    </h3>
+                    <p class="mb-0 text-muted">Modifique los datos de la nota seleccionada</p>
+                </div>
+                <div class="card-body">
+                    <!-- Información actual de la nota -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Nota Actual
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Nota ID:</strong> {{ nota.id }}<br>
+                                <strong>Nota Actual:</strong> 
+                                <span class="badge {% if nota.nota >= 4.0 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                                    {{ "%.1f"|format(nota.nota) }}
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Alumno:</strong> <span id="alumno-actual">-</span><br>
+                                <strong>Evaluación:</strong> <span id="evaluacion-actual">-</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Estado:</strong> 
+                                <span class="badge bg-warning">En edición</span><br>
+                                <strong>Modificable:</strong> 
+                                <span class="badge bg-success">Sí</span>
+                            </div>
+                        </div>
+                    </div>
 
-<div class="card">
-    <div class="card-body">
-        <form method="POST">
-            <div class="mb-3">
-                <label for="alumno_id" class="form-label">Alumno *</label>
-                <select class="form-select" id="alumno_id" name="alumno_id" required>
-                    <option value="">Seleccionar alumno</option>
-                    {% for alumno in alumnos %}
-                        <option value="{{ alumno.id }}"
-                                {% if alumno.id == nota.alumno_id %}selected{% endif %}>
-                            {{ alumno.nombre }} ({{ alumno.correo }})
-                        </option>
-                    {% endfor %}
-                </select>
+                    <form method="POST">
+                        <div class="row">
+                            <!-- Columna Izquierda: Alumno -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-user-graduate text-primary me-2"></i>
+                                            Seleccionar Alumno
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="alumno_id" class="form-label">Alumno</label>
+                                            <select class="form-select" id="alumno_id" name="alumno_id" required>                                                <option value="">Seleccione un alumno...</option>
+                                                {% for alumno in alumnos %}
+                                                    <option value="{{ alumno.alumno_id }}" 
+                                                            data-email="{{ alumno.email }}"
+                                                            {% if alumno.alumno_id == nota.alumno_id %}selected{% endif %}>
+                                                        {{ alumno.nombre }} ({{ alumno.email }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="form-text">
+                                                Seleccione el alumno para esta nota.
+                                            </div>
+                                        </div>
+
+                                        <!-- Info del alumno seleccionado -->
+                                        <div id="alumno-info" class="alert alert-light">
+                                            <h6 class="alert-heading">Información del Alumno</h6>
+                                            <p class="mb-0"><strong>Email:</strong> <span id="alumno-email">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha: Evaluación y Nota -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-clipboard-check text-success me-2"></i>
+                                            Evaluación y Nota
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="instancia_topico_id" class="form-label">Evaluación</label>
+                                            <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required>
+                                                <option value="">Seleccione una evaluación...</option>
+                                                {% for instancia in instancias_topico %}
+                                                    <option value="{{ instancia.id }}" 
+                                                            data-peso="{{ instancia.peso }}" 
+                                                            data-evaluacion="{{ instancia.evaluacion_nombre }}"
+                                                            data-curso="{{ instancia.curso_codigo }}"
+                                                            {% if instancia.id == nota.instancia_topico_id %}selected{% endif %}>
+                                                        {{ instancia.evaluacion_nombre }} - {{ instancia.nombre }}
+                                                        (Peso: {{ instancia.peso }}%)
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="form-text">
+                                                Solo evaluaciones de cursos abiertos.
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="nota" class="form-label">Nueva Nota</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="nota" name="nota" 
+                                                       value="{{ nota.nota }}" min="1.0" max="7.0" step="0.1" required>
+                                                <span class="input-group-text">/7.0</span>
+                                            </div>
+                                            <div class="form-text">
+                                                La nota debe estar entre 1.0 y 7.0
+                                            </div>
+                                        </div>
+
+                                        <!-- Info de la evaluación seleccionada -->
+                                        <div id="evaluacion-info" class="alert alert-light">
+                                            <h6 class="alert-heading">Información de la Evaluación</h6>
+                                            <p class="mb-1"><strong>Evaluación:</strong> <span id="eval-nombre">-</span></p>
+                                            <p class="mb-1"><strong>Peso:</strong> <span id="eval-peso">-</span>%</p>
+                                            <p class="mb-0"><strong>Curso:</strong> <span id="eval-curso">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de los cambios -->
+                        <div id="resumen-cambios" class="card mt-4">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Resumen de Cambios
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Alumno:</strong><br>
+                                        <span id="resumen-alumno">-</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Evaluación:</strong><br>
+                                        <span id="resumen-evaluacion">-</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <strong>Nueva Nota:</strong><br>
+                                        <span id="resumen-nota-valor" class="fs-4 text-primary">-</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Peso:</strong><br>
+                                        <span id="resumen-peso">-</span>%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning" id="btn-actualizar">
+                                <i class="fas fa-save me-2"></i>Actualizar Nota
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label for="instancia_topico_id" class="form-label">Instancia de Tópico *</label>
-                <select class="form-select" id="instancia_topico_id" name="instancia_topico_id" required>
-                    <option value="">Seleccionar instancia</option>
-                    {% for instancia in instancias_topico %}
-                        <option value="{{ instancia.id }}"
-                                {% if instancia.id == nota.instancia_topico_id %}selected{% endif %}>
-                            {{ instancia.nombre }} ({{ instancia.peso }}%) - 
-                            {{ instancia.evaluacion_nombre }} - {{ instancia.curso_codigo }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label for="nota" class="form-label">Nota *</label>
-                <input type="number" class="form-control" id="nota" name="nota" 
-                       value="{{ nota.nota }}" min="1.0" max="7.0" step="0.1" required>
-                <div class="form-text">Nota en escala de 1.0 a 7.0</div>
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Actualizar Nota</button>
-                <a href="{{ url_for('nota.listar_notas') }}" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAlumno = document.getElementById('alumno_id');
+    const selectEvaluacion = document.getElementById('instancia_topico_id');
+    const inputNota = document.getElementById('nota');
+    const btnActualizar = document.getElementById('btn-actualizar');
+    
+    // Elementos de información
+    const alumnoInfo = document.getElementById('alumno-info');
+    const evaluacionInfo = document.getElementById('evaluacion-info');
+    const resumenCambios = document.getElementById('resumen-cambios');
+    
+    // Elementos de información del alumno
+    const alumnoEmail = document.getElementById('alumno-email');
+    
+    // Elementos de información de la evaluación
+    const evalNombre = document.getElementById('eval-nombre');
+    const evalPeso = document.getElementById('eval-peso');
+    const evalCurso = document.getElementById('eval-curso');
+    
+    // Elementos del resumen
+    const resumenAlumno = document.getElementById('resumen-alumno');
+    const resumenEvaluacion = document.getElementById('resumen-evaluacion');
+    const resumenNotaValor = document.getElementById('resumen-nota-valor');
+    const resumenPeso = document.getElementById('resumen-peso');
+    
+    // Elementos de información actual
+    const alumnoActual = document.getElementById('alumno-actual');
+    const evaluacionActual = document.getElementById('evaluacion-actual');
+    
+    function actualizarFormulario() {
+        const alumnoSeleccionado = selectAlumno.value;
+        const evaluacionSeleccionada = selectEvaluacion.value;
+        const notaIngresada = inputNota.value;
+        
+        // Habilitar/deshabilitar botón
+        if (alumnoSeleccionado && evaluacionSeleccionada && notaIngresada) {
+            btnActualizar.disabled = false;
+            actualizarResumen();
+        } else {
+            btnActualizar.disabled = true;
+        }
+    }
+    
+    function actualizarResumen() {
+        const alumnoOption = selectAlumno.options[selectAlumno.selectedIndex];
+        const evaluacionOption = selectEvaluacion.options[selectEvaluacion.selectedIndex];
+        
+        if (alumnoOption.value && evaluacionOption.value && inputNota.value) {
+            resumenAlumno.textContent = alumnoOption.text.split(' (')[0];
+            resumenEvaluacion.textContent = evaluacionOption.text.split(' (')[0];
+            resumenNotaValor.textContent = inputNota.value;
+            resumenPeso.textContent = evaluacionOption.dataset.peso;
+        }
+    }
+    
+    // Inicializar información actual
+    function inicializarInformacionActual() {
+        const alumnoSelected = selectAlumno.options[selectAlumno.selectedIndex];
+        const evaluacionSelected = selectEvaluacion.options[selectEvaluacion.selectedIndex];
+        
+        if (alumnoSelected.value) {
+            alumnoActual.textContent = alumnoSelected.text.split(' (')[0];
+            alumnoEmail.textContent = alumnoSelected.dataset.email || '-';
+        }
+        
+        if (evaluacionSelected.value) {
+            evaluacionActual.textContent = evaluacionSelected.text.split(' (')[0];
+            evalNombre.textContent = evaluacionSelected.dataset.evaluacion || '-';
+            evalPeso.textContent = evaluacionSelected.dataset.peso || '-';
+            evalCurso.textContent = evaluacionSelected.dataset.curso || '-';
+        }
+        
+        actualizarFormulario();
+    }
+    
+    // Event listeners
+    selectAlumno.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            alumnoEmail.textContent = selectedOption.dataset.email || '-';
+        }
+        
+        actualizarFormulario();
+    });
+    
+    selectEvaluacion.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            evalNombre.textContent = selectedOption.dataset.evaluacion || '-';
+            evalPeso.textContent = selectedOption.dataset.peso || '-';
+            evalCurso.textContent = selectedOption.dataset.curso || '-';
+        }
+        
+        actualizarFormulario();
+    });
+    
+    inputNota.addEventListener('input', function() {
+        // Validar rango
+        const valor = parseFloat(this.value);
+        if (valor < 1.0 || valor > 7.0) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+        
+        actualizarFormulario();
+    });
+    
+    // Validación en tiempo real de la nota
+    inputNota.addEventListener('blur', function() {
+        const valor = parseFloat(this.value);
+        if (this.value && (isNaN(valor) || valor < 1.0 || valor > 7.0)) {
+            this.classList.add('is-invalid');
+            const feedback = this.parentNode.querySelector('.invalid-feedback') || document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = 'La nota debe estar entre 1.0 y 7.0';
+            if (!this.parentNode.querySelector('.invalid-feedback')) {
+                this.parentNode.appendChild(feedback);
+            }
+        } else {
+            this.classList.remove('is-invalid');
+            const feedback = this.parentNode.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.remove();
+            }
+        }
+    });
+    
+    // Inicializar al cargar la página
+    inicializarInformacionActual();
+});
+</script>
 {% endblock %}

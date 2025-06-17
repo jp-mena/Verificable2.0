@@ -42,87 +42,107 @@ def listar_notas():
 
 @nota_bp.route('/notas/crear', methods=['GET', 'POST'])
 def crear_nota():
-    """Crea una nueva nota"""
+    """Redirige al formulario simple (el wizard fue eliminado)"""
+    return redirect(url_for('nota.crear_nota_simple'))
+
+@nota_bp.route('/notas/crear/paso2/<int:instancia_curso_id>', methods=['GET', 'POST'])
+def crear_nota_paso2(instancia_curso_id):
+    """Redirige al formulario simple (el wizard fue eliminado)"""
+    return redirect(url_for('nota.crear_nota_simple'))
+
+@nota_bp.route('/notas/crear-simple', methods=['GET', 'POST'])
+def crear_nota_simple():
+    """Crear nota en una sola pantalla con dropdowns dinámicos"""
     if request.method == 'POST':
         try:
-            # Validar campos requeridos
-            if not request.form.get('alumno_id') or not request.form.get('alumno_id').strip():
-                flash('Debe seleccionar un alumno', 'error')
-                return redirect(url_for('nota.crear_nota'))
+            instancia_curso_id = int(request.form['instancia_curso_id'])
+            alumno_id = int(request.form['alumno_id'])
+            instancia_topico_id = int(request.form['instancia_topico_id'])
+            nota_valor = float(request.form['nota'])
             
-            if not request.form.get('instancia_topico_id') or not request.form.get('instancia_topico_id').strip():
-                flash('Debe seleccionar una instancia de tópico', 'error')
-                return redirect(url_for('nota.crear_nota'))
+            # Validaciones
+            if nota_valor < 1.0 or nota_valor > 7.0:
+                flash('La nota debe estar entre 1.0 y 7.0', 'error')
+                return redirect(url_for('nota.crear_nota_simple'))
+              # Validar que la instancia no esté cerrada
+            instancia = InstanciaCurso.obtener_por_id(instancia_curso_id)
+            if not instancia:
+                flash('Instancia de curso no encontrada', 'error')
+                return redirect(url_for('nota.crear_nota_simple'))
             
-            if not request.form.get('nota') or not request.form.get('nota').strip():
-                flash('Debe ingresar una nota', 'error')
-                return redirect(url_for('nota.crear_nota'))
+            if getattr(instancia, 'cerrado', False):
+                flash('No se pueden agregar notas a un curso cerrado', 'error')
+                return redirect(url_for('nota.crear_nota_simple'))
             
-            # Validar tipos de datos
-            try:
-                alumno_id = int(request.form['alumno_id'])
-                instancia_topico_id = int(request.form['instancia_topico_id'])
-                nota_valor = float(request.form['nota'])
-                
-                if alumno_id <= 0 or instancia_topico_id <= 0:
-                    raise ValueError("Los IDs deben ser positivos")
-                
-                if nota_valor < 1.0 or nota_valor > 7.0:
-                    flash('La nota debe estar entre 1.0 y 7.0', 'error')
-                    return redirect(url_for('nota.crear_nota'))
-                    
-            except (ValueError, TypeError):
-                flash('Los datos ingresados no son válidos', 'error')
-                return redirect(url_for('nota.crear_nota'))
-              # Validar que la instancia de curso no esté cerrada
-            if _verificar_instancia_cerrada(instancia_topico_id):
-                flash('No se pueden agregar notas a un curso que ya ha sido cerrado', 'error')
-                return redirect(url_for('nota.crear_nota'))
+            # Validar que el alumno esté inscrito
+            from sga.models.inscripcion import Inscripcion
+            if not Inscripcion.esta_inscrito(alumno_id, instancia_curso_id):
+                flash('El alumno no está inscrito en esta instancia', 'error')
+                return redirect(url_for('nota.crear_nota_simple'))
             
             # Crear la nota
             Nota.crear(alumno_id, instancia_topico_id, nota_valor)
             flash('Nota creada exitosamente', 'success')
             return redirect(url_for('nota.listar_notas'))
             
+        except ValueError as e:
+            if "Ya existe una nota" in str(e):
+                flash('Ya existe una nota para este alumno en esta evaluación', 'error')
+            else:
+                flash('Error en los datos ingresados', 'error')
         except Exception as e:
             flash(f'Error al crear la nota: {str(e)}', 'error')
     
-    # Obtener solo alumnos inscritos en cursos abiertos
-    query_alumnos = """
-    SELECT DISTINCT a.id, a.nombre, a.correo
-    FROM alumnos a
-    JOIN inscripciones i ON a.id = i.alumno_id
-    JOIN instancias_curso ic ON i.instancia_curso_id = ic.id
-    WHERE ic.cerrado = 0 OR ic.cerrado IS NULL
-    ORDER BY a.nombre
-    """
-    resultados_alumnos = execute_query(query_alumnos)
-    alumnos = [
-        {
-            'id': fila[0],
-            'nombre': fila[1],
-            'correo': fila[2]
-        }
-        for fila in resultados_alumnos
-    ]
+    # Obtener instancias de curso abiertas
+    instancias_curso = InstanciaCurso.obtener_todos()
+    instancias_abiertas = [inst for inst in instancias_curso if not inst.get('cerrado', False)]
     
-    # Filtrar instancias de tópico que pertenezcan solo a cursos abiertos
-    todas_instancias = InstanciaTopico.obtener_todos()
-    instancias_topico = []
-    for instancia in todas_instancias:
-        # Verificar si la evaluación pertenece a un curso abierto
+    return render_template('notas/crear_simple.html', instancias_curso=instancias_abiertas)
+
+# API endpoints para obtener datos dinámicamente
+@nota_bp.route('/api/notas/alumnos-inscritos/<int:instancia_curso_id>')
+def obtener_alumnos_inscritos(instancia_curso_id):
+    """API para obtener alumnos inscritos en una instancia de curso"""
+    try:
+        from sga.models.inscripcion import Inscripcion
+        alumnos = Inscripcion.obtener_por_curso(instancia_curso_id)
+        print(f"DEBUG: Instancia {instancia_curso_id} tiene {len(alumnos)} alumnos inscritos")
+        return jsonify({
+            'alumnos': alumnos,
+            'count': len(alumnos),
+            'instancia_curso_id': instancia_curso_id
+        }), 200
+    except Exception as e:
+        print(f"ERROR en obtener_alumnos_inscritos: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@nota_bp.route('/api/notas/instancias-topico/<int:instancia_curso_id>')
+def obtener_instancias_topico_por_curso(instancia_curso_id):
+    """API para obtener instancias de tópico de una instancia de curso"""
+    try:
         query = """
-        SELECT ic.cerrado
-        FROM evaluaciones e
+        SELECT it.id, it.nombre, it.peso, e.nombre as evaluacion_nombre
+        FROM instancias_topico it
+        JOIN evaluaciones e ON it.evaluacion_id = e.id
         JOIN secciones s ON e.seccion_id = s.id
-        JOIN instancias_curso ic ON s.instancia_id = ic.id
-        WHERE e.id = ?
+        WHERE s.instancia_id = ?
+        ORDER BY e.nombre, it.nombre
         """
-        resultado = execute_query(query, (instancia['evaluacion_id'],))
-        if resultado and not bool(resultado[0][0]):  # Si no está cerrado
-            instancias_topico.append(instancia)
-    
-    return render_template('notas/crear.html', alumnos=alumnos, instancias_topico=instancias_topico)
+        resultados = execute_query(query, (instancia_curso_id,))
+        instancias_topico = [
+            {
+                'id': fila[0],
+                'nombre': fila[1],
+                'peso': fila[2],
+                'evaluacion_nombre': fila[3]
+            }
+            for fila in resultados
+        ]
+        return jsonify({'instancias_topico': instancias_topico}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @nota_bp.route('/notas/<int:id>/editar', methods=['GET', 'POST'])
 def editar_nota(id):
@@ -147,10 +167,9 @@ def editar_nota(id):
             if _verificar_instancia_cerrada(nota.instancia_topico_id):
                 flash('No se pueden editar notas a un curso que ya ha sido cerrado', 'error')
                 return redirect(url_for('nota.editar_nota', id=id))
-            
-            # Validaciones básicas
-            if nota.nota < 0 or nota.nota > 7:
-                flash('La nota debe estar entre 0 y 7', 'error')
+              # Validaciones básicas
+            if nota.nota < 1.0 or nota.nota > 7.0:
+                flash('La nota debe estar entre 1.0 y 7.0', 'error')
                 return redirect(url_for('nota.editar_nota', id=id))
             
             nota.actualizar()
@@ -161,22 +180,48 @@ def editar_nota(id):
         except Exception as e:
             flash(f'Error al actualizar la nota: {str(e)}', 'error')
     
-    alumnos = Alumno.obtener_todos()
-    # Filtrar instancias de tópico que pertenezcan solo a cursos abiertos
-    todas_instancias = InstanciaTopico.obtener_todos()
-    instancias_topico = []
-    for instancia in todas_instancias:
-        # Verificar si la evaluación pertenece a un curso abierto
-        query = """
-        SELECT ic.cerrado
-        FROM evaluaciones e
-        JOIN secciones s ON e.seccion_id = s.id
-        JOIN instancias_curso ic ON s.instancia_id = ic.id
-        WHERE e.id = ?
-        """
-        resultado = execute_query(query, (instancia['evaluacion_id'],))
-        if resultado and not bool(resultado[0][0]):  # Si no está cerrado
-            instancias_topico.append(instancia)
+    # Obtener la instancia de curso para esta nota
+    query_instancia = """
+    SELECT ic.id as instancia_curso_id
+    FROM instancias_topico it
+    JOIN evaluaciones e ON it.evaluacion_id = e.id
+    JOIN secciones s ON e.seccion_id = s.id
+    JOIN instancias_curso ic ON s.instancia_id = ic.id
+    WHERE it.id = ?
+    """
+    resultado_instancia = execute_query(query_instancia, (nota.instancia_topico_id,))
+    
+    if not resultado_instancia:
+        flash('No se pudo determinar la instancia de curso para esta nota', 'error')
+        return redirect(url_for('nota.listar_notas'))
+    
+    instancia_curso_id = resultado_instancia[0][0]
+    
+    # Obtener alumnos inscritos en la instancia de curso específica
+    from sga.models.inscripcion import Inscripcion
+    alumnos = Inscripcion.obtener_por_curso(instancia_curso_id)
+    # Obtener instancias de tópico con información completa de cursos abiertos
+    query = """
+    SELECT it.id, it.nombre, it.peso, e.nombre as evaluacion_nombre, c.codigo as curso_codigo
+    FROM instancias_topico it
+    JOIN evaluaciones e ON it.evaluacion_id = e.id
+    JOIN secciones s ON e.seccion_id = s.id
+    JOIN instancias_curso ic ON s.instancia_id = ic.id
+    JOIN cursos c ON ic.curso_id = c.id
+    WHERE ic.cerrado = 0 OR ic.cerrado IS NULL
+    ORDER BY c.codigo, e.nombre, it.nombre
+    """
+    resultados = execute_query(query)
+    instancias_topico = [
+        {
+            'id': fila[0],
+            'nombre': fila[1],
+            'peso': fila[2],
+            'evaluacion_nombre': fila[3],
+            'curso_codigo': fila[4]
+        }
+        for fila in resultados
+    ]
     
     return render_template('notas/editar.html', nota=nota, alumnos=alumnos, instancias_topico=instancias_topico)
 
@@ -201,3 +246,8 @@ def eliminar_nota(id):
         flash(f'Error al eliminar la nota: {str(e)}', 'error')
     
     return redirect(url_for('nota.listar_notas'))
+
+@nota_bp.route('/test-api')
+def test_api_page():
+    """Página de test para el API"""
+    return render_template('test_api.html')

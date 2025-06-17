@@ -170,9 +170,9 @@ function exportarNotas() {
     let contenido = `Notas Finales\n${curso}\n${periodo}\n\n`;
     contenido += 'Alumno,Correo,Nota Final,Estado\n';
     
-    {% for alumno in alumnos_notas %}
-    contenido += '{{ alumno.nombre }},{{ alumno.correo }},{{ "%.2f"|format(alumno.nota_final) }},{% if alumno.nota_final >= 4.0 %}Aprobado{% else %}Reprobado{% endif %}\n';
-    {% endfor %}
+    for (alumno of alumnos_notas) {
+        contenido += `${alumno.nombre},${alumno.correo},${alumno.nota_final.toFixed(1)},${alumno.nota_final >= 4.0 ? 'Aprobado' : 'Reprobado'}\n`;
+    }
     
     const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
