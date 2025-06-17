@@ -21,8 +21,7 @@ class Curso:
     
     def _validate_creditos(self, creditos):
         """Valida la cantidad de créditos"""
-        if creditos is None:
-            return 4  # Valor por defecto
+        if creditos is None:            return 4  # Valor por defecto
             
         try:
             creditos_int = int(creditos)
@@ -77,7 +76,6 @@ class Curso:
             return cursos
         except Exception as e:
             raise ValidationError(f"Error al obtener cursos: {str(e)}")
-    
     @classmethod
     def get_by_id(cls, curso_id):
         """Obtiene un curso por su ID"""
@@ -121,71 +119,76 @@ class Curso:
     
     @classmethod
     def obtener_por_codigo(cls, codigo):
-        """Obtiene un curso por su código (método alternativo para compatibilidad)"""
-        return cls.get_by_codigo(codigo)
+        """Obtiene un curso por su código"""
+        try:
+            query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE codigo = %s"
+            resultado = execute_query(query, (codigo,))
+            if resultado:
+                fila = resultado[0]
+                curso = cls(fila[1], fila[2], fila[3], fila[4])
+                curso.id = fila[0]
+                return curso
+            return None
+        except Exception as e:
+            print(f"Error obteniendo curso por código: {e}")
+            return None
     
     @staticmethod
-    def delete(curso_id):
-        """Elimina un curso por su ID"""
+    def update(curso_id, codigo, nombre, creditos=4, requisitos=None):
+        """Actualiza un curso existente"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
-            query = "DELETE FROM cursos WHERE id = %s"
-            return execute_query(query, (curso_id,))
-        except ValidationError:
-            raise
-        except Exception as e:
-            raise ValidationError(f"Error al eliminar curso: {str(e)}")
-    
-    def update(self):
-        """Actualiza un curso existente"""
-        try:
-            if not hasattr(self, 'id') or not self.id:
-                raise ValidationError("ID de curso es requerido para actualizar")
+            # Crear objeto temporal para validar
+            temp_curso = Curso(codigo, nombre, creditos, requisitos)
             
             query = "UPDATE cursos SET codigo = %s, nombre = %s, creditos = %s, requisitos = %s WHERE id = %s"
-            return execute_query(query, (self.codigo, self.nombre, self.creditos, self.requisitos, self.id))
+            execute_query(query, (temp_curso.codigo, temp_curso.nombre, temp_curso.creditos, temp_curso.requisitos, curso_id))
+            return True
         except ValidationError:
             raise
         except Exception as e:
             raise ValidationError(f"Error al actualizar curso: {str(e)}")
     
-    def to_dict(self):
-        """Convierte el curso a diccionario"""
-        result = {
-            'codigo': self.codigo,
-            'nombre': self.nombre,
-            'creditos': self.creditos,
-            'requisitos': self.get_requisitos_list()
-        }
-        if hasattr(self, 'id'):
-            result['id'] = self.id
-        return result
-    
-    def __str__(self):
-        return f"Curso({self.codigo}: {self.nombre})"
-    
-    def __repr__(self):
-        return f"Curso(codigo='{self.codigo}', nombre='{self.nombre}', creditos={self.creditos})"
-    
-    @classmethod
-    def get_prerequisitos_disponibles(cls):
-        """Obtiene todos los cursos disponibles como prerequisitos"""
+    @staticmethod
+    def delete(curso_id):
+        """Elimina un curso"""
         try:
-            cursos = cls.get_all()
-            return [curso.to_dict() for curso in cursos]
+            curso_id = safe_int_conversion(curso_id)
+            if curso_id is None or curso_id <= 0:
+                raise ValidationError("ID de curso debe ser un entero positivo")
+            
+            # Verificar si el curso existe
+            existing = Curso.get_by_id(curso_id)
+            if not existing:
+                raise ValidationError("Curso no encontrado")
+            
+            query = "DELETE FROM cursos WHERE id = %s"
+            execute_query(query, (curso_id,))
+            return True
+        except ValidationError:
+            raise
         except Exception as e:
-            print(f"Error obteniendo prerequisitos: {e}")
-            return []
+            raise ValidationError(f"Error al eliminar curso: {str(e)}")
+    
+    @staticmethod
+    def get_prerequisitos_disponibles():
+        """Obtiene lista de cursos disponibles como prerrequisitos"""
+        try:
+            query = "SELECT codigo, nombre FROM cursos ORDER BY codigo"
+            results = execute_query(query)
+            return [{'codigo': row[0], 'nombre': row[1]} for row in results]
+        except Exception as e:
+            raise ValidationError(f"Error al obtener prerrequisitos: {str(e)}")
     
     @staticmethod
     def get_requisitos_as_list(requisitos_str):
-        """Convierte una cadena de requisitos en lista"""
+        """Convierte string de requisitos a lista"""
         if not requisitos_str:
             return []
-        return [req.strip() for req in requisitos_str.split(',') if req.strip()]
+        return [codigo.strip() for codigo in requisitos_str.split(',') if codigo.strip()]
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):

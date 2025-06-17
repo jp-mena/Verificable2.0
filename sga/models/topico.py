@@ -71,7 +71,21 @@ class Topico:
         except ValidationError:
             raise
         except Exception as e:
-            raise ValidationError(f"Error al obtener tópico por ID: {str(e)}")
+            raise ValidationError(f"Error al obtener tópico por ID: {str(e)}")    
+    @classmethod
+    def obtener_por_nombre(cls, nombre):
+        """Obtiene un tópico por su nombre"""
+        try:
+            query = "SELECT id, nombre, tipo FROM topicos WHERE nombre = %s"
+            resultado = execute_query(query, (nombre,))
+            if resultado:
+                fila = resultado[0]
+                topico = cls(fila[0], fila[1], fila[2])  # id, nombre, tipo
+                return topico
+            return None
+        except Exception as e:
+            print(f"Error obteniendo tópico por nombre: {e}")
+            return None
 
     def actualizar(self):
         """Actualiza el tópico"""

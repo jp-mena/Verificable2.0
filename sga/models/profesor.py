@@ -69,6 +69,22 @@ class Profesor:
         except Exception as e:
             raise ValidationError(f"Error al obtener profesor por correo: {str(e)}")
     
+    @classmethod
+    def obtener_por_correo(cls, correo):
+        """Obtiene un profesor por su correo"""
+        try:
+            query = "SELECT id, nombre, correo FROM profesores WHERE correo = %s"
+            resultado = execute_query(query, (correo,))
+            if resultado:
+                fila = resultado[0]
+                profesor = cls(fila[1], fila[2])
+                profesor.id = fila[0]
+                return profesor
+            return None
+        except Exception as e:
+            print(f"Error obteniendo profesor por correo: {e}")
+            return None
+    
     @staticmethod
     def update(profesor_id, nombre, correo):
         """Actualiza un profesor existente"""

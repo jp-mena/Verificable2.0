@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Cargar JSON - Individual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Carga Individual de Datos JSON</h1>
+        <p class="lead">Selecciona el tipo de entidad que deseas cargar individualmente.</p>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Nota:</strong> Esta función permite cargar datos específicos por entidad. Cada tipo de dato debe cargarse por separado.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Cursos -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-book me-2"></i>Cursos
+                </h5>
+                <p class="card-text">
+                    Cargar cursos con código, nombre, créditos y requisitos.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='cursos') }}" class="btn btn-secondary btn-lg">
+                    Cargar Cursos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profesores -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Profesores
+                </h5>
+                <p class="card-text">
+                    Cargar profesores con nombre y correo electrónico.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='profesores') }}" class="btn btn-secondary btn-lg">
+                    Cargar Profesores
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alumnos -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-user-graduate me-2"></i>Alumnos
+                </h5>
+                <p class="card-text">
+                    Cargar alumnos con nombre, correo y fecha de ingreso.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='alumnos') }}" class="btn btn-secondary btn-lg">
+                    Cargar Alumnos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instancias de Curso -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-calendar-alt me-2"></i>Instancias de Curso
+                </h5>
+                <p class="card-text">
+                    Cargar instancias con semestre, año y código de curso.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='instancias_curso') }}" class="btn btn-secondary btn-lg">
+                    Cargar Instancias
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secciones -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-users me-2"></i>Secciones
+                </h5>
+                <p class="card-text">
+                    Cargar secciones con número, curso, semestre y profesor.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='secciones') }}" class="btn btn-secondary btn-lg">
+                    Cargar Secciones
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tópicos -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-tags me-2"></i>Tópicos
+                </h5>
+                <p class="card-text">
+                    Cargar tópicos con nombre y tipo de evaluación.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='topicos') }}" class="btn btn-secondary btn-lg">
+                    Cargar Tópicos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluaciones -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-clipboard-check me-2"></i>Evaluaciones
+                </h5>
+                <p class="card-text">
+                    Cargar evaluaciones con nombre, porcentaje y sección.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='evaluaciones') }}" class="btn btn-secondary btn-lg">
+                    Cargar Evaluaciones
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instancias de Tópico -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-list-ul me-2"></i>Instancias de Tópico
+                </h5>
+                <p class="card-text">
+                    Cargar instancias de tópico con nombre, peso y evaluación.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='instancias_topico') }}" class="btn btn-secondary btn-lg">
+                    Cargar Inst. Tópicos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inscripciones -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-user-plus me-2"></i>Inscripciones
+                </h5>
+                <p class="card-text">
+                    Cargar inscripciones de alumnos a cursos específicos.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='inscripciones') }}" class="btn btn-secondary btn-lg">
+                    Cargar Inscripciones
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-star me-2"></i>Notas
+                </h5>
+                <p class="card-text">
+                    Cargar notas de alumnos en instancias de tópico específicas.
+                </p>
+                <a href="{{ url_for('json_load.mostrar_carga_entidad', entidad='notas') }}" class="btn btn-secondary btn-lg">
+                    Cargar Notas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Importante:</strong> 
+            <ul class="mb-0">
+                <li>Los datos deben cargarse en orden: primero cursos y profesores, luego instancias, después secciones, etc.</li>
+                <li>Asegúrate de que las entidades referenciadas ya existan antes de cargar entidades dependientes.</li>
+                <li>El JSON debe contener una lista de objetos con la estructura correcta para cada entidad.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

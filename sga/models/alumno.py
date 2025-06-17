@@ -143,21 +143,18 @@ class Alumno:
             }
         return None
     
-    @staticmethod
-    def get_by_correo(correo):
+    @classmethod
+    def obtener_por_correo(cls, correo):
         """Obtiene un alumno por su correo"""
-        query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE correo = %s"
-        results = execute_query(query, (correo,))
-        return results[0] if results else None
-    
-    @staticmethod
-    def update(alumno_id, nombre, correo, fecha_ingreso):
-        """Actualiza un alumno existente"""
-        query = "UPDATE alumnos SET nombre = %s, correo = %s, fecha_ingreso = %s WHERE id = %s"
-        return execute_query(query, (nombre, correo, fecha_ingreso, alumno_id))
-    
-    @staticmethod
-    def delete(alumno_id):
-        """Elimina un alumno"""
-        query = "DELETE FROM alumnos WHERE id = %s"
-        return execute_query(query, (alumno_id,))
+        try:
+            query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE correo = %s"
+            resultado = execute_query(query, (correo,))
+            if resultado:
+                fila = resultado[0]
+                alumno = cls(fila[1], fila[2], fila[3])
+                alumno.id = fila[0]
+                return alumno
+            return None
+        except Exception as e:
+            print(f"Error obteniendo alumno por correo: {e}")
+            return None

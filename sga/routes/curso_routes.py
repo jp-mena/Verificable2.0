@@ -14,11 +14,11 @@ def listar_cursos():
         cursos_list = []
         for curso in cursos:
             cursos_list.append({
-                'id': curso[0],
-                'codigo': curso[1],
-                'nombre': curso[2],
-                'creditos': curso[3],
-                'requisitos': curso[4] if curso[4] else ''
+                'id': getattr(curso, 'id', None),
+                'codigo': curso.codigo,
+                'nombre': curso.nombre,
+                'creditos': curso.creditos,
+                'requisitos': curso.requisitos if curso.requisitos else ''
             })
         return render_template('cursos/listar.html', cursos=cursos_list)
     except Exception as e:
@@ -99,14 +99,13 @@ def editar_curso(id):
         
         flash('Curso actualizado exitosamente', 'success')
         return redirect(url_for('curso.listar_cursos'))
-    
-    # Convertir tupla a diccionario para la plantilla
+      # Convertir objeto a diccionario para la plantilla
     curso = {
-        'id': curso_data[0],
-        'codigo': curso_data[1],
-        'nombre': curso_data[2],
-        'creditos': curso_data[3],
-        'requisitos': curso_data[4] if curso_data[4] else ''
+        'id': curso_data.id if hasattr(curso_data, 'id') else None,
+        'codigo': curso_data.codigo,
+        'nombre': curso_data.nombre,
+        'creditos': curso_data.creditos,
+        'requisitos': curso_data.requisitos if curso_data.requisitos else ''
     }
       # Obtener cursos disponibles (igual que en crear) pero filtrar el curso actual
     todos_los_cursos = Curso.get_prerequisitos_disponibles()

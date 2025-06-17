@@ -6,14 +6,22 @@ class Inscripcion:
         self.id = id
         self.alumno_id = alumno_id
         self.instancia_curso_id = instancia_curso_id
-        self.fecha_inscripcion = fecha_inscripcion
-
-    @classmethod
-    def crear(cls, alumno_id, instancia_curso_id):
+        self.fecha_inscripcion = fecha_inscripcion    @classmethod
+    def crear(cls, alumno_id, instancia_curso_id, fecha_inscripcion=None):
         """Crea una nueva inscripción"""
-        query = "INSERT INTO inscripciones (alumno_id, instancia_curso_id) VALUES (%s, %s)"
-        id_inscripcion = execute_query(query, (alumno_id, instancia_curso_id))
-        return cls(id_inscripcion, alumno_id, instancia_curso_id)
+        print(f"Debug crear: alumno_id={alumno_id}, instancia_curso_id={instancia_curso_id}, fecha_inscripcion={fecha_inscripcion}")
+        
+        if fecha_inscripcion:
+            query = "INSERT INTO inscripciones (alumno_id, instancia_curso_id, fecha_inscripcion) VALUES (%s, %s, %s)"
+            print(f"Debug: Usando query con fecha: {query}")
+            print(f"Debug: Params: ({alumno_id}, {instancia_curso_id}, {fecha_inscripcion})")
+            id_inscripcion = execute_query(query, (alumno_id, instancia_curso_id, fecha_inscripcion))
+        else:
+            query = "INSERT INTO inscripciones (alumno_id, instancia_curso_id) VALUES (%s, %s)"
+            print(f"Debug: Usando query sin fecha: {query}")
+            print(f"Debug: Params: ({alumno_id}, {instancia_curso_id})")
+            id_inscripcion = execute_query(query, (alumno_id, instancia_curso_id))
+        return cls(id_inscripcion, alumno_id, instancia_curso_id, fecha_inscripcion)
 
     @classmethod
     def obtener_todos(cls):
