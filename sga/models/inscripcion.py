@@ -11,7 +11,7 @@ class Inscripcion:
     @classmethod
     def crear(cls, alumno_id, instancia_curso_id):
         """Crea una nueva inscripción"""
-        query = "INSERT INTO inscripciones (alumno_id, instancia_curso_id) VALUES (?, ?)"
+        query = "INSERT INTO inscripciones (alumno_id, instancia_curso_id) VALUES (%s, %s)"
         id_inscripcion = execute_query(query, (alumno_id, instancia_curso_id))
         return cls(id_inscripcion, alumno_id, instancia_curso_id)
 
@@ -53,7 +53,7 @@ class Inscripcion:
                a.nombre, a.correo
         FROM inscripciones i
         JOIN alumnos a ON i.alumno_id = a.id
-        WHERE i.instancia_curso_id = ?
+        WHERE i.instancia_curso_id = %s
         ORDER BY a.nombre
         """
         resultados = execute_query(query, (instancia_curso_id,))
@@ -79,7 +79,7 @@ class Inscripcion:
         WHERE a.id NOT IN (
             SELECT i.alumno_id 
             FROM inscripciones i 
-            WHERE i.instancia_curso_id = ?
+            WHERE i.instancia_curso_id = %s
         )
         ORDER BY a.nombre
         """        
@@ -96,12 +96,12 @@ class Inscripcion:
     @classmethod
     def eliminar(cls, id):
         """Elimina una inscripción"""
-        query = "DELETE FROM inscripciones WHERE id = ?"
+        query = "DELETE FROM inscripciones WHERE id = %s"
         execute_query(query, (id,))
 
     @classmethod
     def esta_inscrito(cls, alumno_id, instancia_curso_id):
         """Verifica si un alumno está inscrito en un curso"""
-        query = "SELECT COUNT(*) FROM inscripciones WHERE alumno_id = ? AND instancia_curso_id = ?"
+        query = "SELECT COUNT(*) FROM inscripciones WHERE alumno_id = %s AND instancia_curso_id = %s"
         resultado = execute_query(query, (alumno_id, instancia_curso_id))
         return resultado[0][0] > 0

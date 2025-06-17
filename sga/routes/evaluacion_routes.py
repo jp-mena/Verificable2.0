@@ -16,7 +16,7 @@ def _verificar_seccion_cerrada(seccion_id):
         SELECT ic.cerrado
         FROM secciones s
         JOIN instancias_curso ic ON s.instancia_id = ic.id
-        WHERE s.id = ?
+        WHERE s.id = %s
         """
         resultado = execute_query(query, (seccion_id,))
         if resultado:
@@ -29,7 +29,7 @@ def _verificar_instancia_curso_cerrada(instancia_id):
     """Verifica si una instancia de curso está cerrada"""
     try:
         instancia_id = safe_int_conversion(instancia_id, 'ID de instancia')
-        query = "SELECT cerrado FROM instancias_curso WHERE id = ?"
+        query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
         resultado = execute_query(query, (instancia_id,))
         if resultado:
             return bool(resultado[0][0])

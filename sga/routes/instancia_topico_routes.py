@@ -15,7 +15,7 @@ def _verificar_evaluacion_cerrada(evaluacion_id):
     FROM evaluaciones e
     JOIN secciones s ON e.seccion_id = s.id
     JOIN instancias_curso ic ON s.instancia_id = ic.id
-    WHERE e.id = ?
+    WHERE e.id = %s
     """
     resultado = execute_query(query, (evaluacion_id,))
     if resultado:
@@ -24,7 +24,7 @@ def _verificar_evaluacion_cerrada(evaluacion_id):
 
 def _verificar_instancia_curso_cerrada(instancia_id):
     """Verifica si una instancia de curso está cerrada"""
-    query = "SELECT cerrado FROM instancias_curso WHERE id = ?"
+    query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
     resultado = execute_query(query, (instancia_id,))
     if resultado:
         return bool(resultado[0][0])

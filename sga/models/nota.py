@@ -11,7 +11,7 @@ class Nota:
     @classmethod
     def existe_nota(cls, alumno_id, instancia_topico_id):
         """Verifica si ya existe una nota para un alumno en una instancia de tópico"""
-        query = "SELECT COUNT(*) FROM notas WHERE alumno_id = ? AND instancia_topico_id = ?"
+        query = "SELECT COUNT(*) FROM notas WHERE alumno_id = %s AND instancia_topico_id = %s"
         resultado = execute_query(query, (alumno_id, instancia_topico_id))
         return resultado[0][0] > 0
 
@@ -22,7 +22,7 @@ class Nota:
         if cls.existe_nota(alumno_id, instancia_topico_id):
             raise ValueError("Ya existe una nota para este alumno en esta evaluación")
         
-        query = "INSERT INTO notas (alumno_id, instancia_topico_id, nota) VALUES (?, ?, ?)"
+        query = "INSERT INTO notas (alumno_id, instancia_topico_id, nota) VALUES (%s, %s, %s)"
         id_nota = execute_query(query, (alumno_id, instancia_topico_id, nota))
         return cls(id_nota, alumno_id, instancia_topico_id, nota)
 
@@ -70,7 +70,7 @@ class Nota:
     @classmethod
     def obtener_por_id(cls, id):
         """Obtiene una nota por ID"""
-        query = "SELECT id, alumno_id, instancia_topico_id, nota FROM notas WHERE id = ?"
+        query = "SELECT id, alumno_id, instancia_topico_id, nota FROM notas WHERE id = %s"
         resultado = execute_query(query, (id,))
         if resultado:
             fila = resultado[0]
@@ -80,17 +80,17 @@ class Nota:
     @classmethod
     def obtener_por_alumno(cls, alumno_id):
         """Obtiene todas las notas de un alumno"""
-        query = "SELECT id, alumno_id, instancia_topico_id, nota FROM notas WHERE alumno_id = ?"
+        query = "SELECT id, alumno_id, instancia_topico_id, nota FROM notas WHERE alumno_id = %s"
         resultados = execute_query(query, (alumno_id,))
         return [cls(fila[0], fila[1], fila[2], fila[3]) for fila in resultados]
 
     def actualizar(self):
         """Actualiza la nota"""
-        query = "UPDATE notas SET alumno_id = ?, instancia_topico_id = ?, nota = ? WHERE id = ?"
+        query = "UPDATE notas SET alumno_id = %s, instancia_topico_id = %s, nota = %s WHERE id = %s"
         execute_query(query, (self.alumno_id, self.instancia_topico_id, self.nota, self.id))
 
     @classmethod
     def eliminar(cls, id):
         """Elimina una nota"""
-        query = "DELETE FROM notas WHERE id = ?"
+        query = "DELETE FROM notas WHERE id = %s"
         execute_query(query, (id,))

@@ -52,13 +52,13 @@ class Curso:
     def get_requisitos_list(self):
         """Obtiene los requisitos como lista de códigos"""
         if not self.requisitos:
-            return []
+            return []        
         return [codigo.strip() for codigo in self.requisitos.split(',') if codigo.strip()]
     
     def save(self):
         """Guarda un nuevo curso en la base de datos"""
         try:
-            query = "INSERT INTO cursos (codigo, nombre, creditos, requisitos) VALUES (?, ?, ?, ?)"
+            query = "INSERT INTO cursos (codigo, nombre, creditos, requisitos) VALUES (%s, %s, %s, %s)"
             return execute_query(query, (self.codigo, self.nombre, self.creditos, self.requisitos))
         except Exception as e:
             raise ValidationError(f"Error al guardar curso: {str(e)}")
@@ -80,7 +80,7 @@ class Curso:
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
-            query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE id = ?"
+            query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE id = %s"
             results = execute_query(query, (curso_id,))
             return results[0] if results else None
         except ValidationError:
@@ -95,7 +95,7 @@ class Curso:
             if not codigo:
                 raise ValidationError("Código de curso es requerido")
             
-            query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE codigo = ?"
+            query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE codigo = %s"
             results = execute_query(query, (codigo.upper(),))
             return results[0] if results else None        
         except ValidationError:
@@ -114,7 +114,7 @@ class Curso:
             # Crear objeto temporal para validar
             temp_curso = Curso(codigo, nombre, creditos, requisitos)
             
-            query = "UPDATE cursos SET codigo = ?, nombre = ?, creditos = ?, requisitos = ? WHERE id = ?"
+            query = "UPDATE cursos SET codigo = %s, nombre = %s, creditos = %s, requisitos = %s WHERE id = %s"
             execute_query(query, (temp_curso.codigo, temp_curso.nombre, temp_curso.creditos, temp_curso.requisitos, curso_id))
             return True
         except ValidationError:
@@ -135,7 +135,7 @@ class Curso:
             if not existing:
                 raise ValidationError("Curso no encontrado")
             
-            query = "DELETE FROM cursos WHERE id = ?"
+            query = "DELETE FROM cursos WHERE id = %s"
             execute_query(query, (curso_id,))
             return True
         except ValidationError:

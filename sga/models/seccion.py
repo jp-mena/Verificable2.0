@@ -11,7 +11,7 @@ class Seccion:
     @classmethod
     def crear(cls, numero, instancia_id, profesor_id=None):
         """Crea una nueva sección"""
-        query = "INSERT INTO secciones (numero, instancia_id, profesor_id) VALUES (?, ?, ?)"
+        query = "INSERT INTO secciones (numero, instancia_id, profesor_id) VALUES (%s, %s, %s)"
         id_seccion = execute_query(query, (numero, instancia_id, profesor_id))
         return cls(id_seccion, numero, instancia_id, profesor_id)
 
@@ -48,7 +48,7 @@ class Seccion:
     @classmethod
     def obtener_por_id(cls, id):
         """Obtiene una sección por ID"""
-        query = "SELECT id, numero, instancia_id, profesor_id FROM secciones WHERE id = ?"
+        query = "SELECT id, numero, instancia_id, profesor_id FROM secciones WHERE id = %s"
         resultado = execute_query(query, (id,))
         if resultado:
             fila = resultado[0]
@@ -57,12 +57,12 @@ class Seccion:
 
     def actualizar(self):
         """Actualiza la sección"""
-        query = "UPDATE secciones SET numero = ?, instancia_id = ?, profesor_id = ? WHERE id = ?"
+        query = "UPDATE secciones SET numero = %s, instancia_id = %s, profesor_id = %s WHERE id = %s"
         execute_query(query, (self.numero, self.instancia_id, self.profesor_id, self.id))
         return True    @staticmethod
     def eliminar(id):
         """Elimina una sección"""
-        query = "DELETE FROM secciones WHERE id = ?"
+        query = "DELETE FROM secciones WHERE id = %s"
         execute_query(query, (id,))
 
     @staticmethod
@@ -80,7 +80,7 @@ class Seccion:
             query = """
             SELECT DISTINCT profesor_id 
             FROM secciones 
-            WHERE instancia_id = ? AND profesor_id IS NOT NULL
+            WHERE instancia_id = %s AND profesor_id IS NOT NULL
             """
             params = [instancia_id]
             

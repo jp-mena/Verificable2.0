@@ -112,20 +112,24 @@
                             <i class="fas fa-user-plus me-2"></i>
                             <strong>3.</strong> Inscripciones
                             <small class="text-muted d-block">Inscribir alumnos en instancias (desde detalle de instancia)</small>
-                        </a>
-                        <a href="{{ url_for('evaluacion.listar_evaluaciones') }}" class="list-group-item list-group-item-action">
+                        </a>                        <a href="{{ url_for('evaluacion.listar_evaluaciones') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-clipboard-check me-2"></i>
                             <strong>4.</strong> Evaluaciones
                             <small class="text-muted d-block">Definir evaluaciones por sección</small>
                         </a>
+                        <a href="{{ url_for('topico.listar_topicos') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-book-open me-2"></i>
+                            <strong>5.</strong> Tópicos
+                            <small class="text-muted d-block">Crear temas/unidades del curso</small>
+                        </a>
                         <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-tasks me-2"></i>
-                            <strong>5.</strong> Instancias de Tópico
+                            <strong>6.</strong> Instancias de Tópico
                             <small class="text-muted d-block">Asociar tópicos a evaluaciones</small>
                         </a>
                         <a href="{{ url_for('nota.listar_notas') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-star me-2"></i>
-                            <strong>6.</strong> Notas
+                            <strong>7.</strong> Notas
                             <small class="text-muted d-block">Asignar calificaciones finales</small>
                         </a>
                     </div>

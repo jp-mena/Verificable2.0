@@ -9,7 +9,7 @@ seccion_bp = Blueprint('seccion', __name__)
 
 def _verificar_instancia_curso_cerrada(instancia_id):
     """Verifica si una instancia de curso está cerrada"""
-    query = "SELECT cerrado FROM instancias_curso WHERE id = ?"
+    query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
     resultado = execute_query(query, (instancia_id,))
     if resultado:
         return bool(resultado[0][0])

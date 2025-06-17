@@ -20,7 +20,7 @@ def _verificar_instancia_cerrada(instancia_topico_id):
         JOIN evaluaciones e ON it.evaluacion_id = e.id
         JOIN secciones s ON e.seccion_id = s.id
         JOIN instancias_curso ic ON s.instancia_id = ic.id
-        WHERE it.id = ?
+        WHERE it.id = %s
         """
         resultado = execute_query(query, (instancia_topico_id,))
         if resultado:
@@ -64,7 +64,8 @@ def crear_nota_simple():
             if nota_valor < 1.0 or nota_valor > 7.0:
                 flash('La nota debe estar entre 1.0 y 7.0', 'error')
                 return redirect(url_for('nota.crear_nota_simple'))
-              # Validar que la instancia no esté cerrada
+              
+            # Validar que la instancia no esté cerrada
             instancia = InstanciaCurso.obtener_por_id(instancia_curso_id)
             if not instancia:
                 flash('Instancia de curso no encontrada', 'error')
@@ -115,8 +116,6 @@ def obtener_alumnos_inscritos(instancia_curso_id):
     except Exception as e:
         print(f"ERROR en obtener_alumnos_inscritos: {str(e)}")
         return jsonify({'error': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @nota_bp.route('/api/notas/instancias-topico/<int:instancia_curso_id>')
 def obtener_instancias_topico_por_curso(instancia_curso_id):
@@ -127,7 +126,7 @@ def obtener_instancias_topico_por_curso(instancia_curso_id):
         FROM instancias_topico it
         JOIN evaluaciones e ON it.evaluacion_id = e.id
         JOIN secciones s ON e.seccion_id = s.id
-        WHERE s.instancia_id = ?
+        WHERE s.instancia_id = %s
         ORDER BY e.nombre, it.nombre
         """
         resultados = execute_query(query, (instancia_curso_id,))
@@ -140,8 +139,10 @@ def obtener_instancias_topico_por_curso(instancia_curso_id):
             }
             for fila in resultados
         ]
+        print(f"DEBUG: Instancia {instancia_curso_id} tiene {len(instancias_topico)} evaluaciones disponibles")
         return jsonify({'instancias_topico': instancias_topico}), 200
     except Exception as e:
+        print(f"ERROR en obtener_instancias_topico_por_curso: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @nota_bp.route('/notas/<int:id>/editar', methods=['GET', 'POST'])
@@ -167,7 +168,8 @@ def editar_nota(id):
             if _verificar_instancia_cerrada(nota.instancia_topico_id):
                 flash('No se pueden editar notas a un curso que ya ha sido cerrado', 'error')
                 return redirect(url_for('nota.editar_nota', id=id))
-              # Validaciones básicas
+              
+            # Validaciones básicas
             if nota.nota < 1.0 or nota.nota > 7.0:
                 flash('La nota debe estar entre 1.0 y 7.0', 'error')
                 return redirect(url_for('nota.editar_nota', id=id))
@@ -187,7 +189,7 @@ def editar_nota(id):
     JOIN evaluaciones e ON it.evaluacion_id = e.id
     JOIN secciones s ON e.seccion_id = s.id
     JOIN instancias_curso ic ON s.instancia_id = ic.id
-    WHERE it.id = ?
+    WHERE it.id = %s
     """
     resultado_instancia = execute_query(query_instancia, (nota.instancia_topico_id,))
     
@@ -200,6 +202,7 @@ def editar_nota(id):
     # Obtener alumnos inscritos en la instancia de curso específica
     from sga.models.inscripcion import Inscripcion
     alumnos = Inscripcion.obtener_por_curso(instancia_curso_id)
+    
     # Obtener instancias de tópico con información completa de cursos abiertos
     query = """
     SELECT it.id, it.nombre, it.peso, e.nombre as evaluacion_nombre, c.codigo as curso_codigo
@@ -234,7 +237,8 @@ def eliminar_nota(id):
         if not nota:
             flash('Nota no encontrada', 'error')
             return redirect(url_for('nota.listar_notas'))
-          # Verificar si la instancia de curso está cerrada
+          
+        # Verificar si la instancia de curso está cerrada
         if _verificar_instancia_cerrada(nota.instancia_topico_id):
             flash('No se pueden eliminar notas de un curso que ya ha sido cerrado', 'error')
             return redirect(url_for('nota.listar_notas'))

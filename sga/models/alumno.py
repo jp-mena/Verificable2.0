@@ -32,7 +32,7 @@ class Alumno:
         """Crea un nuevo alumno"""
         try:
             alumno = cls(nombre, correo, fecha_ingreso)
-            query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (?, ?, ?)"
+            query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (%s, %s, %s)"
             id_alumno = execute_query(query, (alumno.nombre, alumno.correo, alumno.fecha_ingreso))
             return alumno
         except ValidationError:
@@ -52,7 +52,7 @@ class Alumno:
     def save(self):
         """Guarda un nuevo alumno en la base de datos"""
         try:
-            query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (?, ?, ?)"
+            query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (%s, %s, %s)"
             return execute_query(query, (self.nombre, self.correo, self.fecha_ingreso))
         except Exception as e:
             raise ValidationError(f"Error al guardar alumno: {str(e)}")
@@ -74,7 +74,7 @@ class Alumno:
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             
-            query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE id = ?"
+            query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE id = %s"
             results = execute_query(query, (alumno_id,))
             return results[0] if results else None
         except ValidationError:
@@ -101,7 +101,7 @@ class Alumno:
             if not re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
                 raise ValidationError("Fecha de ingreso debe estar en formato YYYY-MM-DD")
             
-            query = "UPDATE alumnos SET nombre = ?, correo = ?, fecha_ingreso = ? WHERE id = ?"
+            query = "UPDATE alumnos SET nombre = %s, correo = %s, fecha_ingreso = %s WHERE id = %s"
             execute_query(query, (nombre, correo, fecha_str, alumno_id))
             return True
         except ValidationError:
@@ -122,7 +122,7 @@ class Alumno:
             if not existing:
                 raise ValidationError("Alumno no encontrado")
             
-            query = "DELETE FROM alumnos WHERE id = ?"
+            query = "DELETE FROM alumnos WHERE id = %s"
             execute_query(query, (alumno_id,))
             return True
         except ValidationError:
@@ -146,18 +146,18 @@ class Alumno:
     @staticmethod
     def get_by_correo(correo):
         """Obtiene un alumno por su correo"""
-        query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE correo = ?"
+        query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE correo = %s"
         results = execute_query(query, (correo,))
         return results[0] if results else None
     
     @staticmethod
     def update(alumno_id, nombre, correo, fecha_ingreso):
         """Actualiza un alumno existente"""
-        query = "UPDATE alumnos SET nombre = ?, correo = ?, fecha_ingreso = ? WHERE id = ?"
+        query = "UPDATE alumnos SET nombre = %s, correo = %s, fecha_ingreso = %s WHERE id = %s"
         return execute_query(query, (nombre, correo, fecha_ingreso, alumno_id))
     
     @staticmethod
     def delete(alumno_id):
         """Elimina un alumno"""
-        query = "DELETE FROM alumnos WHERE id = ?"
+        query = "DELETE FROM alumnos WHERE id = %s"
         return execute_query(query, (alumno_id,))

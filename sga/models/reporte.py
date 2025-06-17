@@ -41,7 +41,7 @@ class Reporte:
             JOIN secciones s ON e.seccion_id = s.id
             JOIN instancias_curso ic ON s.instancia_id = ic.id
             JOIN cursos c ON ic.curso_id = c.id
-            WHERE it.id = ?
+            WHERE it.id = %s
             ORDER BY a.nombre
             """
             
@@ -86,7 +86,6 @@ class Reporte:
                 raise ValidationError("ID de instancia de curso debe ser un entero positivo")
             if seccion_numero is None or seccion_numero <= 0:
                 raise ValidationError("Número de sección debe ser un entero positivo")
-            
             query = """
             SELECT 
                 a.id as alumno_id,
@@ -105,13 +104,14 @@ class Reporte:
             JOIN alumnos a ON nf.alumno_id = a.id
             JOIN instancias_curso ic ON nf.instancia_curso_id = ic.id
             JOIN cursos c ON ic.curso_id = c.id
-            JOIN secciones s ON s.instancia_id = ic.id
-            WHERE ic.id = ? 
-            AND s.numero = ?
+            JOIN inscripciones i ON i.alumno_id = a.id AND i.instancia_curso_id = ic.id
+            LEFT JOIN secciones s ON s.instancia_id = ic.id AND s.numero = %s
+            WHERE ic.id = %s 
             AND ic.cerrado = 1
+            AND s.id IS NOT NULL
             ORDER BY a.nombre
             """
-            resultados = execute_query(query, (instancia_curso_id, seccion_numero))
+            resultados = execute_query(query, (seccion_numero, instancia_curso_id))
             return [
                 {
                     'alumno_id': fila[0],
@@ -163,7 +163,7 @@ class Reporte:
             JOIN instancias_curso ic ON nf.instancia_curso_id = ic.id
             JOIN cursos c ON ic.curso_id = c.id
             JOIN secciones s ON s.instancia_id = ic.id
-            WHERE nf.alumno_id = ?
+            WHERE nf.alumno_id = %s
             AND ic.cerrado = 1
             ORDER BY ic.anio DESC, ic.semestre DESC, c.codigo
             """
@@ -281,7 +281,7 @@ class Reporte:
             LEFT JOIN instancias_topico it ON it.evaluacion_id = e.id
             LEFT JOIN notas n ON n.instancia_topico_id = it.id
             LEFT JOIN notas_finales nf ON nf.alumno_id = n.alumno_id AND nf.instancia_curso_id = s.instancia_id
-            WHERE s.instancia_id = ?
+            WHERE s.instancia_id = %s
             GROUP BY s.numero
             ORDER BY s.numero
             """

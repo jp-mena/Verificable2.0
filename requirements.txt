@@ -1,6 +1,12 @@
 # Framework web principal
 Flask==2.3.3
 
+# Conector MySQL
+mysql-connector-python==8.2.0
+
+# Para leer archivos .env
+python-dotenv==1.1.0
+
 # ORM para base de datos
 SQLAlchemy==2.0.23
 

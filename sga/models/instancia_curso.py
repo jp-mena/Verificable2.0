@@ -13,7 +13,7 @@ class InstanciaCurso:
     def crear(cls, semestre, anio, curso_id):
         """Crea una nueva instancia de curso"""
         try:
-            query = "INSERT INTO instancias_curso (semestre, anio, curso_id) VALUES (?, ?, ?)"
+            query = "INSERT INTO instancias_curso (semestre, anio, curso_id) VALUES (%s, %s, %s)"
             id_instancia = execute_query(query, (semestre, anio, curso_id))
             return cls(id_instancia, semestre, anio, curso_id)
         except Exception as e:
@@ -60,7 +60,7 @@ class InstanciaCurso:
                    c.codigo, c.nombre
             FROM instancias_curso ic
             JOIN cursos c ON ic.curso_id = c.id
-            WHERE ic.id = ?
+            WHERE ic.id = %s
             """
             resultado = execute_query(query, (id,))
             if resultado:
@@ -82,7 +82,7 @@ class InstanciaCurso:
             if not self.id:
                 raise ValidationError("No se puede actualizar una instancia sin ID")
             
-            query = "UPDATE instancias_curso SET semestre = ?, anio = ?, curso_id = ? WHERE id = ?"
+            query = "UPDATE instancias_curso SET semestre = %s, anio = %s, curso_id = %s WHERE id = %s"
             execute_query(query, (self.semestre, self.anio, self.curso_id, self.id))
         except Exception as e:
             raise ValidationError(f"Error al actualizar la instancia de curso: {str(e)}")    @classmethod
@@ -92,7 +92,7 @@ class InstanciaCurso:
             if not id:
                 raise ValidationError("ID de instancia requerido")
             
-            query = "DELETE FROM instancias_curso WHERE id = ?"
+            query = "DELETE FROM instancias_curso WHERE id = %s"
             execute_query(query, (id,))
         except Exception as e:
             raise ValidationError(f"Error al eliminar la instancia de curso: {str(e)}")
@@ -111,7 +111,7 @@ class InstanciaCurso:
             query = """
             SELECT nota_final, fecha_calculo
             FROM notas_finales
-            WHERE instancia_curso_id = ? AND alumno_id = ?
+            WHERE instancia_curso_id = %s AND alumno_id = %s
             """
             resultado = execute_query(query, (instancia_id, alumno_id))
             if resultado:
@@ -145,11 +145,10 @@ class InstanciaCurso:
             for alumno in alumnos:
                 try:
                     nota_final = cls.calcular_nota_final_alumno(instancia_id, alumno['id'])
-                    
-                    # Guardar nota final en la tabla notas_finales
+                      # Guardar nota final en la tabla notas_finales
                     query_nota = """
-                    INSERT OR REPLACE INTO notas_finales (instancia_curso_id, alumno_id, nota_final, fecha_calculo)
-                    VALUES (?, ?, ?, ?)
+                    REPLACE INTO notas_finales (instancia_curso_id, alumno_id, nota_final, fecha_calculo)
+                    VALUES (%s, %s, %s, %s)
                     """
                     execute_query(query_nota, (instancia_id, alumno['id'], nota_final, datetime.now()))
                 except Exception as e:
@@ -159,8 +158,8 @@ class InstanciaCurso:
             # Marcar el curso como cerrado
             query_cerrar = """
             UPDATE instancias_curso 
-            SET cerrado = 1, fecha_cierre = ?
-            WHERE id = ?
+            SET cerrado = 1, fecha_cierre = %s
+            WHERE id = %s
             """
             execute_query(query_cerrar, (datetime.now(), instancia_id))        
             return True
@@ -180,7 +179,7 @@ class InstanciaCurso:
             SELECT a.id, a.nombre, a.correo, a.fecha_ingreso, i.fecha_inscripcion
             FROM alumnos a
             JOIN inscripciones i ON a.id = i.alumno_id
-            WHERE i.instancia_curso_id = ?
+            WHERE i.instancia_curso_id = %s
             ORDER BY a.nombre
             """
             resultados = execute_query(query, (instancia_id,))
@@ -219,7 +218,7 @@ class InstanciaCurso:
             JOIN evaluaciones e ON it.evaluacion_id = e.id
             JOIN secciones s ON e.seccion_id = s.id
             JOIN topicos t ON it.topico_id = t.id
-            WHERE s.instancia_id = ? AND n.alumno_id = ?
+            WHERE s.instancia_id = %s AND n.alumno_id = %s
             ORDER BY e.nombre, it.nombre
             """
             resultados = execute_query(query, (instancia_id, alumno_id))
@@ -250,7 +249,7 @@ class InstanciaCurso:
             SELECT DISTINCT e.id, e.porcentaje
             FROM evaluaciones e
             JOIN secciones s ON e.seccion_id = s.id
-            WHERE s.instancia_id = ?
+            WHERE s.instancia_id = %s
             """
             evaluaciones = execute_query(query_evaluaciones, (instancia_id,))
             
@@ -259,17 +258,16 @@ class InstanciaCurso:
             
             nota_final = 0.0
             total_porcentaje = 0.0
-            
             for evaluacion in evaluaciones:
                 evaluacion_id = evaluacion[0]
-                porcentaje_evaluacion = evaluacion[1] or 0
+                porcentaje_evaluacion = float(evaluacion[1] or 0)
                 
                 # Obtener todas las instancias de tópico de esta evaluación con sus notas y pesos
                 query_instancias = """
                 SELECT it.peso, n.nota
                 FROM instancias_topico it
                 JOIN notas n ON n.instancia_topico_id = it.id
-                WHERE it.evaluacion_id = ? AND n.alumno_id = ?
+                WHERE it.evaluacion_id = %s AND n.alumno_id = %s
                 """
                 instancias = execute_query(query_instancias, (evaluacion_id, alumno_id))
                 
@@ -279,17 +277,18 @@ class InstanciaCurso:
                     suma_pesos = 0.0
                     
                     for instancia in instancias:
-                        peso = instancia[0] or 0
-                        nota = instancia[1] or 0
+                        peso = float(instancia[0] or 0)
+                        nota = float(instancia[1] or 0)
                         suma_ponderada += (nota * peso)
                         suma_pesos += peso
                     
                     # Promedio ponderado de la evaluación
                     if suma_pesos > 0:
                         promedio_evaluacion = suma_ponderada / suma_pesos
-                        nota_final += (promedio_evaluacion * porcentaje_evaluacion / 100.0)
+                        nota_final += (promedio_evaluacion * porcentaje_evaluacion / 100.0)                        
                         total_porcentaje += porcentaje_evaluacion
-              # Normalizar si el total de porcentajes no es 100%
+            
+            # Normalizar si el total de porcentajes no es 100%
             if total_porcentaje > 0 and total_porcentaje != 100:
                 nota_final = (nota_final * 100.0) / total_porcentaje
             

@@ -9,7 +9,7 @@ class Profesor:
     def save(self):
         """Guarda un nuevo profesor en la base de datos"""
         try:
-            query = "INSERT INTO profesores (nombre, correo) VALUES (?, ?)"
+            query = "INSERT INTO profesores (nombre, correo) VALUES (%s, %s)"
             return execute_query(query, (self.nombre, self.correo))
         except Exception as e:
             raise ValidationError(f"Error al guardar profesor: {str(e)}")
@@ -48,7 +48,7 @@ class Profesor:
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             
-            query = "SELECT id, nombre, correo FROM profesores WHERE id = ?"
+            query = "SELECT id, nombre, correo FROM profesores WHERE id = %s"
             results = execute_query(query, (profesor_id,))
             return results[0] if results else None
         except ValidationError:
@@ -61,7 +61,7 @@ class Profesor:
         """Obtiene un profesor por su correo"""
         try:
             correo = validate_email(correo)
-            query = "SELECT id, nombre, correo FROM profesores WHERE correo = ?"
+            query = "SELECT id, nombre, correo FROM profesores WHERE correo = %s"
             results = execute_query(query, (correo,))
             return results[0] if results else None
         except ValidationError:
@@ -81,7 +81,7 @@ class Profesor:
             nombre = validate_required_string(nombre, "nombre")
             correo = validate_email(correo)
             
-            query = "UPDATE profesores SET nombre = ?, correo = ? WHERE id = ?"
+            query = "UPDATE profesores SET nombre = %s, correo = %s WHERE id = %s"
             execute_query(query, (nombre, correo, profesor_id))
             return True
         except ValidationError:
@@ -102,7 +102,7 @@ class Profesor:
             if not existing:
                 raise ValidationError("Profesor no encontrado")
             
-            query = "DELETE FROM profesores WHERE id = ?"
+            query = "DELETE FROM profesores WHERE id = %s"
             execute_query(query, (profesor_id,))
             return True
         except ValidationError:
@@ -113,5 +113,5 @@ class Profesor:
     @staticmethod
     def delete(profesor_id):
         """Elimina un profesor"""
-        query = "DELETE FROM profesores WHERE id = ?"
+        query = "DELETE FROM profesores WHERE id = %s"
         return execute_query(query, (profesor_id,))

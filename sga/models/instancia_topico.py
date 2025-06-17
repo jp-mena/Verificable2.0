@@ -14,11 +14,11 @@ class InstanciaTopico:
     def crear(cls, nombre, opcional, evaluacion_id, topico_id):
         """Crea una nueva instancia de tópico"""
         # Obtener el peso de la evaluación automáticamente
-        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = %s"
         resultado_peso = execute_query(query_peso, (evaluacion_id,))
         peso = float(resultado_peso[0][0]) if resultado_peso else 0.0
         
-        query = "INSERT INTO instancias_topico (nombre, peso, opcional, evaluacion_id, topico_id) VALUES (?, ?, ?, ?, ?)"
+        query = "INSERT INTO instancias_topico (nombre, peso, opcional, evaluacion_id, topico_id) VALUES (%s, %s, %s, %s, %s)"
         id_instancia = execute_query(query, (nombre, peso, opcional, evaluacion_id, topico_id))
         return cls(id_instancia, nombre, peso, opcional, evaluacion_id, topico_id)
 
@@ -61,7 +61,7 @@ class InstanciaTopico:
     @classmethod
     def obtener_por_id(cls, id):
         """Obtiene una instancia de tópico por ID"""
-        query = "SELECT id, nombre, peso, opcional, evaluacion_id, topico_id FROM instancias_topico WHERE id = ?"
+        query = "SELECT id, nombre, peso, opcional, evaluacion_id, topico_id FROM instancias_topico WHERE id = %s"
         resultado = execute_query(query, (id,))
         if resultado:
             fila = resultado[0]
@@ -71,18 +71,18 @@ class InstanciaTopico:
     def actualizar(self):
         """Actualiza la instancia de tópico"""
         # Actualizar el peso automáticamente desde la evaluación
-        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = %s"
         resultado_peso = execute_query(query_peso, (self.evaluacion_id,))
         if resultado_peso:
             self.peso = float(resultado_peso[0][0])
         
-        query = "UPDATE instancias_topico SET nombre = ?, peso = ?, opcional = ?, evaluacion_id = ?, topico_id = ? WHERE id = ?"
+        query = "UPDATE instancias_topico SET nombre = %s, peso = %s, opcional = %s, evaluacion_id = %s, topico_id = %s WHERE id = %s"
         execute_query(query, (self.nombre, self.peso, self.opcional, self.evaluacion_id, self.topico_id, self.id))
 
     @classmethod
     def eliminar(cls, id):
         """Elimina una instancia de tópico"""
-        query = "DELETE FROM instancias_topico WHERE id = ?"
+        query = "DELETE FROM instancias_topico WHERE id = %s"
         execute_query(query, (id,))
 
     def obtener_peso_de_evaluacion(self):
@@ -90,6 +90,6 @@ class InstanciaTopico:
         if not self.evaluacion_id:
             return 0.0
         
-        query = "SELECT porcentaje FROM evaluaciones WHERE id = ?"
+        query = "SELECT porcentaje FROM evaluaciones WHERE id = %s"
         resultado = execute_query(query, (self.evaluacion_id,))
         return float(resultado[0][0]) if resultado else 0.0

@@ -1,8 +1,8 @@
 """
-Utilidades para administración de la base de datos
+Utilidades para administración de la base de datos MySQL
 """
 
-from sga.db.database import get_connection, DATABASE_PATH
+from sga.db.database import get_connection
 import os
 
 def limpiar_todas_las_tablas():
@@ -30,17 +30,16 @@ def limpiar_todas_las_tablas():
         ]
         
         # Desactivar restricciones de claves foráneas
-        cursor.execute('PRAGMA foreign_keys = OFF')
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
         
         # Eliminar datos de cada tabla
         for tabla in tablas:
             cursor.execute(f'DELETE FROM {tabla}')
-        
-        # Resetear autoincrement
-        cursor.execute("DELETE FROM sqlite_sequence")
+            # Resetear auto_increment para cada tabla
+            cursor.execute(f'ALTER TABLE {tabla} AUTO_INCREMENT = 1')
         
         # Reactivar restricciones
-        cursor.execute('PRAGMA foreign_keys = ON')
+        cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         
         conn.commit()
         conn.close()

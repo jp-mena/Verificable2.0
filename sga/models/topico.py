@@ -28,7 +28,7 @@ class Topico:
         """Crea un nuevo tópico"""
         try:
             topico = cls(None, nombre, tipo)
-            query = "INSERT INTO topicos (nombre, tipo) VALUES (?, ?)"
+            query = "INSERT INTO topicos (nombre, tipo) VALUES (%s, %s)"
             id_topico = execute_query(query, (topico.nombre, topico.tipo))
             topico.id = id_topico
             return topico
@@ -62,7 +62,7 @@ class Topico:
             if id is None or id <= 0:
                 raise ValidationError("ID de tópico debe ser un entero positivo")
             
-            query = "SELECT id, nombre, tipo FROM topicos WHERE id = ?"
+            query = "SELECT id, nombre, tipo FROM topicos WHERE id = %s"
             resultado = execute_query(query, (id,))
             if resultado:
                 fila = resultado[0]
@@ -83,7 +83,7 @@ class Topico:
             if not self.tipo:
                 raise ValidationError("Tipo es requerido para actualización")
             
-            query = "UPDATE topicos SET nombre = ?, tipo = ? WHERE id = ?"
+            query = "UPDATE topicos SET nombre = %s, tipo = %s WHERE id = %s"
             execute_query(query, (self.nombre, self.tipo, self.id))
             return True
         except ValidationError:
@@ -104,7 +104,7 @@ class Topico:
             if not existing:
                 raise ValidationError("Tópico no encontrado")
             
-            query = "DELETE FROM topicos WHERE id = ?"
+            query = "DELETE FROM topicos WHERE id = %s"
             execute_query(query, (id,))
             return True
         except ValidationError:
