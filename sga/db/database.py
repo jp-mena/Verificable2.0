@@ -11,13 +11,13 @@ def init_database():
     
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    
-    # Tabla Cursos
+      # Tabla Cursos
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS cursos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             codigo TEXT UNIQUE NOT NULL,
             nombre TEXT NOT NULL,
+            creditos INTEGER DEFAULT 4,
             requisitos TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -55,15 +55,16 @@ def init_database():
             FOREIGN KEY (curso_id) REFERENCES cursos (id) ON DELETE CASCADE
         )
     ''')
-    
-    # Tabla Secciones
+      # Tabla Secciones
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS secciones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             numero INTEGER NOT NULL,
             instancia_id INTEGER NOT NULL,
+            profesor_id INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (instancia_id) REFERENCES instancias_curso (id) ON DELETE CASCADE
+            FOREIGN KEY (instancia_id) REFERENCES instancias_curso (id) ON DELETE CASCADE,
+            FOREIGN KEY (profesor_id) REFERENCES profesores (id) ON DELETE SET NULL
         )
     ''')
     
@@ -144,8 +145,7 @@ def init_database():
             UNIQUE(alumno_id, instancia_curso_id)
         )
     ''')
-    
-    # Agregar campos a tablas existentes si no existen
+      # Agregar campos a tablas existentes si no existen
     try:
         cursor.execute('ALTER TABLE instancias_curso ADD COLUMN cerrado BOOLEAN DEFAULT 0')
     except sqlite3.OperationalError:
@@ -153,6 +153,18 @@ def init_database():
     
     try:
         cursor.execute('ALTER TABLE instancias_curso ADD COLUMN fecha_cierre TIMESTAMP NULL')
+    except sqlite3.OperationalError:
+        pass  # El campo ya existe    # Migración: Agregar profesor_id a la tabla secciones si no existe
+    try:
+        cursor.execute('ALTER TABLE secciones ADD COLUMN profesor_id INTEGER')
+        print("✅ Columna profesor_id agregada a la tabla secciones")
+    except sqlite3.OperationalError:
+        pass  # El campo ya existe
+
+    # Migración: Agregar creditos a la tabla cursos si no existe
+    try:
+        cursor.execute('ALTER TABLE cursos ADD COLUMN creditos INTEGER DEFAULT 4')
+        print("✅ Columna creditos agregada a la tabla cursos")
     except sqlite3.OperationalError:
         pass  # El campo ya existe
 
