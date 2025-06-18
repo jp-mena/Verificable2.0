@@ -4,10 +4,8 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde .env
 load_dotenv()
 
-# Configuración de base de datos
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
@@ -19,9 +17,7 @@ DB_CONFIG = {
 }
 
 def create_database_if_not_exists():
-    """Crea la base de datos si no existe"""
     try:
-        # Conectar sin especificar base de datos
         temp_config = DB_CONFIG.copy()
         temp_config.pop('database')
         
@@ -36,16 +32,12 @@ def create_database_if_not_exists():
         print(f"❌ Error creando base de datos: {e}")
 
 def init_database():
-    """Inicializa la base de datos y crea las tablas necesarias"""
     try:
-        # Primero crear la base de datos si no existe
         create_database_if_not_exists()
         
-        # Conectar a la base de datos
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        # Tabla Cursos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS cursos (
                 id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -57,7 +49,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Salas
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS salas (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -67,7 +58,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
 
-        # Tabla Profesores
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS profesores (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -77,7 +67,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Alumnos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS alumnos (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -88,7 +77,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Instancias de Curso
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS instancias_curso (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -102,7 +90,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Secciones
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS secciones (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -117,7 +104,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Evaluaciones
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS evaluaciones (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -129,7 +115,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Tópicos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS topicos (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -139,7 +124,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Instancias de Tópico
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS instancias_topico (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -154,7 +138,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Notas
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS notas (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -168,7 +151,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        # Tabla Inscripciones
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS inscripciones (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -182,7 +164,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
 
-        # Tabla Notas Finales (calculadas al cerrar curso)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS notas_finales (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -196,8 +177,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-
-        # Tabla Bloques
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS bloques (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -207,7 +186,6 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
 
-        # Tabla Horarios
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS horarios (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -222,13 +200,12 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
 
-        
         print("✅ Base de datos MySQL inicializada correctamente")
         
         cursor.execute("SELECT COUNT(*) FROM bloques")
         if cursor.fetchone()[0] == 0:
             horas = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"]
-            for d in range(1, 6):  # De lunes (1) a viernes (5)
+            for d in range(1, 6):
                 for h in horas:
                     fin = f"{int(h[:2])+1:02d}:{h[3:]}"
                     cursor.execute("INSERT INTO bloques (dia, inicio, fin) VALUES (%s, %s, %s)", (d, h, fin))
@@ -239,7 +216,6 @@ def init_database():
         print(f"❌ Error inicializando base de datos MySQL: {e}")
 
 def get_connection():
-    """Obtiene una conexión a la base de datos MySQL"""
     try:
         return mysql.connector.connect(**DB_CONFIG)
     except Error as e:
@@ -256,7 +232,7 @@ def execute_query(query, params=None):
         cur.execute(query, params or ())
         is_select = query.lstrip()[:6].upper() == "SELECT"
         if is_select:
-            rows = cur.fetchall() or []      # nunca None
+            rows = cur.fetchall() or []
             return rows
         conn.commit()
         return cur.lastrowid
