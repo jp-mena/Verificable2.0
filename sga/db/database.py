@@ -48,7 +48,7 @@ def init_database():
         # Tabla Cursos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS cursos (
-                id INT PRIMARY KEY AUTO_INCREMENT,
+                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
                 codigo VARCHAR(10) UNIQUE NOT NULL,
                 nombre VARCHAR(255) NOT NULL,
                 creditos INT DEFAULT 4,
@@ -57,6 +57,16 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
+        # Tabla Salas
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS salas (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                nombre VARCHAR(255) UNIQUE NOT NULL,
+                capacidad INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ''')
+
         # Tabla Profesores
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS profesores (
@@ -84,7 +94,7 @@ def init_database():
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 semestre INT NOT NULL,
                 anio INT NOT NULL,
-                curso_id INT NOT NULL,
+                curso_id INT UNSIGNED NOT NULL,
                 cerrado BOOLEAN DEFAULT 0,
                 fecha_cierre TIMESTAMP NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -99,9 +109,11 @@ def init_database():
                 numero INT NOT NULL,
                 instancia_id INT NOT NULL,
                 profesor_id INT,
+                sala_id INT,       
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (instancia_id) REFERENCES instancias_curso (id) ON DELETE CASCADE,
-                FOREIGN KEY (profesor_id) REFERENCES profesores (id) ON DELETE SET NULL
+                FOREIGN KEY (profesor_id) REFERENCES profesores (id) ON DELETE SET NULL,
+                FOREIGN KEY(sala_id) REFERENCES salas(id) ON DELETE SET NULL   
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
@@ -184,10 +196,45 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ''')
         
-        conn.commit()
-        conn.close()
+
+        # Tabla Bloques
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS bloques (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                dia INT NOT NULL,
+                inicio TIME NOT NULL,
+                fin TIME NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ''')
+
+        # Tabla Horarios
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS horarios (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                seccion_id INT NOT NULL,
+                bloque_id INT NOT NULL,
+                sala_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE,
+                FOREIGN KEY (bloque_id) REFERENCES bloques(id) ON DELETE CASCADE,
+                FOREIGN KEY (sala_id) REFERENCES salas(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_bloque_sala (bloque_id, sala_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ''')
+
+        
         print("✅ Base de datos MySQL inicializada correctamente")
         
+        cursor.execute("SELECT COUNT(*) FROM bloques")
+        if cursor.fetchone()[0] == 0:
+            horas = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"]
+            for d in range(1, 6):  # De lunes (1) a viernes (5)
+                for h in horas:
+                    fin = f"{int(h[:2])+1:02d}:{h[3:]}"
+                    cursor.execute("INSERT INTO bloques (dia, inicio, fin) VALUES (%s, %s, %s)", (d, h, fin))
+                    
+        conn.commit()
+        conn.close()
     except Error as e:
         print(f"❌ Error inicializando base de datos MySQL: {e}")
 

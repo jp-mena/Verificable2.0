@@ -104,32 +104,37 @@
                             <strong>1.</strong> Instancias de Curso
                             <small class="text-muted d-block">Crear ofertas de cursos por semestre</small>
                         </a>
+                        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-location-pin me-2"></i>
+                            <strong>2.</strong> Salas
+                            <small class="text-muted d-block">Crear salas donde impartir clases</small>
+                        </a>
                         <a href="{{ url_for('seccion.listar_secciones') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-users me-2"></i>
-                            <strong>2.</strong> Secciones
+                            <strong>3.</strong> Secciones
                             <small class="text-muted d-block">Asignar profesores a instancias</small>
                         </a>                        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-user-plus me-2"></i>
-                            <strong>3.</strong> Inscripciones
+                            <strong>4.</strong> Inscripciones
                             <small class="text-muted d-block">Inscribir alumnos en instancias (desde detalle de instancia)</small>
                         </a>                        <a href="{{ url_for('evaluacion.listar_evaluaciones') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-clipboard-check me-2"></i>
-                            <strong>4.</strong> Evaluaciones
+                            <strong>5.</strong> Evaluaciones
                             <small class="text-muted d-block">Definir evaluaciones por sección</small>
                         </a>
                         <a href="{{ url_for('topico.listar_topicos') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-book-open me-2"></i>
-                            <strong>5.</strong> Tópicos
+                            <strong>6.</strong> Tópicos
                             <small class="text-muted d-block">Crear temas/unidades del curso</small>
                         </a>
                         <a href="{{ url_for('instancia_topico.listar_instancias') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-tasks me-2"></i>
-                            <strong>6.</strong> Instancias de Tópico
+                            <strong>7.</strong> Instancias de Tópico
                             <small class="text-muted d-block">Asociar tópicos a evaluaciones</small>
                         </a>
                         <a href="{{ url_for('nota.listar_notas') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-star me-2"></i>
-                            <strong>7.</strong> Notas
+                            <strong>8.</strong> Notas
                             <small class="text-muted d-block">Asignar calificaciones finales</small>
                         </a>
                     </div>
@@ -145,10 +150,6 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <a href="{{ url_for('topico.listar_topicos') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-tags me-2"></i>                            Tópicos
-                            <small class="text-muted d-block">Gestionar tipos de evaluaciones</small>
-                        </a>
                         <a href="{{ url_for('json_load.mostrar_carga') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-upload me-2"></i>
                             Cargar JSON
@@ -158,6 +159,11 @@
                             <i class="fas fa-chart-bar me-2"></i>
                             Reportes Académicos
                             <small class="text-muted d-block">Notas, certificados y estadísticas</small>
+                        </a>
+                        <a href="{{ url_for('reporte.index_reportes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar me-2"></i>
+                            Generacion de horarios
+                            <small class="text-muted d-block">Genera horarios por semestre sin topes</small>
                         </a>
                     </div>
                 </div>

@@ -75,14 +75,12 @@ def create_app():
         }
         
         try:
-            # Obtener estadísticas para el dashboard
             from sga.models.curso import Curso
             from sga.models.profesor import Profesor  
             from sga.models.alumno import Alumno
             from sga.models.instancia_curso import InstanciaCurso
             from sga.models.seccion import Seccion
             from sga.models.evaluacion import Evaluacion            
-            # Cargar estadísticas una por una para identificar el error específico
             try:
                 stats['total_cursos'] = len(Curso.get_all() or [])
             except Exception as e:
@@ -120,7 +118,6 @@ def create_app():
         
         return render_template('index.html', stats=stats)
 
-    # Ruta de bienvenida para la API (mantener compatibilidad)
     @app.route('/api')
     def api_welcome():
         return jsonify({
@@ -153,10 +150,8 @@ def create_app():
 def main():
     """Función principal para ejecutar la aplicación"""
     try:
-        # Inicializar la base de datos
         init_database()
         
-        # Crear la aplicación
         app = create_app()
         
         # Ejecutar la aplicación
