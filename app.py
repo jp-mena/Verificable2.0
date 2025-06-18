@@ -18,7 +18,6 @@ from sga.utils.validators import ValidationError
 from sga.routes.horario_routes import horario_bp
 from sga.routes.sala_routes import sala_bp
 
-# Configurar logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,16 +28,13 @@ logging.basicConfig(
 )
 
 def create_app():
-    """Factory function para crear la aplicación Flask"""
     app = Flask(__name__, 
                 template_folder='sga/templates',
                 static_folder='sga/static')
-    app.secret_key = 'clave-secreta-para-desarrollo'  # En producción usar variable de entorno
+    app.secret_key = 'clave-secreta-para-desarrollo'
     
-    # Configurar manejadores de error globales
     @app.errorhandler(ValidationError)
     def handle_validation_error(e):
-        """Maneja errores de validación"""
         if request.is_json:
             return jsonify({'error': str(e)}), 400
         else:
@@ -47,14 +43,13 @@ def create_app():
 
     @app.errorhandler(404)
     def handle_not_found(e):
-        """Maneja errores 404"""
         if request.is_json:
             return jsonify({'error': 'Recurso no encontrado'}), 404
         else:
             flash('Página no encontrada', 'error')
             return render_template('error.html', error_code=404, error_message='Página no encontrada'), 404    @app.errorhandler(500)
+        
     def handle_internal_error(e):
-        """Maneja errores internos del servidor"""
         app.logger.error(f"Error interno del servidor: {e}")
         app.logger.error(f"Traceback: {traceback.format_exc()}")
         if request.is_json:
@@ -63,7 +58,6 @@ def create_app():
             flash('Ha ocurrido un error interno. Por favor, intente nuevamente.', 'error')
             return render_template('error.html', error_code=500, error_message='Error interno del servidor'), 500
 
-    # Ruta principal que sirve la interfaz web
     @app.route('/')
     def index():
         stats = {
@@ -131,7 +125,8 @@ def create_app():
                 'alumnos': '/api/alumnos'
             },
             'status': 'operativo'
-        })    # Registrar todos los blueprints
+        })
+    
     try:
         app.register_blueprint(curso_bp)
         app.register_blueprint(profesor_bp)
@@ -153,14 +148,11 @@ def create_app():
     return app
 
 def main():
-    """Función principal para ejecutar la aplicación"""
     try:
-        init_database()
-        
+        init_database()    
         app = create_app()
-        
-        # Ejecutar la aplicación
         app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
+
     except Exception as e:
         print(f"Error crítico al inicializar la aplicación: {e}")
         print("No se puede iniciar el servidor. Verifique la configuración y la base de datos.")

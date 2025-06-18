@@ -10,7 +10,7 @@ class Horario:
     def insertar(seccion_id: int, bloque_id: int, sala_id: int) -> None:
         """Inserta una fila (id autoincremental) sin devolver resultado."""
         execute_query(
-            "INSERT INTO horarios (seccion_id, bloque_id, sala_id) VALUES (?,?,?)",
+            "INSERT INTO horarios (seccion_id, bloque_id, sala_id) VALUES (%s,%s,%s)",
             (seccion_id, bloque_id, sala_id),
         )
 
@@ -30,7 +30,7 @@ class Horario:
                 SELECT s.id
                 FROM secciones s
                 JOIN instancias_curso ic ON ic.id = s.instancia_id
-                WHERE ic.semestre = ? AND ic.anio = ?
+                WHERE ic.semestre = %s AND ic.anio = %s
             )
             """,
             (semestre, anio),
@@ -45,17 +45,18 @@ class Horario:
             return execute_query("SELECT * FROM horarios")
 
         qry = """
-            SELECT h.id,
-                   c.codigo             AS sigla,
-                   s.numero             AS seccion,
-                   sal.nombre           AS sala,
-                   b.dia, b.inicio, b.fin
-            FROM horarios h
-            JOIN secciones s     ON s.id  = h.seccion_id
-            JOIN instancias_curso ic ON ic.id = s.instancia_id
-            JOIN cursos c        ON c.id  = ic.curso_id
-            JOIN bloques b       ON b.id  = h.bloque_id
-            JOIN salas  sal      ON sal.id = h.sala_id
-            ORDER BY b.dia, b.inicio
+        SELECT c.codigo,
+               s.numero,
+               sal.nombre,
+               b.dia,
+               b.inicio,
+               b.fin
+        FROM horarios h
+        JOIN secciones s       ON s.id  = h.seccion_id
+        JOIN instancias_curso ic ON ic.id = s.instancia_id
+        JOIN cursos c          ON c.id  = ic.curso_id
+        JOIN bloques b         ON b.id  = h.bloque_id
+        JOIN salas sal         ON sal.id = h.sala_id
+        WHERE ic.semestre=%s AND ic.anio=%s
         """
         return execute_query(qry)

@@ -1,9 +1,18 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from sga.services.scheduler import SchedulerService
 from sga.db.database import execute_query
+from datetime import timedelta, time
 
 horario_bp = Blueprint("horario", __name__, url_prefix="/horarios")
 
+def _to_str(hora):
+    if isinstance(hora, timedelta):
+        minutos = hora.total_seconds() // 60
+        h, m = divmod(int(minutos), 60)
+        return f"{h:02d}:{m:02d}"
+    if isinstance(hora, time):
+        return hora.strftime("%H:%M")
+    return str(hora)[:5]  
 
 def _grid_horario(semestre, anio):
     rows = execute_query(
@@ -12,32 +21,28 @@ def _grid_horario(semestre, anio):
                s.numero,
                sal.nombre,
                b.dia,
-               b.inicio
+               b.inicio,
+               b.fin
         FROM horarios h
         JOIN secciones s          ON s.id  = h.seccion_id
         JOIN instancias_curso ic  ON ic.id = s.instancia_id
         JOIN cursos c             ON c.id  = ic.curso_id
         JOIN bloques b            ON b.id  = h.bloque_id
         JOIN salas sal            ON sal.id= h.sala_id
-        WHERE ic.semestre=? AND ic.anio=?
+        WHERE ic.semestre=%s AND ic.anio=%s
         ORDER BY b.inicio,b.dia
         """,
         (semestre, anio),
     )
-    horas = [
-        "09:00",
-        "10:00",
-        "11:00",
-        "12:00",
-        "14:00",
-        "15:00",
-        "16:00",
-        "17:00",
-    ]
-    grid = {h: {d: "" for d in range(1, 6)} for h in horas}
-    for cod, sec, sala, dia, ini, _ in rows:
-        grid[ini][dia] = f"{cod}-{sec}<br><small>{sala}</small>"
-    return horas, grid
+    horas_base = ["09:00","10:00","11:00","12:00",
+                  "14:00","15:00","16:00","17:00"]
+    grid = {h:{d:"" for d in range(1,6)} for h in horas_base}
+
+    for cod, sec, sala, dia, ini, _ in rows:     # ini es timedelta o time
+        key = _to_str(ini)
+        grid[key][dia] = f"{cod}-{sec}<br><small>{sala}</small>"
+
+    return horas_base, grid
 
 
 @horario_bp.route("/")
