@@ -1,7 +1,3 @@
-# filepath: utils/error_handlers.py
-"""
-Sistema centralizado de manejo de errores para el SGA
-"""
 import logging
 import traceback
 from functools import wraps
@@ -11,11 +7,9 @@ from sga.utils.validators import ValidationError
 logger = logging.getLogger(__name__)
 
 class ErrorHandler:
-    """Clase para manejo centralizado de errores"""
     
     @staticmethod
     def handle_route_error(func):
-        """Decorator para manejo de errores en rutas"""
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
@@ -36,7 +30,6 @@ class ErrorHandler:
     
     @staticmethod
     def handle_api_error(func):
-        """Decorator para manejo de errores en APIs"""
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
@@ -52,8 +45,6 @@ class ErrorHandler:
     
     @staticmethod
     def _get_safe_redirect(func_name):
-        """Obtiene una redirección segura basada en el nombre de la función"""
-        # Mapeo de funciones a rutas de listado
         route_map = {
             'crear_alumno': 'alumno.listar_alumnos',
             'editar_alumno': 'alumno.listar_alumnos',
@@ -87,15 +78,12 @@ class ErrorHandler:
             'eliminar_seccion': 'seccion.listar_secciones',
         }
         
-        # Intentar obtener la ruta específica
         if func_name in route_map:
             return redirect(url_for(route_map[func_name]))
         
-        # Fallback a la página principal
         return redirect(url_for('index'))
 
 def safe_form_data(form, fields):
-    """Extrae datos del formulario de forma segura"""
     data = {}
     for field in fields:
         value = form.get(field, '').strip() if form.get(field) else ''
@@ -103,13 +91,11 @@ def safe_form_data(form, fields):
     return data
 
 def validate_required_fields(data, required_fields):
-    """Valida que todos los campos requeridos estén presentes"""
     for field in required_fields:
         if not data.get(field):
             raise ValidationError(f"El campo '{field}' es requerido")
 
 def safe_database_operation(operation, *args, **kwargs):
-    """Ejecuta una operación de base de datos de forma segura"""
     try:
         return operation(*args, **kwargs)
     except Exception as e:
@@ -117,7 +103,6 @@ def safe_database_operation(operation, *args, **kwargs):
         raise ValidationError(f"Error en la operación: {str(e)}")
 
 def format_error_message(error, context=""):
-    """Formatea mensajes de error de forma consistente"""
     if isinstance(error, ValidationError):
         return str(error)
     else:

@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Script de prueba para diagnosticar el error del operador @
-"""
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +23,7 @@ try:
     print(f"✅ _validate_nota result: {validated}")
     
     print("\n🔍 Probando Nota.crear...")
-    # Nota: Esto podría fallar si la nota ya existe, pero debería mostrar el error específico
+    
     try:
         nota_creada = Nota.crear(19, 7, 5.5)
         print(f"✅ Nota.crear successful: {nota_creada}")

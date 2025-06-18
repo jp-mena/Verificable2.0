@@ -14,9 +14,9 @@ from sga.routes.nota_routes import nota_bp
 from sga.routes.json_routes import json_bp
 from sga.routes.reporte_routes import reporte_bp
 from sga.config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
-from sga.utils.validators import ValidationError
 from sga.routes.horario_routes import horario_bp
 from sga.routes.sala_routes import sala_bp
+from sga.utils.validators import ValidationError
 
 logging.basicConfig(
     level=logging.DEBUG,

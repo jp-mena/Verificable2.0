@@ -1,13 +1,7 @@
-#!/usr/bin/env python3
-"""
-Script para probar la funcionalidad de carga JSON masiva
-"""
-
 import sys
 import os
 import json
 
-# Agregar el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sga.db.database import init_database
@@ -39,10 +33,8 @@ def test_carga_basica():
         return False
 
 def test_carga_completa():
-    """Prueba la carga completa con todas las entidades"""
     print("\n=== Probando Carga JSON Completa ===")
     
-    # Leer el archivo de ejemplo completo
     try:
         with open('static/examples/ejemplo_completo.json', 'r', encoding='utf-8') as f:
             datos_completos = json.load(f)
@@ -58,17 +50,15 @@ def test_carga_completa():
         return False
 
 def test_validacion_errores():
-    """Prueba el manejo de errores en la carga JSON"""
     print("\n=== Probando Validación de Errores ===")
     
-    # Datos con errores intencionados
     datos_con_errores = {
         "cursos": [
-            {"codigo": "", "nombre": "Curso Sin Código", "requisitos": ""},  # Error: código vacío
-            {"codigo": "VALID01", "nombre": "", "requisitos": ""}  # Error: nombre vacío
+            {"codigo": "", "nombre": "Curso Sin Código", "requisitos": ""},
+            {"codigo": "VALID01", "nombre": "", "requisitos": ""}
         ],
         "alumnos": [
-            {"nombre": "Alumno Sin Correo", "fecha_ingreso": "2024-03-01"}  # Error: falta correo
+            {"nombre": "Alumno Sin Correo", "fecha_ingreso": "2024-03-01"}
         ]
     }
     
@@ -132,10 +122,8 @@ def main():
     """Función principal"""
     print("🧪 Iniciando pruebas de carga JSON...\n")
     
-    # Inicializar base de datos
     init_database()
     
-    # Ejecutar pruebas
     tests = [
         test_archivo_ejemplo,
         test_carga_basica,
@@ -148,10 +136,8 @@ def main():
         resultado = test()
         resultados.append(resultado)
     
-    # Limpiar después de las pruebas
     limpiar_datos_prueba()
     
-    # Resumen
     print("\n" + "="*50)
     print("🏁 RESUMEN DE PRUEBAS JSON:")
     print(f"✅ Exitosas: {sum(r for r in resultados if r)}")

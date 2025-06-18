@@ -1,20 +1,11 @@
-"""
-Utilidades para administración de la base de datos MySQL
-"""
-
 from sga.db.database import get_connection
 import os
 
 def limpiar_todas_las_tablas():
-    """
-    Limpia todos los datos de todas las tablas
-    Retorna True si fue exitoso, False si hubo error
-    """
     try:
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Lista de tablas en orden de dependencias
         tablas = [
             'notas_finales',
             'notas', 
@@ -29,16 +20,12 @@ def limpiar_todas_las_tablas():
             'cursos'
         ]
         
-        # Desactivar restricciones de claves foráneas
         cursor.execute('SET FOREIGN_KEY_CHECKS = 0')
         
-        # Eliminar datos de cada tabla
         for tabla in tablas:
             cursor.execute(f'DELETE FROM {tabla}')
-            # Resetear auto_increment para cada tabla
             cursor.execute(f'ALTER TABLE {tabla} AUTO_INCREMENT = 1')
         
-        # Reactivar restricciones
         cursor.execute('SET FOREIGN_KEY_CHECKS = 1')
         
         conn.commit()
@@ -51,9 +38,6 @@ def limpiar_todas_las_tablas():
         return False
 
 def obtener_estadisticas_db():
-    """
-    Obtiene estadísticas de cuántos registros hay en cada tabla
-    """
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -78,8 +62,5 @@ def obtener_estadisticas_db():
         return {}
 
 def verificar_db_vacia():
-    """
-    Verifica si la base de datos está completamente vacía
-    """
     estadisticas = obtener_estadisticas_db()
     return all(count == 0 for count in estadisticas.values())

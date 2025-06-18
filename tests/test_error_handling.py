@@ -1,27 +1,21 @@
-# filepath: test_error_handling.py
-"""
-Script de prueba para verificar el manejo robusto de errores
-"""
 import requests
 import json
 
 BASE_URL = "http://localhost:5000"
 
 def test_invalid_data():
-    """Prueba diferentes tipos de datos inválidos"""
     print("=== PRUEBAS DE ROBUSTEZ DEL SISTEMA ===\n")
     
-    # Pruebas con datos inválidos para cursos
     print("1. Pruebas con datos inválidos para cursos:")
     invalid_course_data = [
-        {},  # Datos vacíos
-        {"codigo": ""},  # Código vacío
-        {"codigo": "TEST", "nombre": ""},  # Nombre vacío
-        {"codigo": "T", "nombre": "Test"},  # Código muy corto
-        {"codigo": "A" * 50, "nombre": "Test"},  # Código muy largo
-        {"codigo": 123, "nombre": "Test"},  # Tipo incorrecto
-        {"codigo": None, "nombre": "Test"},  # Valor nulo
-        {"codigo": "TEST", "nombre": "A" * 200},  # Nombre muy largo
+        {},
+        {"codigo": ""},
+        {"codigo": "TEST", "nombre": ""},
+        {"codigo": "T", "nombre": "Test"},
+        {"codigo": "A" * 50, "nombre": "Test"},
+        {"codigo": 123, "nombre": "Test"},
+        {"codigo": None, "nombre": "Test"},
+        {"codigo": "TEST", "nombre": "A" * 200},
     ]
     
     for i, data in enumerate(invalid_course_data):
@@ -34,15 +28,15 @@ def test_invalid_data():
     # Pruebas con datos inválidos para alumnos
     print("\n2. Pruebas con datos inválidos para alumnos:")
     invalid_student_data = [
-        {},  # Datos vacíos
-        {"nombre": "Test", "correo": "invalid-email"},  # Email inválido
-        {"nombre": "", "correo": "test@email.com"},  # Nombre vacío
-        {"nombre": "T", "correo": "test@email.com"},  # Nombre muy corto
-        {"nombre": 123, "correo": "test@email.com"},  # Tipo incorrecto
-        {"nombre": "Test", "correo": ""},  # Email vacío
-        {"nombre": "Test", "correo": None},  # Email nulo
-        {"nombre": "Test", "correo": "test@email.com", "fecha_ingreso": "invalid-date"},  # Fecha inválida
-        {"nombre": "Test", "correo": "test@email.com", "fecha_ingreso": "2025-13-40"},  # Fecha imposible
+        {},
+        {"nombre": "Test", "correo": "invalid-email"},
+        {"nombre": "", "correo": "test@email.com"},
+        {"nombre": "T", "correo": "test@email.com"},
+        {"nombre": 123, "correo": "test@email.com"},
+        {"nombre": "Test", "correo": ""},
+        {"nombre": "Test", "correo": None},
+        {"nombre": "Test", "correo": "test@email.com", "fecha_ingreso": "invalid-date"},
+        {"nombre": "Test", "correo": "test@email.com", "fecha_ingreso": "2025-13-40"},
     ]
     
     for i, data in enumerate(invalid_student_data):
@@ -63,7 +57,6 @@ def test_invalid_data():
         except Exception as e:
             print(f"   Test {i+1} (ID={invalid_id}): Error de conexión - {e}")
     
-    # Pruebas de inyección SQL básica
     print("\n4. Pruebas de inyección SQL:")
     sql_injection_attempts = [
         "'; DROP TABLE cursos; --",
@@ -75,7 +68,6 @@ def test_invalid_data():
     
     for i, injection in enumerate(sql_injection_attempts):
         try:
-            # Probar en diferentes endpoints
             response = requests.get(f"{BASE_URL}/api/cursos/{injection}")
             print(f"   Test {i+1}: Status {response.status_code}")
         except Exception as e:
@@ -85,7 +77,6 @@ def test_edge_cases():
     """Prueba casos extremos"""
     print("\n=== PRUEBAS DE CASOS EXTREMOS ===\n")
     
-    # Datos extremadamente largos
     print("1. Datos extremadamente largos:")
     very_long_string = "A" * 10000
     
@@ -96,14 +87,13 @@ def test_edge_cases():
     except Exception as e:
         print(f"   String muy largo: Error - {e}")
     
-    # Caracteres especiales
     print("\n2. Caracteres especiales:")
     special_chars = [
-        "éñüáí",  # Acentos
-        "中文测试",  # Caracteres chinos
-        "🚀🎉📚",  # Emojis
-        "' \" \\ / \n \t",  # Caracteres de escape
-        "\x00\x01\x02",  # Caracteres de control
+        "éñüáí",
+        "中文测试",
+        "🚀🎉📚",
+        "' \" \\ / \n \t",
+        "\x00\x01\x02",
     ]
     
     for i, chars in enumerate(special_chars):
@@ -115,7 +105,6 @@ def test_edge_cases():
             print(f"   Test {i+1}: Error - {e}")
 
 def test_concurrent_requests():
-    """Prueba solicitudes concurrentes"""
     print("\n=== PRUEBAS DE CONCURRENCIA ===\n")
     
     import threading
@@ -131,14 +120,12 @@ def test_concurrent_requests():
         except Exception as e:
             results.append(f"Thread {i}: Error - {e}")
     
-    # Crear 10 hilos para hacer solicitudes simultáneas
     threads = []
     for i in range(10):
         thread = threading.Thread(target=make_request, args=(i,))
         threads.append(thread)
         thread.start()
     
-    # Esperar a que todos los hilos terminen
     for thread in threads:
         thread.join()
     
@@ -151,11 +138,9 @@ if __name__ == "__main__":
     print("Asegúrate de que el servidor esté ejecutándose en http://localhost:5000\n")
     
     try:
-        # Verificar que el servidor esté disponible
         response = requests.get(f"{BASE_URL}/api")
         print(f"Servidor disponible: {response.status_code}\n")
         
-        # Ejecutar todas las pruebas
         test_invalid_data()
         test_edge_cases()
         test_concurrent_requests()

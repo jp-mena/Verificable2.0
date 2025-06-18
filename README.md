@@ -60,6 +60,7 @@ La aplicación estará disponible en: **http://127.0.0.1:5000**
 - **Cursos** (`/cursos`) - Crear, listar, editar, eliminar cursos
 - **Profesores** (`/profesores`) - Gestión completa de profesores  
 - **Alumnos** (`/alumnos`) - Registro y gestión de estudiantes
+- **Salas** (`/salas`) - CRUD de salas
 - **Instancias de Curso** (`/instancias-curso`) - Semestres/años con asignación de profesores
 - **Secciones** (`/secciones`) - Organización de estudiantes e inscripciones
 - **Evaluaciones** (`/evaluaciones`) - Tipos de evaluación con porcentajes
@@ -69,6 +70,7 @@ La aplicación estará disponible en: **http://127.0.0.1:5000**
 
 **3. Funcionalidades especiales:**
 - **Carga JSON** (`/cargar-json`) - Importación masiva de datos
+- **Generacion de Horarios** (`/horarios*`) - Genera horarios con las secciones y salas existentes.
 - **API REST** (`/api/*`) - Endpoints para todas las entidades
 
 ### Flujo recomendado para pruebas:
