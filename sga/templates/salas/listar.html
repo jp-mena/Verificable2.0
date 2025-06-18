@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">Salas</h3>
+
+<table class="table table-bordered">
+  <thead>
+    <tr><th>ID</th><th>Nombre</th><th>Capacidad</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for s in salas %}
+    <tr>
+      <td>{{ s[0] }}</td><td>{{ s[1] }}</td><td>{{ s[2] }}</td>
+      <td>
+        <form action="{{ url_for('sala.eliminar', id=s[0]) }}" method="post" class="d-inline">
+          <button class="btn btn-sm btn-danger">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h4 class="mt-4">Crear sala</h4>
+<form action="{{ url_for('sala.crear') }}" method="post" class="row g-2">
+  <div class="col-auto"><input name="nombre" class="form-control" placeholder="Nombre"></div>
+  <div class="col-auto"><input name="capacidad" type="number" class="form-control" placeholder="Capacidad"></div>
+  <div class="col-auto"><button class="btn btn-success">Guardar</button></div>
+</form>
+{% endblock %}

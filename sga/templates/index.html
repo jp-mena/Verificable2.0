@@ -104,7 +104,7 @@
                             <strong>1.</strong> Instancias de Curso
                             <small class="text-muted d-block">Crear ofertas de cursos por semestre</small>
                         </a>
-                        <a href="{{ url_for('instancia_curso.listar_instancias') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ url_for('sala.listar') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-location-pin me-2"></i>
                             <strong>2.</strong> Salas
                             <small class="text-muted d-block">Crear salas donde impartir clases</small>
@@ -160,7 +160,7 @@
                             Reportes Académicos
                             <small class="text-muted d-block">Notas, certificados y estadísticas</small>
                         </a>
-                        <a href="{{ url_for('reporte.index_reportes') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ url_for('horario.ver_horario') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-calendar me-2"></i>
                             Generacion de horarios
                             <small class="text-muted d-block">Genera horarios por semestre sin topes</small>
@@ -205,6 +205,7 @@
         </div>
     </div>
 </div>
+<br>
 {% endblock %}
 
 {% block extra_js %}

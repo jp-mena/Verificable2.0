@@ -15,6 +15,8 @@ from sga.routes.json_routes import json_bp
 from sga.routes.reporte_routes import reporte_bp
 from sga.config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
 from sga.utils.validators import ValidationError
+from sga.routes.horario_routes import horario_bp
+from sga.routes.sala_routes import sala_bp
 
 # Configurar logging
 logging.basicConfig(
@@ -142,6 +144,9 @@ def create_app():
         app.register_blueprint(nota_bp)
         app.register_blueprint(json_bp)
         app.register_blueprint(reporte_bp)
+        app.register_blueprint(horario_bp)
+        app.register_blueprint(sala_bp)
+
     except Exception as e:
         print(f"Error al registrar blueprints: {e}")
     

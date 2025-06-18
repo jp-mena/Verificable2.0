@@ -247,34 +247,23 @@ def get_connection():
         return None
 
 def execute_query(query, params=None):
-    """Ejecuta una consulta y retorna los resultados"""
     conn = get_connection()
-    if not conn:
-        return None
-        
+    if conn is None:
+        raise RuntimeError("No se pudo abrir conexión a la BD")
+
     try:
-        cursor = conn.cursor()
-        
-        if params:
-            cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-        
-        if query.strip().upper().startswith('SELECT'):
-            results = cursor.fetchall()
-        else:
-            conn.commit()
-            results = cursor.lastrowid
-        
-        return results
-        
-    except Error as e:
-        print(f"❌ Error ejecutando consulta: {e}")
-        print(f"Query: {query}")
-        print(f"Params: {params}")
+        cur = conn.cursor()
+        cur.execute(query, params or ())
+        is_select = query.lstrip()[:6].upper() == "SELECT"
+        if is_select:
+            rows = cur.fetchall() or []      # nunca None
+            return rows
+        conn.commit()
+        return cur.lastrowid
+    except Exception as e:
         conn.rollback()
-        return None
+        print("❌ Error:", e, "\nQuery:", query, "\nParams:", params)
+        return []
     finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
+        cur.close()
+        conn.close()

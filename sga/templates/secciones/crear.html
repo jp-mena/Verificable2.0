@@ -56,7 +56,21 @@
                     Puedes asignar un profesor ahora o dejarlo sin asignar para asignarlo después
                 </div>
             </div>
-            
+            <div class="mb-3">
+            <label for="profesor_id" class="form-label">
+                    <i class="fas fa-location-pin me-2"></i>
+                    Sala (Opcional)
+            </label>   
+            <select class="form-select" name="sala_id">
+              <option value="">Sin asignar</option>
+              {% for s in salas %}
+                <option value="{{ s[0] }}" {% if seccion and seccion.sala_id==s[0] %}selected{% endif %}>
+                  {{ s[1] }} (cap {{ s[2] }})
+                </option>
+              {% endfor %}
+            </select>
+            </div>
+            <br>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>
