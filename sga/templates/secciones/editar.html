@@ -50,6 +50,25 @@
                     Puedes cambiar el profesor asignado o dejarlo sin asignar
                 </div>
             </div>
+
+            <div class="mb-3">
+    <label for="sala_id" class="form-label">
+        <i class="fas fa-door-open me-2"></i>
+        Sala fija (Opcional)
+    </label>
+    <select class="form-select" id="sala_id" name="sala_id">
+        <option value="">Sin sala fija</option>
+        {% for sala in salas %}
+            <option value="{{ sala[0] }}"
+                    {% if sala[0] == seccion.sala_id %}selected{% endif %}>
+                {{ sala[1] }} — capacidad {{ sala[2] }}
+            </option>
+        {% endfor %}
+    </select>
+    <div class="form-text">
+        Si elijes una sala, el planificador respetará esta asignación.
+    </div>
+</div>
             
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Actualizar Sección</button>

@@ -1,23 +1,32 @@
-# sga/models/sala.py
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, safe_int_conversion, validate_required_string
 
 class Sala:
-    def __init__(self, nombre, capacidad, id=None):
-        self.id = id
-        self.nombre = validate_required_string(nombre, "nombre")
-        self.capacidad = safe_int_conversion(capacidad)
-
-    @classmethod
-    def crear(cls, nombre, capacidad):
-        query = "INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)"
-        sala_id = execute_query(query, (nombre, capacidad))
-        return cls(nombre, capacidad, sala_id)
-
     @staticmethod
     def obtener_todas():
         return execute_query("SELECT id, nombre, capacidad FROM salas")
 
     @staticmethod
-    def eliminar(id_):
-        execute_query("DELETE FROM salas WHERE id = %s", (id_,))
+    def obtener_por_id(sala_id: int):
+        filas = execute_query(
+            "SELECT id, nombre, capacidad FROM salas WHERE id=%s",
+            (sala_id,)
+        )
+        return filas[0] if filas else None          # (id,nombre,capacidad) | None
+
+    @staticmethod
+    def crear(nombre: str, capacidad: int):
+        execute_query(
+            "INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)",
+            (nombre, capacidad)
+        )
+
+    @staticmethod
+    def actualizar(sala_id: int, nombre: str, capacidad: int):
+        execute_query(
+            "UPDATE salas SET nombre=%s, capacidad=%s WHERE id=%s",
+            (nombre, capacidad, sala_id)
+        )
+
+    @staticmethod
+    def eliminar(sala_id: int):
+        execute_query("DELETE FROM salas WHERE id=%s", (sala_id,))
