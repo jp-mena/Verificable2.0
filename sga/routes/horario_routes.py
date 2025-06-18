@@ -34,15 +34,12 @@ def _grid_horario(semestre, anio):
         """,
         (semestre, anio),
     )
-    horas_base = ["09:00","10:00","11:00","12:00",
-                  "14:00","15:00","16:00","17:00"]
-    grid = {h:{d:"" for d in range(1,6)} for h in horas_base}
-
-    for cod, sec, sala, dia, ini, _ in rows:     # ini es timedelta o time
-        key = _to_str(ini)
-        grid[key][dia] = f"{cod}-{sec}<br><small>{sala}</small>"
-
-    return horas_base, grid
+    horas = ["09:00","10:00","11:00","12:00","14:00","15:00","16:00","17:00"]
+    grid = {h:{d:[] for d in range(1,6)} for h in horas}
+    for cod, sec, sala, dia, ini, _ in rows:
+        key = ini.strftime("%H:%M") if hasattr(ini, "strftime") else f"{int(ini.total_seconds()//3600):02d}:00"
+        grid[key][dia].append(f"{cod}-{sec}<br><small>{sala}</small>")
+    return horas, grid
 
 
 @horario_bp.route("/")

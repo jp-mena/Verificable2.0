@@ -11,8 +11,7 @@ class Sala:
             "SELECT id, nombre, capacidad FROM salas WHERE id=%s",
             (sala_id,)
         )
-        return filas[0] if filas else None          # (id,nombre,capacidad) | None
-
+        return filas[0] if filas else None
     @staticmethod
     def crear(nombre: str, capacidad: int):
         execute_query(
