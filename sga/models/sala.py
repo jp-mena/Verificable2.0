@@ -10,7 +10,7 @@ class Sala:
 
     @classmethod
     def crear(cls, nombre, capacidad):
-        query = "INSERT INTO salas (nombre, capacidad) VALUES (?, ?)"
+        query = "INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)"
         sala_id = execute_query(query, (nombre, capacidad))
         return cls(nombre, capacidad, sala_id)
 
@@ -20,4 +20,4 @@ class Sala:
 
     @staticmethod
     def eliminar(id_):
-        execute_query("DELETE FROM salas WHERE id = ?", (id_,))
+        execute_query("DELETE FROM salas WHERE id = %s", (id_,))

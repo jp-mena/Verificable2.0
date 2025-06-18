@@ -8,7 +8,7 @@ from sga.db.database import execute_query
 seccion_bp = Blueprint('seccion', __name__)
 
 def _verificar_instancia_curso_cerrada(instancia_id):
-    query = "SELECT cerrado FROM instancias_curso WHERE id = ?"
+    query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
     res = execute_query(query, (instancia_id,))
     return bool(res[0][0]) if res else False
 
