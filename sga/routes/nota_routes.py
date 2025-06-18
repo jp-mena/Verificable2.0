@@ -1,4 +1,3 @@
-# filepath: routes/nota_routes.py
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from sga.models.nota import Nota
 from sga.models.alumno import Alumno

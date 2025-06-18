@@ -1,4 +1,3 @@
-# filepath: routes/json_routes.py
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 import json
 import os
@@ -15,7 +14,6 @@ from sga.models.inscripcion import Inscripcion
 
 json_bp = Blueprint('json_load', __name__)
 
-# Ejemplos de JSON para cada entidad
 EJEMPLOS_JSON = {
     'cursos': [
         {
@@ -145,7 +143,6 @@ def mostrar_carga_entidad(entidad):
                          ejemplo_json=json.dumps(ejemplo_json, indent=2, ensure_ascii=False),
                          entidades_validas=entidades_validas)
 
-# API REST endpoints para validación y carga de JSON (para uso programático)
 
 @json_bp.route('/api/validar-json', methods=['POST'])
 def api_validar_json():
@@ -158,7 +155,6 @@ def api_validar_json():
         if not datos:
             return jsonify({'error': 'No se recibieron datos JSON'}), 400
         
-        # Validar estructura
         entidades_validas = ['cursos', 'profesores', 'alumnos', 'instancias_curso', 
                            'secciones', 'topicos', 'evaluaciones', 'instancias_topico', 'notas']
         
@@ -168,13 +164,11 @@ def api_validar_json():
         for key in datos.keys():
             if key in entidades_validas:
                 entidades_encontradas.append(key)
-                # Validar que sea una lista
                 if not isinstance(datos[key], list):
                     errores.append(f"'{key}' debe ser una lista")
             else:
                 errores.append(f"Entidad desconocida: '{key}'")
         
-        # Contar elementos por entidad
         conteos = {}
         for entidad in entidades_encontradas:
             conteos[entidad] = len(datos[entidad])
@@ -193,7 +187,6 @@ def api_validar_json():
 
 @json_bp.route('/cargar-json/<entidad>/procesar', methods=['POST'])
 def procesar_carga_entidad(entidad):
-    """Procesa la carga de una entidad específica"""
     entidades_validas = list(EJEMPLOS_JSON.keys())
     
     if entidad not in entidades_validas:
@@ -201,7 +194,6 @@ def procesar_carga_entidad(entidad):
         return redirect(url_for('json_load.mostrar_carga'))
     
     try:
-        # Verificar si se subió un archivo
         if 'archivo_json' in request.files:
             archivo = request.files['archivo_json']
             if archivo.filename != '':
@@ -211,19 +203,16 @@ def procesar_carga_entidad(entidad):
                 flash('No se seleccionó ningún archivo', 'error')
                 return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
         else:
-            # Obtener datos del textarea
             contenido_texto = request.form.get('datos_json', '').strip()
             if not contenido_texto:
                 flash('No se proporcionaron datos JSON', 'error')
                 return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
             datos = json.loads(contenido_texto)
         
-        # Validar que datos sea una lista
         if not isinstance(datos, list):
             flash('El JSON debe contener una lista de objetos', 'error')
             return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
         
-        # Procesar la entidad específica
         resultado = procesar_entidad_especifica(entidad, datos)
         
         flash(f'Carga de {entidad} completada: {resultado}', 'success')
@@ -237,7 +226,6 @@ def procesar_carga_entidad(entidad):
     return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
 
 def procesar_entidad_especifica(entidad, datos):
-    """Procesa los datos de una entidad específica"""
     total_procesados = 0
     errores = 0
     
@@ -276,7 +264,6 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'instancias_curso':
             for item in datos:
                 try:
-                    # Buscar el curso por código
                     curso = Curso.get_by_codigo(item['curso_codigo'])
                     if curso:
                         InstanciaCurso.crear(item['semestre'], item['anio'], curso.id)
@@ -291,9 +278,7 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'secciones':
             for item in datos:
                 try:
-                    # Buscar la instancia de curso
                     instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
-                    # Buscar el profesor
                     profesor = Profesor.obtener_por_correo(item['profesor_correo'])
                     
                     if instancia and profesor:
@@ -319,7 +304,6 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'evaluaciones':
             for item in datos:
                 try:
-                    # Buscar la sección
                     seccion = _buscar_seccion(item['curso_codigo'], item['semestre'], item['anio'], item['seccion_numero'])
                     
                     if seccion:
@@ -335,14 +319,12 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'instancias_topico':
             for item in datos:
                 try:
-                    # Buscar el tópico
                     topico = Topico.obtener_por_nombre(item['topico_nombre'])
                     if not topico:
                         print(f"Tópico no encontrado: {item['topico_nombre']}")
                         errores += 1
                         continue
                         
-                    # Buscar la evaluación
                     evaluacion = _buscar_evaluacion(item['evaluacion_nombre'], item['curso_codigo'], item['semestre'], item['anio'])
                     if not evaluacion:
                         print(f"Evaluación no encontrada: {item['evaluacion_nombre']} para curso {item['curso_codigo']}")
@@ -362,9 +344,7 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'inscripciones':
             for item in datos:
                 try:
-                    # Buscar alumno
                     alumno = Alumno.obtener_por_correo(item['alumno_correo'])
-                    # Buscar instancia de curso
                     instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
                     
                     if alumno and instancia:
@@ -380,9 +360,7 @@ def procesar_entidad_especifica(entidad, datos):
         elif entidad == 'notas':
             for item in datos:
                 try:
-                    # Buscar alumno
                     alumno = Alumno.obtener_por_correo(item['alumno_correo'])
-                    # Buscar instancia de tópico
                     instancia_topico = _buscar_instancia_topico(
                         item['instancia_topico_nombre'], 
                         item['evaluacion_nombre'],
@@ -407,7 +385,6 @@ def procesar_entidad_especifica(entidad, datos):
         return f"Error general: {str(e)}"
 
 def _buscar_instancia_curso(curso_codigo, semestre, anio):
-    """Función auxiliar para buscar una instancia de curso"""
     try:
         from sga.db.database import execute_query
         query = """
@@ -427,7 +404,6 @@ def _buscar_instancia_curso(curso_codigo, semestre, anio):
         return None
 
 def _buscar_seccion(curso_codigo, semestre, anio, numero):
-    """Función auxiliar para buscar una sección"""
     try:
         from sga.db.database import execute_query
         query = """
@@ -448,7 +424,6 @@ def _buscar_seccion(curso_codigo, semestre, anio, numero):
         return None
 
 def _buscar_evaluacion(nombre, curso_codigo, semestre, anio):
-    """Función auxiliar para buscar una evaluación"""
     try:
         from sga.db.database import execute_query
         query = """
@@ -470,7 +445,6 @@ def _buscar_evaluacion(nombre, curso_codigo, semestre, anio):
         return None
 
 def _buscar_instancia_topico(nombre, evaluacion_nombre, curso_codigo, semestre, anio):
-    """Función auxiliar para buscar una instancia de tópico"""
     try:
         from sga.db.database import execute_query
         query = """

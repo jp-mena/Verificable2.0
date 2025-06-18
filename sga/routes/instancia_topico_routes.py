@@ -1,4 +1,3 @@
-# filepath: routes/instancia_topico_routes.py
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from sga.models.instancia_topico import InstanciaTopico
 from sga.models.evaluacion import Evaluacion
@@ -9,7 +8,6 @@ from sga.db.database import execute_query
 instancia_topico_bp = Blueprint('instancia_topico', __name__)
 
 def _verificar_evaluacion_cerrada(evaluacion_id):
-    """Verifica si la evaluación pertenece a un curso cerrado"""
     query = """
     SELECT ic.cerrado
     FROM evaluaciones e
@@ -23,7 +21,6 @@ def _verificar_evaluacion_cerrada(evaluacion_id):
     return False
 
 def _verificar_instancia_curso_cerrada(instancia_id):
-    """Verifica si una instancia de curso está cerrada"""
     query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
     resultado = execute_query(query, (instancia_id,))
     if resultado:
@@ -32,13 +29,11 @@ def _verificar_instancia_curso_cerrada(instancia_id):
 
 @instancia_topico_bp.route('/instancias-topico')
 def listar_instancias():
-    """Lista todas las instancias de tópico"""
     instancias = InstanciaTopico.obtener_todos()
     return render_template('instancias_topico/listar.html', instancias=instancias)
 
 @instancia_topico_bp.route('/instancias-topico/crear', methods=['GET', 'POST'])
 def crear_instancia():
-    """Crea una nueva instancia de tópico"""
     if request.method == 'POST':
         try:
             nombre = request.form['nombre'].strip()
@@ -46,17 +41,14 @@ def crear_instancia():
             evaluacion_id = int(request.form['evaluacion_id'])
             topico_id = int(request.form['topico_id'])
             
-            # Verificar que la evaluación no pertenezca a un curso cerrado
             if _verificar_evaluacion_cerrada(evaluacion_id):
                 flash('No se pueden crear instancias de tópico en un curso que ya ha sido cerrado', 'error')
                 return redirect(url_for('instancia_topico.crear_instancia'))
             
-            # Validaciones básicas
             if not nombre:
                 flash('El nombre de la instancia es requerido', 'error')
                 return redirect(url_for('instancia_topico.crear_instancia'))
             
-            # Crear instancia (el peso se toma automáticamente de la evaluación)
             InstanciaTopico.crear(nombre, opcional, evaluacion_id, topico_id)
             flash('Instancia de tópico creada exitosamente. El peso se asignó automáticamente desde la evaluación.', 'success')
             return redirect(url_for('instancia_topico.listar_instancias'))
@@ -66,7 +58,6 @@ def crear_instancia():
         except Exception as e:
             flash(f'Error al crear la instancia: {str(e)}', 'error')
     
-    # Filtrar evaluaciones que pertenezcan solo a cursos abiertos
     todas_evaluaciones = Evaluacion.obtener_todos()
     evaluaciones = []
     for evaluacion in todas_evaluaciones:
@@ -78,12 +69,12 @@ def crear_instancia():
 
 @instancia_topico_bp.route('/instancias-topico/<int:id>/editar', methods=['GET', 'POST'])
 def editar_instancia(id):
-    """Edita una instancia de tópico"""
     instancia = InstanciaTopico.obtener_por_id(id)
+
     if not instancia:
         flash('Instancia de tópico no encontrada', 'error')
         return redirect(url_for('instancia_topico.listar_instancias'))
-      # Verificar si la evaluación actual pertenece a un curso cerrado
+    
     if _verificar_evaluacion_cerrada(instancia.evaluacion_id):
         flash('No se pueden editar instancias de tópico de un curso que ya ha sido cerrado', 'error')
         return redirect(url_for('instancia_topico.listar_instancias'))
@@ -95,19 +86,16 @@ def editar_instancia(id):
             nueva_evaluacion_id = int(request.form['evaluacion_id'])
             instancia.topico_id = int(request.form['topico_id'])
             
-            # Verificar que la nueva evaluación no pertenezca a un curso cerrado
             if _verificar_evaluacion_cerrada(nueva_evaluacion_id):
                 flash('No se puede mover la instancia a un curso que ya ha sido cerrado', 'error')
                 return redirect(url_for('instancia_topico.editar_instancia', id=id))
             
             instancia.evaluacion_id = nueva_evaluacion_id
             
-            # Validaciones básicas
             if not instancia.nombre:
                 flash('El nombre de la instancia es requerido', 'error')
                 return redirect(url_for('instancia_topico.editar_instancia', id=id))
             
-            # Actualizar (el peso se ajustará automáticamente desde la evaluación)
             instancia.actualizar()
             flash('Instancia de tópico actualizada exitosamente. El peso se ajustó automáticamente.', 'success')
             return redirect(url_for('instancia_topico.listar_instancias'))
@@ -117,7 +105,6 @@ def editar_instancia(id):
         except Exception as e:
             flash(f'Error al actualizar la instancia: {str(e)}', 'error')
     
-    # Filtrar evaluaciones que pertenezcan solo a cursos abiertos
     todas_evaluaciones = Evaluacion.obtener_todos()
     evaluaciones = []
     for evaluacion in todas_evaluaciones:
@@ -129,15 +116,12 @@ def editar_instancia(id):
 
 @instancia_topico_bp.route('/instancias-topico/<int:id>/eliminar', methods=['POST'])
 def eliminar_instancia(id):
-    """Elimina una instancia de tópico"""
     try:
-        # Obtener la instancia antes de eliminarla para verificar si está cerrada
         instancia = InstanciaTopico.obtener_por_id(id)
         if not instancia:
             flash('Instancia de tópico no encontrada', 'error')
             return redirect(url_for('instancia_topico.listar_instancias'))
         
-        # Verificar si la evaluación pertenece a un curso cerrado
         if _verificar_evaluacion_cerrada(instancia.evaluacion_id):
             flash('No se pueden eliminar instancias de tópico de un curso que ya ha sido cerrado', 'error')
             return redirect(url_for('instancia_topico.listar_instancias'))
