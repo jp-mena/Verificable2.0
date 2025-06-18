@@ -1,4 +1,3 @@
-# filepath: routes/alumno_routes.py
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from sga.models.alumno import Alumno
 from sga.utils.validators import ValidationError, validate_text_field, validate_email, validate_date, safe_int_conversion
@@ -8,7 +7,6 @@ alumno_bp = Blueprint('alumno', __name__)
 
 @alumno_bp.route('/alumnos')
 def listar_alumnos():
-    """Lista todos los alumnos"""
     try:
         alumnos = Alumno.get_all()
         alumnos_list = []
@@ -29,20 +27,15 @@ def listar_alumnos():
 @alumno_bp.route('/alumnos/crear', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def crear_alumno():
-    """Crea un nuevo alumno"""
     if request.method == 'POST':
-        # Extraer datos del formulario de forma segura
         data = safe_form_data(request.form, ['nombre', 'correo', 'fecha_ingreso'])
         
-        # Validar campos requeridos
         validate_required_fields(data, ['nombre', 'correo', 'fecha_ingreso'])
         
-        # Validar formato de cada campo
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
         correo = validate_email(data['correo'])
         fecha_ingreso = validate_date(data['fecha_ingreso'], 'Fecha de ingreso')
         
-        # Crear el alumno
         alumno = Alumno(nombre, correo, fecha_ingreso)
         alumno_id = alumno.save()
         
@@ -54,34 +47,26 @@ def crear_alumno():
 @alumno_bp.route('/alumnos/<int:id>/editar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def editar_alumno(id):
-    """Edita un alumno existente"""
-    # Validar que el ID sea válido
     alumno_id = safe_int_conversion(id, 'ID del alumno')
     
-    # Verificar que el alumno existe
     alumno_data = Alumno.get_by_id(alumno_id)
     if not alumno_data:
         raise ValidationError('Alumno no encontrado')
     
     if request.method == 'POST':
-        # Extraer datos del formulario de forma segura
         data = safe_form_data(request.form, ['nombre', 'correo', 'fecha_ingreso'])
         
-        # Validar campos requeridos
         validate_required_fields(data, ['nombre', 'correo', 'fecha_ingreso'])
         
-        # Validar formato de cada campo
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
         correo = validate_email(data['correo'])
         fecha_ingreso = validate_date(data['fecha_ingreso'], 'Fecha de ingreso')
         
-        # Actualizar el alumno
         Alumno.update(alumno_id, nombre, correo, fecha_ingreso)
         
         flash('Alumno actualizado exitosamente', 'success')
         return redirect(url_for('alumno.listar_alumnos'))
     
-    # Convertir tupla a diccionario para la plantilla
     alumno = {
         'id': alumno_data[0],
         'nombre': alumno_data[1],
@@ -95,21 +80,17 @@ def editar_alumno(id):
 @ErrorHandler.handle_route_error
 def eliminar_alumno(id):
     """Elimina un alumno"""
-    # Validar que el ID sea válido
     alumno_id = safe_int_conversion(id, 'ID del alumno')
     
-    # Verificar que el alumno existe
     alumno_data = Alumno.get_by_id(alumno_id)
     if not alumno_data:
         raise ValidationError('Alumno no encontrado')
     
-    # Eliminar el alumno
     Alumno.delete(alumno_id)
     
     flash('Alumno eliminado exitosamente', 'success')
     return redirect(url_for('alumno.listar_alumnos'))
 
-# API endpoints (mantenidos para compatibilidad)
 @alumno_bp.route('/api/alumnos', methods=['GET'])
 @ErrorHandler.handle_api_error
 def get_alumnos():
@@ -133,15 +114,12 @@ def create_alumno():
     if not data:
         raise ValidationError('No se recibieron datos')
     
-    # Validar campos requeridos
     validate_required_fields(data, ['nombre', 'correo', 'fecha_ingreso'])
     
-    # Validar formato de cada campo
     nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
     correo = validate_email(data['correo'])
     fecha_ingreso = validate_date(data['fecha_ingreso'], 'Fecha de ingreso')
     
-    # Crear el alumno
     alumno = Alumno(nombre, correo, fecha_ingreso)
     alumno_id = alumno.save()
     
@@ -150,11 +128,10 @@ def create_alumno():
 @alumno_bp.route('/api/alumnos/<int:alumno_id>', methods=['GET'])
 @ErrorHandler.handle_api_error
 def get_alumno(alumno_id):
-    """Obtiene un alumno específico (API)"""
-    # Validar que el ID sea válido
     alumno_id = safe_int_conversion(alumno_id, 'ID del alumno')
     
     alumno = Alumno.get_by_id(alumno_id)
+
     if not alumno:
         return jsonify({'error': 'Alumno no encontrado'}), 404
     
@@ -168,28 +145,22 @@ def get_alumno(alumno_id):
 @alumno_bp.route('/api/alumnos/<int:alumno_id>', methods=['PUT'])
 @ErrorHandler.handle_api_error
 def update_alumno(alumno_id):
-    """Actualiza un alumno específico (API)"""
-    # Validar que el ID sea válido
     alumno_id = safe_int_conversion(alumno_id, 'ID del alumno')
     
     data = request.get_json()
     if not data:
         raise ValidationError('No se recibieron datos')
     
-    # Verificar que el alumno existe
     alumno_existente = Alumno.get_by_id(alumno_id)
     if not alumno_existente:
         return jsonify({'error': 'Alumno no encontrado'}), 404
     
-    # Validar campos requeridos
     validate_required_fields(data, ['nombre', 'correo', 'fecha_ingreso'])
     
-    # Validar formato de cada campo
     nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
     correo = validate_email(data['correo'])
     fecha_ingreso = validate_date(data['fecha_ingreso'], 'Fecha de ingreso')
     
-    # Actualizar el alumno
     Alumno.update(alumno_id, nombre, correo, fecha_ingreso)
     
     return jsonify({'mensaje': 'Alumno actualizado exitosamente'}), 200
@@ -197,8 +168,6 @@ def update_alumno(alumno_id):
 @alumno_bp.route('/api/alumnos/<int:alumno_id>', methods=['DELETE'])
 @ErrorHandler.handle_api_error
 def delete_alumno(alumno_id):
-    """Elimina un alumno específico (API)"""
-    # Validar que el ID sea válido
     alumno_id = safe_int_conversion(alumno_id, 'ID del alumno')
     
     alumno_existente = Alumno.get_by_id(alumno_id)

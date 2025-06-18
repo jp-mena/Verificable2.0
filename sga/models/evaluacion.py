@@ -10,8 +10,8 @@ class Evaluacion:
         self.seccion_id = seccion_id
     
     def _validate_porcentaje(self, porcentaje):
-        """Valida que el porcentaje esté en el rango correcto"""
-        if porcentaje is None:            raise ValidationError("El porcentaje es requerido")
+        if porcentaje is None:            
+            raise ValidationError("El porcentaje es requerido")
         
         try:
             porcentaje_float = float(porcentaje)
@@ -25,17 +25,13 @@ class Evaluacion:
     
     @classmethod
     def crear(cls, nombre, porcentaje, seccion_id):
-        """Crea una nueva evaluación"""
         try:
-            # Validar ID de sección
             seccion_id = safe_int_conversion(seccion_id)
             if seccion_id is None or seccion_id <= 0:
                 raise ValidationError("ID de sección debe ser un entero positivo")
             
-            # Crear objeto para validar
             evaluacion = cls(None, nombre, porcentaje, seccion_id)
             
-            # Verificar que la suma de porcentajes no exceda 100%
             cls._validar_suma_porcentajes(seccion_id, evaluacion.porcentaje)
             
             query = "INSERT INTO evaluaciones (nombre, porcentaje, seccion_id) VALUES (%s, %s, %s)"
@@ -49,7 +45,6 @@ class Evaluacion:
     
     @classmethod
     def _validar_suma_porcentajes(cls, seccion_id, nuevo_porcentaje):
-        """Valida que la suma de porcentajes no exceda 100%"""
         try:
             query = "SELECT SUM(porcentaje) FROM evaluaciones WHERE seccion_id = %s"
             resultado = execute_query(query, (seccion_id,))
@@ -65,16 +60,16 @@ class Evaluacion:
 
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todas las evaluaciones"""
         query = """
-        SELECT e.id, e.nombre, e.porcentaje, e.seccion_id, s.numero, 
-               ic.semestre, ic.anio, c.codigo, c.nombre, ic.cerrado
-        FROM evaluaciones e
-        JOIN secciones s ON e.seccion_id = s.id
-        JOIN instancias_curso ic ON s.instancia_id = ic.id
-        JOIN cursos c ON ic.curso_id = c.id
-        ORDER BY ic.anio DESC, ic.semestre DESC, s.numero, e.nombre
+            SELECT e.id, e.nombre, e.porcentaje, e.seccion_id, s.numero, 
+                   ic.semestre, ic.anio, c.codigo, c.nombre, ic.cerrado
+            FROM evaluaciones e
+            JOIN secciones s ON e.seccion_id = s.id
+            JOIN instancias_curso ic ON s.instancia_id = ic.id
+            JOIN cursos c ON ic.curso_id = c.id
+            ORDER BY ic.anio DESC, ic.semestre DESC, s.numero, e.nombre
         """
+
         resultados = execute_query(query)
         return [
             {
@@ -94,7 +89,6 @@ class Evaluacion:
 
     @classmethod
     def obtener_por_id(cls, id):
-        """Obtiene una evaluación por ID"""
         query = "SELECT id, nombre, porcentaje, seccion_id FROM evaluaciones WHERE id = %s"
         resultado = execute_query(query, (id,))
         if resultado:
@@ -104,18 +98,15 @@ class Evaluacion:
 
     @classmethod
     def obtener_por_seccion(cls, seccion_id):
-        """Obtiene todas las evaluaciones de una sección"""
         query = "SELECT id, nombre, porcentaje, seccion_id FROM evaluaciones WHERE seccion_id = %s"
         resultados = execute_query(query, (seccion_id,))
         return [cls(fila[0], fila[1], fila[2], fila[3]) for fila in resultados]
 
     def actualizar(self):
-        """Actualiza la evaluación"""
         query = "UPDATE evaluaciones SET nombre = %s, porcentaje = %s, seccion_id = %s WHERE id = %s"
         execute_query(query, (self.nombre, self.porcentaje, self.seccion_id, self.id))
 
     @classmethod
     def eliminar(cls, id):
-        """Elimina una evaluación"""
         query = "DELETE FROM evaluaciones WHERE id = %s"
         execute_query(query, (id,))

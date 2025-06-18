@@ -1,19 +1,16 @@
-# filepath: models/instancia_topico.py
 from sga.db.database import execute_query
 
 class InstanciaTopico:
     def __init__(self, id=None, nombre=None, peso=None, opcional=None, evaluacion_id=None, topico_id=None):
         self.id = id
         self.nombre = nombre
-        self.peso = peso  # peso individual dentro de la evaluación
-        self.opcional = opcional  # boolean
+        self.peso = peso
+        self.opcional = opcional
         self.evaluacion_id = evaluacion_id
         self.topico_id = topico_id
 
     @classmethod
     def crear(cls, nombre, opcional, evaluacion_id, topico_id):
-        """Crea una nueva instancia de tópico"""
-        # Obtener el peso de la evaluación automáticamente
         query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = %s"
         resultado_peso = execute_query(query_peso, (evaluacion_id,))
         peso = float(resultado_peso[0][0]) if resultado_peso else 0.0
@@ -24,7 +21,6 @@ class InstanciaTopico:
 
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todas las instancias de tópico"""
         query = """
         SELECT it.id, it.nombre, it.peso, it.opcional, it.evaluacion_id, it.topico_id,
                e.nombre as evaluacion_nombre, t.nombre as topico_nombre, t.tipo,
@@ -60,7 +56,6 @@ class InstanciaTopico:
 
     @classmethod
     def obtener_por_id(cls, id):
-        """Obtiene una instancia de tópico por ID"""
         query = "SELECT id, nombre, peso, opcional, evaluacion_id, topico_id FROM instancias_topico WHERE id = %s"
         resultado = execute_query(query, (id,))
         if resultado:
@@ -69,8 +64,6 @@ class InstanciaTopico:
         return None
 
     def actualizar(self):
-        """Actualiza la instancia de tópico"""
-        # Actualizar el peso automáticamente desde la evaluación
         query_peso = "SELECT porcentaje FROM evaluaciones WHERE id = %s"
         resultado_peso = execute_query(query_peso, (self.evaluacion_id,))
         if resultado_peso:
@@ -81,12 +74,10 @@ class InstanciaTopico:
 
     @classmethod
     def eliminar(cls, id):
-        """Elimina una instancia de tópico"""
         query = "DELETE FROM instancias_topico WHERE id = %s"
         execute_query(query, (id,))
 
     def obtener_peso_de_evaluacion(self):
-        """Obtiene el peso de la evaluación asociada"""
         if not self.evaluacion_id:
             return 0.0
         

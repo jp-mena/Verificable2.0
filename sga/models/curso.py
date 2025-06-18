@@ -5,27 +5,23 @@ import re
 class Curso:
     def __init__(self, codigo, nombre, creditos=4, requisitos=None):
         self.codigo = self._validate_codigo(codigo)
-        self.nombre = validate_required_string(nombre, "nombre", 100)  # Máximo 100 caracteres
+        self.nombre = validate_required_string(nombre, "nombre", 100)
         self.creditos = self._validate_creditos(creditos)
         self.requisitos = self._process_requisitos(requisitos)
     
     def _validate_codigo(self, codigo):
         """Valida el código del curso"""
-        codigo = validate_required_string(codigo, "código", 20)  # Máximo 20 caracteres
+        codigo = validate_required_string(codigo, "código", 20)
         
-        # Validar longitud máxima (evitar códigos excesivamente largos)
         if len(codigo) > 20:
             raise ValidationError("El código del curso no puede exceder 20 caracteres")
         
-        # Validar que no contenga espacios
         if ' ' in codigo:
             raise ValidationError("El código del curso no puede contener espacios")
         
-        # Validar que solo contenga caracteres alfanuméricos
         if not re.match(r'^[A-Za-z0-9]+$', codigo):
             raise ValidationError("El código del curso solo puede contener letras y números")
         
-        # Validar formato del código (letras seguidas de números, ej: ICC3030)
         if not re.match(r'^[A-Z]{2,5}\d{3,4}$', codigo.upper()):
             raise ValidationError("Código debe tener formato: 2-5 letras seguidas de 3-4 números (ej: ICC3030, TEST101)")
         
@@ -33,7 +29,7 @@ class Curso:
     def _validate_creditos(self, creditos):
         """Valida la cantidad de créditos"""
         if creditos is None:
-            return 4  # Valor por defecto
+            return 4
             
         try:
             creditos_int = int(creditos)
@@ -49,25 +45,21 @@ class Curso:
             return None
             
         if isinstance(requisitos, list):
-            # Ya es una lista de códigos
             requisitos_clean = [codigo.strip().upper() for codigo in requisitos if codigo.strip()]
             return ','.join(requisitos_clean) if requisitos_clean else None
         
         if isinstance(requisitos, str):
-            # String separado por comas
             requisitos_clean = [codigo.strip().upper() for codigo in requisitos.split(',') if codigo.strip()]
             return ','.join(requisitos_clean) if requisitos_clean else None
             
         return None
     
     def get_requisitos_list(self):
-        """Obtiene los requisitos como lista de códigos"""
         if not self.requisitos:
             return []        
         return [codigo.strip() for codigo in self.requisitos.split(',') if codigo.strip()]
     
     def save(self):
-        """Guarda un nuevo curso en la base de datos"""
         try:
             # Verificar que no exista un curso con el mismo código
             existing_curso = self.get_by_codigo(self.codigo)
@@ -83,7 +75,6 @@ class Curso:
     
     @classmethod
     def get_all(cls):
-        """Obtiene todos los cursos"""
         try:
             query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos ORDER BY codigo"
             resultados = execute_query(query)
@@ -98,7 +89,6 @@ class Curso:
     
     @classmethod
     def get_by_id(cls, curso_id):
-        """Obtiene un curso por su ID"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
@@ -119,7 +109,6 @@ class Curso:
     
     @classmethod
     def get_by_codigo(cls, codigo):
-        """Obtiene un curso por su código"""
         try:
             if not codigo:
                 raise ValidationError("Código de curso es requerido")
@@ -139,12 +128,10 @@ class Curso:
     
     @classmethod
     def obtener_por_codigo(cls, codigo):
-        """Obtiene un curso por su código (método alternativo para compatibilidad)"""
         return cls.get_by_codigo(codigo)
     
     @staticmethod
     def delete(curso_id):
-        """Elimina un curso por su ID"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
@@ -158,7 +145,6 @@ class Curso:
             raise ValidationError(f"Error al eliminar curso: {str(e)}")
     
     def update(self):
-        """Actualiza un curso existente"""
         try:
             if not hasattr(self, 'id') or not self.id:
                 raise ValidationError("ID de curso es requerido para actualizar")
@@ -171,7 +157,6 @@ class Curso:
             raise ValidationError(f"Error al actualizar curso: {str(e)}")
     
     def to_dict(self):
-        """Convierte el curso a diccionario"""
         result = {
             'codigo': self.codigo,
             'nombre': self.nombre,
@@ -189,7 +174,6 @@ class Curso:
         return f"Curso(codigo='{self.codigo}', nombre='{self.nombre}', creditos={self.creditos})"
     @classmethod
     def get_prerequisitos_disponibles(cls):
-        """Obtiene todos los cursos disponibles como prerequisitos"""
         try:
             cursos = cls.get_all()
             return [curso.to_dict() for curso in cursos]
@@ -199,22 +183,18 @@ class Curso:
     
     @staticmethod
     def get_requisitos_as_list(requisitos_str):
-        """Convierte una cadena de requisitos en lista"""
         if not requisitos_str:
             return []
         return [req.strip() for req in requisitos_str.split(',') if req.strip()]
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):
-        """Valida que los códigos de prerrequisitos existan y no haya ciclos"""
         if not requisitos_list:
             return True
             
         for codigo in requisitos_list:
-            # No puede ser prerrequisito de sí mismo
             if curso_codigo and codigo.upper() == curso_codigo.upper():
                 raise ValidationError(f"Un curso no puede ser prerrequisito de sí mismo")
-                  # Verificar que el curso existe
             existing = Curso.get_by_codigo(codigo)
             if not existing:
                 raise ValidationError(f"El curso prerrequisito {codigo} no existe")

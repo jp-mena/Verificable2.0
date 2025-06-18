@@ -5,47 +5,40 @@ from datetime import datetime
 
 class Alumno:    
     def __init__(self, nombre, correo, fecha_ingreso):
-        # Validar longitud del nombre
         if len(nombre) > 100:
             raise ValidationError("El nombre no puede exceder 100 caracteres")
         
-        # Validar longitud del email
         if len(correo) > 100:
             raise ValidationError("El email no puede exceder 100 caracteres")
             
         self.nombre = validate_required_string(nombre, "nombre")
         self.correo = validate_email(correo)
         self.fecha_ingreso = self._validate_fecha_ingreso(fecha_ingreso)
+        
     def _validate_fecha_ingreso(self, fecha):
-        """Valida el formato de fecha de ingreso"""
         if not fecha:
             raise ValidationError("Fecha de ingreso es requerida")
         
-        # Asegurar que sea string
         fecha_str = str(fecha).strip()
         
-        # Validar formato YYYY-MM-DD
         if not re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
             raise ValidationError("Fecha de ingreso debe estar en formato YYYY-MM-DD")
         
         try:
-            # Verificar que sea una fecha válida
             fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d')
             
-            # Validar que no sea muy antigua (después de 1950)
             if fecha_obj.year < 1950:
                 raise ValidationError("La fecha de ingreso no puede ser anterior a 1950")
                 
-            # Validar que no sea futura
             if fecha_obj > datetime.now():
                 raise ValidationError("La fecha de ingreso no puede ser futura")
                 
             return fecha_str
         except ValueError:
             raise ValidationError("Fecha de ingreso no es válida")
+        
     @classmethod
     def crear(cls, nombre, correo, fecha_ingreso):
-        """Crea un nuevo alumno"""
         try:
             alumno = cls(nombre, correo, fecha_ingreso)
             query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (%s, %s, %s)"
@@ -58,7 +51,6 @@ class Alumno:
     
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todos los alumnos en formato consistente"""
         try:
             query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos ORDER BY nombre"
             return execute_query(query)
@@ -66,7 +58,6 @@ class Alumno:
             raise ValidationError(f"Error al obtener todos los alumnos: {str(e)}")
     
     def save(self):
-        """Guarda un nuevo alumno en la base de datos"""
         try:
             query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (%s, %s, %s)"
             return execute_query(query, (self.nombre, self.correo, self.fecha_ingreso))
@@ -75,7 +66,6 @@ class Alumno:
     
     @staticmethod
     def get_all():
-        """Obtiene todos los alumnos"""
         try:
             query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos"
             return execute_query(query)
@@ -84,7 +74,6 @@ class Alumno:
     
     @staticmethod
     def get_by_id(alumno_id):
-        """Obtiene un alumno por su ID"""
         try:
             alumno_id = safe_int_conversion(alumno_id)
             if alumno_id is None or alumno_id <= 0:
@@ -100,7 +89,6 @@ class Alumno:
     
     @staticmethod
     def update(alumno_id, nombre, correo, fecha_ingreso):
-        """Actualiza un alumno existente"""
         try:
             alumno_id = safe_int_conversion(alumno_id)
             if alumno_id is None or alumno_id <= 0:
@@ -127,7 +115,6 @@ class Alumno:
     
     @staticmethod
     def delete(alumno_id):
-        """Elimina un alumno"""
         try:
             alumno_id = safe_int_conversion(alumno_id)
             if alumno_id is None or alumno_id <= 0:
@@ -148,7 +135,6 @@ class Alumno:
     
     @classmethod
     def obtener_por_id(cls, alumno_id):
-        """Obtiene un alumno por su ID (método de compatibilidad)"""
         result = cls.get_by_id(alumno_id)
         if result:
             return {
@@ -161,7 +147,6 @@ class Alumno:
     
     @classmethod
     def obtener_por_correo(cls, correo):
-        """Obtiene un alumno por su correo"""
         try:
             query = "SELECT id, nombre, correo, fecha_ingreso FROM alumnos WHERE correo = %s"
             resultado = execute_query(query, (correo,))

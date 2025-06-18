@@ -1,42 +1,73 @@
-import mysql.connector
-from mysql.connector import Error
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+import pymysql
+from pymysql.err import MySQLError
 
 load_dotenv()
 
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'sga_db'),
-    'port': int(os.getenv('DB_PORT', 3306)),
-    'charset': 'utf8mb4',
-    'autocommit': True
+    "host":     os.getenv("DB_HOST", "localhost"),
+    "user":     os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", ""),
+    "database": os.getenv("DB_NAME", "sga_db"),
+    "port":     int(os.getenv("DB_PORT", 3306)),
+    "charset":  "utf8mb4",
+    "autocommit": True,
+    "cursorclass": pymysql.cursors.Cursor      # o DictCursor si prefieres dicts
 }
 
+# ------------------------------------------------------------------------
 def create_database_if_not_exists():
     try:
-        temp_config = DB_CONFIG.copy()
-        temp_config.pop('database')
-        
-        conn = mysql.connector.connect(**temp_config)
-        cursor = conn.cursor()
-        
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-        print(f"✅ Base de datos '{DB_CONFIG['database']}' lista")
-        
+        cfg = DB_CONFIG.copy()
+        cfg.pop("database")
+        conn = pymysql.connect(**cfg)
+        cur  = conn.cursor()
+        cur.execute(
+            f"CREATE DATABASE IF NOT EXISTS `{DB_CONFIG['database']}` "
+            "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        )
         conn.close()
-    except Error as e:
-        print(f"❌ Error creando base de datos: {e}")
+        print(f"✅ Base de datos '{DB_CONFIG['database']}' lista")
+    except MySQLError as e:
+        print("❌ Error creando base de datos:", e)
+
+# ------------------------------------------------------------------------
+def get_connection():
+    try:
+        return pymysql.connect(**DB_CONFIG)
+    except MySQLError as e:
+        print("❌ Error conectando a MySQL:", e)
+        return None
+
+# ------------------------------------------------------------------------
+def execute_query(sql: str, params: tuple | None = None):
+    conn = get_connection()
+    if conn is None:
+        raise RuntimeError("No se pudo abrir conexión a la BD")
+
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
+        if sql.lstrip()[:6].upper() == "SELECT":
+            return cur.fetchall() or []
+        conn.commit()
+        return cur.lastrowid
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error:", e, "\nQuery:", sql, "\nParams:", params)
+        return []
+    finally:
+        cur.close()
+        conn.close()
 
 def init_database():
     try:
         create_database_if_not_exists()
         
-        conn = mysql.connector.connect(**DB_CONFIG)
-        cursor = conn.cursor()
+        conn = get_connection()
+        cursor  = conn.cursor()
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS cursos (
@@ -212,33 +243,32 @@ def init_database():
                     
         conn.commit()
         conn.close()
-    except Error as e:
+    except MySQLError as e:
         print(f"❌ Error inicializando base de datos MySQL: {e}")
 
 def get_connection():
     try:
-        return mysql.connector.connect(**DB_CONFIG)
-    except Error as e:
-        print(f"❌ Error conectando a MySQL: {e}")
+        return pymysql.connect(**DB_CONFIG)
+    except MySQLError as e:
+        print("❌ Error conectando a MySQL:", e)
         return None
 
-def execute_query(query, params=None):
+# ------------------------------------------------------------------------
+def execute_query(sql: str, params: tuple | None = None):
     conn = get_connection()
     if conn is None:
         raise RuntimeError("No se pudo abrir conexión a la BD")
 
     try:
         cur = conn.cursor()
-        cur.execute(query, params or ())
-        is_select = query.lstrip()[:6].upper() == "SELECT"
-        if is_select:
-            rows = cur.fetchall() or []
-            return rows
+        cur.execute(sql, params or ())
+        if sql.lstrip()[:6].upper() == "SELECT":
+            return cur.fetchall() or []
         conn.commit()
         return cur.lastrowid
     except Exception as e:
         conn.rollback()
-        print("❌ Error:", e, "\nQuery:", query, "\nParams:", params)
+        print("❌ Error:", e, "\nQuery:", sql, "\nParams:", params)
         return []
     finally:
         cur.close()

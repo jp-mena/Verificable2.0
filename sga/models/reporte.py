@@ -6,12 +6,8 @@ from sga.utils.validators import ValidationError, safe_int_conversion
 class Reporte:
     @classmethod
     def obtener_notas_instancia_topico(cls, instancia_topico_id):
-        """
-        Reporte a: Notas de una cierta instancia de tópico
-        Ejemplo: notas de la entrega 2 del proyecto, de la sección 1 del curso ICC5130 202501
-        """
+
         try:
-            # Validar entrada
             instancia_topico_id = safe_int_conversion(instancia_topico_id)
             if instancia_topico_id is None or instancia_topico_id <= 0:
                 raise ValidationError("ID de instancia de tópico debe ser un entero positivo")
@@ -72,21 +68,20 @@ class Reporte:
             raise
         except Exception as e:
             raise ValidationError(f"Error en obtener_notas_instancia_topico: {str(e)}")
+        
     @classmethod
     def obtener_notas_finales_seccion(cls, instancia_curso_id, seccion_numero):
-        """
-        Reporte b: Notas finales de una sección de un curso cerrado
-        Ejemplo: notas finales de la sección 1 de ICC5130 202501
-        """
+
         try:
-            # Validar entrada
             instancia_curso_id = safe_int_conversion(instancia_curso_id)
             seccion_numero = safe_int_conversion(seccion_numero)
             
             if instancia_curso_id is None or instancia_curso_id <= 0:
                 raise ValidationError("ID de instancia de curso debe ser un entero positivo")
+            
             if seccion_numero is None or seccion_numero <= 0:
                 raise ValidationError("Número de sección debe ser un entero positivo")
+            
             query = """
             SELECT 
                 a.id as alumno_id,
@@ -136,12 +131,8 @@ class Reporte:
             raise ValidationError(f"Error en obtener_notas_finales_seccion: {str(e)}")
     @classmethod
     def obtener_certificado_notas_alumno(cls, alumno_id):
-        """
-        Reporte c: Certificado de notas - todas las notas finales de cursos cerrados de un alumno
-        Muestra: nota final, curso, instancia, sección, fecha (año/semestre)
-        """
+
         try:
-            # Validar entrada
             alumno_id = safe_int_conversion(alumno_id)
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
@@ -189,7 +180,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_certificado_notas_alumno: {str(e)}")
     @classmethod
     def obtener_instancias_topico_disponibles(cls):
-        """Obtiene todas las instancias de tópico disponibles para reportes"""
         try:
             query = """
             SELECT 
@@ -230,7 +220,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_instancias_topico_disponibles: {str(e)}")
     @classmethod
     def obtener_cursos_cerrados(cls):
-        """Obtiene todas las instancias de curso cerradas para reportes"""
         try:
             query = """
             SELECT DISTINCT
@@ -266,7 +255,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_cursos_cerrados: {str(e)}")
     @classmethod
     def obtener_secciones_curso_cerrado(cls, instancia_curso_id):
-        """Obtiene las secciones de un curso cerrado específico"""
         try:
             # Validar entrada
             instancia_curso_id = safe_int_conversion(instancia_curso_id)
@@ -300,7 +288,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_secciones_curso_cerrado: {str(e)}")
     @classmethod
     def obtener_alumnos_con_cursos_cerrados(cls):
-        """Obtiene alumnos que tienen cursos cerrados para certificado de notas"""
         try:
             query = """
             SELECT DISTINCT
@@ -330,7 +317,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_alumnos_con_cursos_cerrados: {str(e)}")
     @classmethod
     def calcular_estadisticas_seccion(cls, notas):
-        """Calcula estadísticas para una sección"""
         try:
             if not notas or not isinstance(notas, list):
                 return {
@@ -365,7 +351,6 @@ class Reporte:
     
     @classmethod
     def calcular_estadisticas_alumno(cls, certificado):
-        """Calcula estadísticas para el certificado de un alumno"""
         try:
             if not certificado or not isinstance(certificado, list):
                 return {

@@ -1,4 +1,3 @@
-# filepath: models/topico.py
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, safe_int_conversion, validate_required_string
 
@@ -12,7 +11,6 @@ class Topico:
             self.tipo = None
             
     def _validate_tipo(self, tipo):
-        """Valida el tipo de tópico"""
         tipo = validate_required_string(tipo, "tipo")
         tipos_validos = [
             'control', 'tarea', 'actividad', 'proyecto', 'examen', 'quiz',
@@ -25,7 +23,6 @@ class Topico:
 
     @classmethod
     def crear(cls, nombre, tipo):
-        """Crea un nuevo tópico"""
         try:
             topico = cls(None, nombre, tipo)
             query = "INSERT INTO topicos (nombre, tipo) VALUES (%s, %s)"
@@ -39,7 +36,6 @@ class Topico:
 
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todos los tópicos"""
         try:
             query = "SELECT id, nombre, tipo FROM topicos ORDER BY tipo, nombre"
             resultados = execute_query(query)
@@ -56,7 +52,6 @@ class Topico:
 
     @classmethod
     def obtener_por_id(cls, id):
-        """Obtiene un tópico por ID"""
         try:
             id = safe_int_conversion(id)
             if id is None or id <= 0:
@@ -74,7 +69,6 @@ class Topico:
             raise ValidationError(f"Error al obtener tópico por ID: {str(e)}")    
     @classmethod
     def obtener_por_nombre(cls, nombre):
-        """Obtiene un tópico por su nombre"""
         try:
             query = "SELECT id, nombre, tipo FROM topicos WHERE nombre = %s"
             resultado = execute_query(query, (nombre,))
@@ -88,7 +82,6 @@ class Topico:
             return None
 
     def actualizar(self):
-        """Actualiza el tópico"""
         try:
             if self.id is None or self.id <= 0:
                 raise ValidationError("ID de tópico no válido para actualización")
@@ -107,13 +100,11 @@ class Topico:
 
     @classmethod
     def eliminar(cls, id):
-        """Elimina un tópico"""
         try:
             id = safe_int_conversion(id)
             if id is None or id <= 0:
                 raise ValidationError("ID de tópico debe ser un entero positivo")
             
-            # Verificar si el tópico existe
             existing = cls.obtener_por_id(id)
             if not existing:
                 raise ValidationError("Tópico no encontrado")
@@ -128,7 +119,6 @@ class Topico:
     
     @staticmethod
     def update(topico_id, nombre, tipo):
-        """Actualiza un tópico existente (método estático para compatibilidad)"""
         try:
             topico = Topico.obtener_por_id(topico_id)
             if not topico:

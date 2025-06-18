@@ -7,12 +7,9 @@ class Profesor:
         self.correo = validate_email(correo)
     
     def save(self):
-        """Guarda un nuevo profesor en la base de datos"""
         try:
-            # Validar longitud de email
             if len(self.correo) > 100:
                 raise ValidationError("El email no puede exceder 100 caracteres")
-              # Verificar que no exista un profesor con el mismo email
             existing_profesor = self.get_by_correo(self.correo)
             if existing_profesor:
                 raise ValidationError(f"Ya existe un profesor con el email {self.correo}")
@@ -26,7 +23,6 @@ class Profesor:
     
     @staticmethod
     def get_all():
-        """Obtiene todos los profesores"""
         try:
             query = "SELECT id, nombre, correo FROM profesores"
             return execute_query(query)
@@ -35,12 +31,10 @@ class Profesor:
     
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todos los profesores (método de compatibilidad)"""
         return cls.get_all()
     
     @classmethod
     def crear(cls, nombre, correo):
-        """Crea un nuevo profesor (método de compatibilidad)"""
         try:
             profesor = cls(nombre, correo)
             profesor_id = profesor.save()
@@ -52,7 +46,6 @@ class Profesor:
     
     @staticmethod
     def get_by_id(profesor_id):
-        """Obtiene un profesor por su ID"""
         try:
             profesor_id = safe_int_conversion(profesor_id)
             if profesor_id is None or profesor_id <= 0:
@@ -68,7 +61,6 @@ class Profesor:
     
     @staticmethod
     def get_by_correo(correo):
-        """Obtiene un profesor por su correo"""
         try:
             correo = validate_email(correo)
             query = "SELECT id, nombre, correo FROM profesores WHERE correo = %s"
@@ -81,7 +73,6 @@ class Profesor:
     
     @classmethod
     def obtener_por_correo(cls, correo):
-        """Obtiene un profesor por su correo"""
         try:
             query = "SELECT id, nombre, correo FROM profesores WHERE correo = %s"
             resultado = execute_query(query, (correo,))
@@ -97,13 +88,11 @@ class Profesor:
     
     @staticmethod
     def update(profesor_id, nombre, correo):
-        """Actualiza un profesor existente"""
         try:
             profesor_id = safe_int_conversion(profesor_id)
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             
-            # Validar datos
             nombre = validate_required_string(nombre, "nombre")
             correo = validate_email(correo)
             
@@ -117,13 +106,11 @@ class Profesor:
     
     @staticmethod
     def delete(profesor_id):
-        """Elimina un profesor"""
         try:
             profesor_id = safe_int_conversion(profesor_id)
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             
-            # Verificar si el profesor existe
             existing = Profesor.get_by_id(profesor_id)
             if not existing:
                 raise ValidationError("Profesor no encontrado")
@@ -138,6 +125,5 @@ class Profesor:
     
     @staticmethod
     def delete(profesor_id):
-        """Elimina un profesor"""
         query = "DELETE FROM profesores WHERE id = %s"
         return execute_query(query, (profesor_id,))

@@ -16,7 +16,6 @@ class SchedulerService:
         self.allowed_rooms = defaultdict(list)
         self.omitidas = []
 
-    # --- loaders -----------------------------------------------------------
     def _load_salas(self):
         self.salas = [{"id": r[0], "capacidad": r[2]} for r in Sala.obtener_todas()]
 
@@ -63,7 +62,6 @@ class SchedulerService:
                 )
             )
 
-    # --- placements --------------------------------------------------------
     def _build_placements(self):
         by_day = defaultdict(list)
         for b in self.bloques:
@@ -78,7 +76,6 @@ class SchedulerService:
                     self.placements[s["id"]].append({"plc": plc, "bloques": win})
                     plc += 1
 
-    # --- variables ---------------------------------------------------------
     def _create_variables(self):
         self.X = {}
         for s in self.secciones:
@@ -94,7 +91,6 @@ class SchedulerService:
                         f"y_{s['id']}_{p['plc']}_{r['id']}"
                     )
 
-    # --- constraints -------------------------------------------------------
     def _add_constraints(self):
         # cada sección exactamente una asignación
         for s in self.secciones:
@@ -152,7 +148,6 @@ class SchedulerService:
                     )
                     <= 1
                 )
-        # objetivo simple
         self.model.Minimize(
             sum(
                 b["dia"] * self.X[(s["id"], p["plc"], r["id"])]
@@ -163,7 +158,6 @@ class SchedulerService:
             )
         )
 
-    # --- solve -------------------------------------------------------------
     def solve_and_persist(self):
         self._load_salas()
         self._load_bloques()

@@ -10,7 +10,6 @@ class Curso:
         self.requisitos = self._process_requisitos(requisitos)
     
     def _validate_codigo(self, codigo):
-        """Valida el código del curso"""
         codigo = validate_required_string(codigo, "código")
         
         # Validar formato del código (letras seguidas de números, ej: ICC3030)
@@ -20,8 +19,7 @@ class Curso:
         return codigo.upper()
     
     def _validate_creditos(self, creditos):
-        """Valida la cantidad de créditos"""
-        if creditos is None:            return 4  # Valor por defecto
+        if creditos is None:  return 4
             
         try:
             creditos_int = int(creditos)
@@ -32,30 +30,25 @@ class Curso:
             raise ValidationError("Los créditos deben ser un número entero")
     
     def _process_requisitos(self, requisitos):
-        """Procesa los requisitos: puede ser lista de códigos o string separado por comas"""
         if not requisitos:
             return None
             
         if isinstance(requisitos, list):
-            # Ya es una lista de códigos
             requisitos_clean = [codigo.strip().upper() for codigo in requisitos if codigo.strip()]
             return ','.join(requisitos_clean) if requisitos_clean else None
         
         if isinstance(requisitos, str):
-            # String separado por comas
             requisitos_clean = [codigo.strip().upper() for codigo in requisitos.split(',') if codigo.strip()]
             return ','.join(requisitos_clean) if requisitos_clean else None
             
         return None
     
     def get_requisitos_list(self):
-        """Obtiene los requisitos como lista de códigos"""
         if not self.requisitos:
             return []        
         return [codigo.strip() for codigo in self.requisitos.split(',') if codigo.strip()]
     
     def save(self):
-        """Guarda un nuevo curso en la base de datos"""
         try:
             query = "INSERT INTO cursos (codigo, nombre, creditos, requisitos) VALUES (%s, %s, %s, %s)"
             return execute_query(query, (self.codigo, self.nombre, self.creditos, self.requisitos))
@@ -64,7 +57,6 @@ class Curso:
     
     @classmethod
     def get_all(cls):
-        """Obtiene todos los cursos"""
         try:
             query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos ORDER BY codigo"
             resultados = execute_query(query)
@@ -78,7 +70,6 @@ class Curso:
             raise ValidationError(f"Error al obtener cursos: {str(e)}")
     @classmethod
     def get_by_id(cls, curso_id):
-        """Obtiene un curso por su ID"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
@@ -99,7 +90,6 @@ class Curso:
     
     @classmethod
     def get_by_codigo(cls, codigo):
-        """Obtiene un curso por su código"""
         try:
             if not codigo:
                 raise ValidationError("Código de curso es requerido")
@@ -119,7 +109,6 @@ class Curso:
     
     @classmethod
     def obtener_por_codigo(cls, codigo):
-        """Obtiene un curso por su código"""
         try:
             query = "SELECT id, codigo, nombre, creditos, requisitos FROM cursos WHERE codigo = %s"
             resultado = execute_query(query, (codigo,))
@@ -135,13 +124,11 @@ class Curso:
     
     @staticmethod
     def update(curso_id, codigo, nombre, creditos=4, requisitos=None):
-        """Actualiza un curso existente"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
-            # Crear objeto temporal para validar
             temp_curso = Curso(codigo, nombre, creditos, requisitos)
             
             query = "UPDATE cursos SET codigo = %s, nombre = %s, creditos = %s, requisitos = %s WHERE id = %s"
@@ -154,7 +141,6 @@ class Curso:
     
     @staticmethod
     def delete(curso_id):
-        """Elimina un curso"""
         try:
             curso_id = safe_int_conversion(curso_id)
             if curso_id is None or curso_id <= 0:
@@ -175,7 +161,6 @@ class Curso:
     
     @staticmethod
     def get_prerequisitos_disponibles():
-        """Obtiene lista de cursos disponibles como prerrequisitos"""
         try:
             query = "SELECT codigo, nombre FROM cursos ORDER BY codigo"
             results = execute_query(query)
@@ -185,23 +170,19 @@ class Curso:
     
     @staticmethod
     def get_requisitos_as_list(requisitos_str):
-        """Convierte string de requisitos a lista"""
         if not requisitos_str:
             return []
         return [codigo.strip() for codigo in requisitos_str.split(',') if codigo.strip()]
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):
-        """Valida que los códigos de prerrequisitos existan y no haya ciclos"""
         if not requisitos_list:
             return True
             
         for codigo in requisitos_list:
-            # No puede ser prerrequisito de sí mismo
             if curso_codigo and codigo.upper() == curso_codigo.upper():
                 raise ValidationError(f"Un curso no puede ser prerrequisito de sí mismo")
                 
-            # Verificar que el curso existe
             existing = Curso.get_by_codigo(codigo)
             if not existing:
                 raise ValidationError(f"El curso prerrequisito {codigo} no existe")

@@ -1,11 +1,3 @@
-
-"""
-Modelo Bloque
--------------
-Representa un bloque horario genérico (día + hora de inicio y fin).
-Los días se codifican 1=Lunes … 6=Sábado para compatibilidad con el
-scheduler OR-Tools y consultas SQL simples.
-"""
 import re
 from datetime import datetime
 from sga.db.database import execute_query
@@ -33,9 +25,6 @@ class Bloque:
 
     @classmethod
     def crear(cls, dia, inicio, fin):
-        """
-        Inserta el bloque y devuelve la instancia creada.
-        """
         nuevo = cls(dia, inicio, fin)
         bloque_id = execute_query(
             "INSERT INTO bloques (dia, inicio, fin) VALUES (?, ?, ?)",

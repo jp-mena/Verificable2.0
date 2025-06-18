@@ -1,4 +1,3 @@
-# filepath: models/instancia_curso.py
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, safe_int_conversion
 from datetime import datetime
@@ -12,7 +11,6 @@ class InstanciaCurso:
         self.cerrado = cerrado
     
     def _validate_semestre(self, semestre):
-        """Valida que el semestre esté en el rango correcto"""
         try:
             semestre_int = int(semestre)
             if semestre_int not in [1, 2]:
@@ -22,7 +20,6 @@ class InstanciaCurso:
             raise ValidationError("El semestre debe ser un número válido")
     
     def _validate_anio(self, anio):
-        """Valida que el año esté en un rango razonable"""
         try:
             anio_int = int(anio)
             anio_actual = datetime.now().year
@@ -34,7 +31,6 @@ class InstanciaCurso:
 
     @classmethod
     def crear(cls, semestre, anio, curso_id):
-        """Crea una nueva instancia de curso"""
         try:
             query = "INSERT INTO instancias_curso (semestre, anio, curso_id) VALUES (%s, %s, %s)"
             id_instancia = execute_query(query, (semestre, anio, curso_id))
@@ -44,7 +40,6 @@ class InstanciaCurso:
 
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todas las instancias de curso"""
         try:
             query = """
             SELECT ic.id, ic.semestre, ic.anio, ic.curso_id, c.codigo, c.nombre, 
@@ -73,7 +68,6 @@ class InstanciaCurso:
 
     @classmethod
     def obtener_por_id(cls, id):
-        """Obtiene una instancia de curso por ID"""
         try:
             if not id:
                 return None
@@ -100,7 +94,6 @@ class InstanciaCurso:
             return None
 
     def actualizar(self):
-        """Actualiza la instancia de curso"""
         try:
             if not self.id:
                 raise ValidationError("No se puede actualizar una instancia sin ID")
@@ -111,7 +104,6 @@ class InstanciaCurso:
     
     @classmethod
     def eliminar(cls, id):
-        """Elimina una instancia de curso"""
         try:
             if not id:
                 raise ValidationError("ID de instancia requerido")
@@ -122,12 +114,10 @@ class InstanciaCurso:
             raise ValidationError(f"Error al eliminar la instancia de curso: {str(e)}")
 
     def esta_cerrado(self):
-        """Verifica si la instancia de curso está cerrada"""
         return getattr(self, 'cerrado', False)
 
     @classmethod
     def obtener_nota_final_alumno(cls, instancia_id, alumno_id):
-        """Obtiene la nota final de un alumno en una instancia cerrada"""
         try:
             if not instancia_id or not alumno_id:
                 return None
@@ -150,32 +140,26 @@ class InstanciaCurso:
 
     @classmethod
     def cerrar_curso(cls, instancia_id):
-        """Cierra un curso y calcula las notas finales"""
         try:
             instancia_id = safe_int_conversion(instancia_id)
             if instancia_id is None or instancia_id <= 0:
                 raise ValidationError("ID de instancia debe ser un entero positivo")
             
-            # Verificar que la instancia existe
             instancia = cls.obtener_por_id(instancia_id)
             if not instancia:
                 raise ValidationError("La instancia de curso no existe")
-              # Verificar que no esté ya cerrada
+            
             if instancia.esta_cerrado():
                 raise ValidationError("El curso ya está cerrado")
             
-            # Verificar que todas las evaluaciones tengan notas
             if not cls._verificar_notas_completas(instancia_id):
                 raise ValidationError("No se puede cerrar el curso: faltan notas por asignar")
             
-            # Verificar que la suma de porcentajes sea 100%
             if not cls._verificar_porcentajes_completos(instancia_id):
                 raise ValidationError("No se puede cerrar el curso: la suma de porcentajes de evaluaciones no es 100%")
             
-            # Calcular notas finales
             cls._calcular_notas_finales(instancia_id)
             
-            # Marcar como cerrado
             query = "UPDATE instancias_curso SET cerrado = 1, fecha_cierre = %s WHERE id = %s"
             fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             execute_query(query, (fecha_actual, instancia_id))
@@ -188,7 +172,6 @@ class InstanciaCurso:
     
     @classmethod
     def _verificar_notas_completas(cls, instancia_id):
-        """Verifica que todas las evaluaciones tengan notas para todos los alumnos inscritos"""
         try:
             query = """
             SELECT COUNT(*) as faltantes FROM (
@@ -214,7 +197,6 @@ class InstanciaCurso:
     
     @classmethod
     def _verificar_porcentajes_completos(cls, instancia_id):
-        """Verifica que la suma de porcentajes de evaluaciones sea 100%"""
         try:
             query = """
             SELECT SUM(e.porcentaje) as suma_total
@@ -233,9 +215,7 @@ class InstanciaCurso:
     
     @classmethod
     def _calcular_notas_finales(cls, instancia_id):
-        """Calcula las notas finales de todos los alumnos"""
         try:
-            # Obtener todos los alumnos inscritos
             query_alumnos = """
             SELECT DISTINCT i.alumno_id, a.nombre
             FROM inscripciones i
@@ -245,7 +225,6 @@ class InstanciaCurso:
             alumnos = execute_query(query_alumnos, (instancia_id,))
             
             for alumno_id, nombre in alumnos:
-                # Calcular nota final para cada alumno
                 query_notas = """
                 SELECT n.nota, e.porcentaje
                 FROM notas n
@@ -258,7 +237,6 @@ class InstanciaCurso:
                 if notas_data:
                     nota_final = sum(float(nota) * (float(porcentaje) / 100.0) for nota, porcentaje in notas_data)
                     nota_final = round(nota_final, 1)
-                      # Guardar o actualizar nota final
                     query_final = """
                     INSERT INTO notas_finales (alumno_id, instancia_curso_id, nota_final) 
                     VALUES (%s, %s, %s)
@@ -270,7 +248,6 @@ class InstanciaCurso:
     
     @classmethod
     def obtener_alumnos_curso(cls, instancia_id):
-        """Obtiene todos los alumnos inscritos en un curso a través de la tabla inscripciones"""
         try:
             if not instancia_id:
                 return []
@@ -299,7 +276,6 @@ class InstanciaCurso:
 
     @classmethod
     def obtener_notas_alumno_curso(cls, instancia_id, alumno_id):
-        """Obtiene todas las notas de un alumno en un curso específico"""
         try:
             if not instancia_id or not alumno_id:
                 return []
@@ -339,12 +315,10 @@ class InstanciaCurso:
 
     @classmethod
     def calcular_nota_final_alumno(cls, instancia_id, alumno_id):
-        """Calcula la nota final de un alumno específico usando ponderación por peso de instancias de tópico"""
         try:
             if not instancia_id or not alumno_id:
                 return 0.0
             
-            # Obtener todas las evaluaciones con su porcentaje
             query_evaluaciones = """
             SELECT DISTINCT e.id, e.porcentaje
             FROM evaluaciones e
@@ -362,7 +336,6 @@ class InstanciaCurso:
                 evaluacion_id = evaluacion[0]
                 porcentaje_evaluacion = float(evaluacion[1] or 0)
                 
-                # Obtener todas las instancias de tópico de esta evaluación con sus notas y pesos
                 query_instancias = """
                 SELECT it.peso, n.nota
                 FROM instancias_topico it
@@ -372,7 +345,6 @@ class InstanciaCurso:
                 instancias = execute_query(query_instancias, (evaluacion_id, alumno_id))
                 
                 if instancias:
-                    # Calcular el promedio ponderado de la evaluación
                     suma_ponderada = 0.0
                     suma_pesos = 0.0
                     
@@ -382,17 +354,15 @@ class InstanciaCurso:
                         suma_ponderada += (nota * peso)
                         suma_pesos += peso
                     
-                    # Promedio ponderado de la evaluación
                     if suma_pesos > 0:
                         promedio_evaluacion = suma_ponderada / suma_pesos
                         nota_final += (promedio_evaluacion * porcentaje_evaluacion / 100.0)                        
                         total_porcentaje += porcentaje_evaluacion
             
-            # Normalizar si el total de porcentajes no es 100%
             if total_porcentaje > 0 and total_porcentaje != 100:
                 nota_final = (nota_final * 100.0) / total_porcentaje
             
-            return round(nota_final, 1)  # Redondear a 1 decimal para notas finales
+            return round(nota_final, 1)
             
         except Exception as e:
             print(f"Error al calcular nota final del alumno {alumno_id} en instancia {instancia_id}: {e}")
@@ -409,7 +379,6 @@ class InstanciaCurso:
             if not instancia:
                 return None
             
-            # Convertir instancia a diccionario para la plantilla
             instancia_dict = {
                 'id': instancia.id,
                 'semestre': instancia.semestre,
@@ -423,17 +392,14 @@ class InstanciaCurso:
             
             alumnos = cls.obtener_alumnos_curso(instancia_id)
             
-            # Agregar notas a cada alumno
             for alumno in alumnos:
                 try:
                     alumno['notas'] = cls.obtener_notas_alumno_curso(instancia_id, alumno['id'])
                     
-                    # Si el curso está cerrado, obtener nota final
                     if instancia_dict['cerrado']:
                         nota_final_info = cls.obtener_nota_final_alumno(instancia_id, alumno['id'])
                         alumno['nota_final'] = nota_final_info
                     else:
-                        # Si no está cerrado, calcular nota final temporal
                         alumno['nota_final_temporal'] = cls.calcular_nota_final_alumno(instancia_id, alumno['id'])
                 except Exception as e:
                     print(f"Error al procesar datos del alumno {alumno['id']}: {e}")

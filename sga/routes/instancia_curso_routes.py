@@ -1,4 +1,3 @@
-# filepath: routes/instancia_curso_routes.py
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from sga.models.instancia_curso import InstanciaCurso
 from sga.models.curso import Curso
@@ -11,7 +10,6 @@ instancia_curso_bp = Blueprint('instancia_curso', __name__)
 
 @instancia_curso_bp.route('/instancias-curso')
 def listar_instancias():
-    """Lista todas las instancias de curso"""
     try:
         instancias = InstanciaCurso.obtener_todos()
         return render_template('instancias_curso/listar.html', instancias=instancias)
@@ -22,32 +20,24 @@ def listar_instancias():
 @instancia_curso_bp.route('/instancias-curso/crear', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def crear_instancia():
-    """Crea una nueva instancia de curso"""
     if request.method == 'POST':
-        # Extraer datos del formulario de forma segura
         data = safe_form_data(request.form, ['semestre', 'anio', 'curso_id'])
         
-        # Validar campos requeridos
         validate_required_fields(data, ['semestre', 'anio', 'curso_id'])
         
-        # Validar formato de cada campo
         semestre = validate_semester(data['semestre'])
         anio = validate_year(data['anio'])
         curso_id = safe_int_conversion(data['curso_id'], 'Curso')
         
-        # Verificar que el curso existe
         curso = Curso.get_by_id(curso_id)
         if not curso:
             raise ValidationError('El curso seleccionado no existe')
         
-        # Crear la instancia
         InstanciaCurso.crear(semestre, anio, curso_id)
         flash('Instancia de curso creada exitosamente', 'success')
         return redirect(url_for('instancia_curso.listar_instancias'))
-      # Obtener cursos para el formulario
     try:
         cursos = Curso.get_all()
-        # Los cursos ya son objetos, no necesitamos convertirlos
     except Exception:
         cursos = []
         flash('Error al cargar la lista de cursos', 'warning')
@@ -57,37 +47,28 @@ def crear_instancia():
 @instancia_curso_bp.route('/instancias-curso/<int:id>/editar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def editar_instancia(id):
-    """Edita una instancia de curso"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
-    # Obtener instancia
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
     if not instancia:
         raise ValidationError('Instancia de curso no encontrada')
     
-    # Verificar si la instancia está cerrada
     if instancia.esta_cerrado():
         raise ValidationError('No se puede editar una instancia de curso que ya ha sido cerrada')
     
     if request.method == 'POST':
-        # Extraer datos del formulario de forma segura
         data = safe_form_data(request.form, ['semestre', 'anio', 'curso_id'])
         
-        # Validar campos requeridos
         validate_required_fields(data, ['semestre', 'anio', 'curso_id'])
         
-        # Validar formato de cada campo
         semestre = validate_semester(data['semestre'])
         anio = validate_year(data['anio'])
         curso_id = safe_int_conversion(data['curso_id'], 'Curso')
         
-        # Verificar que el curso existe
         curso = Curso.get_by_id(curso_id)
         if not curso:
             raise ValidationError('El curso seleccionado no existe')
         
-        # Actualizar la instancia
         instancia.semestre = semestre
         instancia.anio = anio
         instancia.curso_id = curso_id
@@ -95,10 +76,8 @@ def editar_instancia(id):
         
         flash('Instancia de curso actualizada exitosamente', 'success')
         return redirect(url_for('instancia_curso.listar_instancias'))
-      # Obtener cursos para el formulario
     try:
         cursos = Curso.get_all()
-        # Los cursos ya son objetos, no necesitamos convertirlos
     except Exception:
         cursos = []
         flash('Error al cargar la lista de cursos', 'warning')
@@ -108,20 +87,15 @@ def editar_instancia(id):
 @instancia_curso_bp.route('/instancias-curso/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error
 def eliminar_instancia(id):
-    """Elimina una instancia de curso"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
-    # Verificar que la instancia existe
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
     if not instancia:
         raise ValidationError('Instancia de curso no encontrada')
     
-    # Verificar si la instancia está cerrada
     if instancia.esta_cerrado():
         raise ValidationError('No se puede eliminar una instancia de curso que ya ha sido cerrada')
     
-    # Eliminar la instancia
     InstanciaCurso.eliminar(instancia_id)
     flash('Instancia de curso eliminada exitosamente', 'success')
     return redirect(url_for('instancia_curso.listar_instancias'))
@@ -129,16 +103,12 @@ def eliminar_instancia(id):
 @instancia_curso_bp.route('/instancias-curso/<int:id>/detalle')
 @ErrorHandler.handle_route_error
 def detalle_curso(id):
-    """Muestra el detalle completo del curso con alumnos y notas"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
-    # Obtener resumen del curso
     resumen = InstanciaCurso.obtener_resumen_curso(instancia_id)
     if not resumen:
         raise ValidationError('Instancia de curso no encontrada')
     
-    # Obtener alumnos disponibles para inscribir (solo si no está cerrado)
     alumnos_disponibles = []
     if not resumen['instancia']['cerrado']:
         try:
@@ -153,11 +123,8 @@ def detalle_curso(id):
 @instancia_curso_bp.route('/instancias-curso/<int:id>/cerrar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def cerrar_instancia(id):
-    """Cierra una instancia de curso y calcula notas finales"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
-    # Obtener instancia
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
     if not instancia:
         raise ValidationError('Instancia de curso no encontrada')
@@ -178,36 +145,28 @@ def cerrar_instancia(id):
 @instancia_curso_bp.route('/instancias-curso/<int:id>/inscribir', methods=['POST'])
 @ErrorHandler.handle_route_error
 def inscribir_alumno(id):
-    """Inscribe un alumno en una instancia de curso"""
-    # Validar ID de instancia
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
-    # Verificar que la instancia existe
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
     if not instancia:
         raise ValidationError('Instancia de curso no encontrada')
     
-    # Verificar que la instancia no esté cerrada
     if instancia.esta_cerrado():
         raise ValidationError('No se pueden inscribir alumnos en un curso cerrado')
     
-    # Extraer y validar datos del formulario
     data = safe_form_data(request.form, ['alumno_id'])
     validate_required_fields(data, ['alumno_id'])
     
     alumno_id = safe_int_conversion(data['alumno_id'], 'Alumno')
     
-    # Verificar que el alumno existe
     alumno = Alumno.get_by_id(alumno_id)
     if not alumno:
         raise ValidationError('El alumno seleccionado no existe')
     
-    # Verificar que el alumno no esté ya inscrito
     if Inscripcion.esta_inscrito(alumno_id, instancia_id):
         flash('El alumno ya está inscrito en este curso', 'warning')
         return redirect(url_for('instancia_curso.detalle_curso', id=instancia_id))
     
-    # Crear la inscripción
     Inscripcion.crear(alumno_id, instancia_id)
     flash('Alumno inscrito exitosamente', 'success')
     
@@ -216,21 +175,16 @@ def inscribir_alumno(id):
 @instancia_curso_bp.route('/instancias-curso/<int:instancia_id>/desinscribir/<int:alumno_id>', methods=['POST'])
 @ErrorHandler.handle_route_error
 def desinscribir_alumno(instancia_id, alumno_id):
-    """Desinscribe un alumno de una instancia de curso"""
-    # Validar IDs
     instancia_id = safe_int_conversion(instancia_id, 'ID de la instancia')
     alumno_id = safe_int_conversion(alumno_id, 'ID del alumno')
     
-    # Verificar que la instancia existe
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
     if not instancia:
         raise ValidationError('Instancia de curso no encontrada')
     
-    # Verificar que la instancia no esté cerrada
     if instancia.esta_cerrado():
         raise ValidationError('No se pueden desinscribir alumnos de un curso cerrado')
     
-    # Buscar la inscripción
     try:
         inscripciones = Inscripcion.obtener_por_curso(instancia_id)
         inscripcion_id = None
@@ -249,12 +203,10 @@ def desinscribir_alumno(instancia_id, alumno_id):
     
     return redirect(url_for('instancia_curso.detalle_curso', id=instancia_id))
 
-# API endpoints
 @instancia_curso_bp.route('/api/instancias-curso/<int:id>/cerrar', methods=['POST'])
 @ErrorHandler.handle_api_error
 def api_cerrar_instancia(id):
     """API para cerrar una instancia de curso"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
     instancia = InstanciaCurso.obtener_por_id(instancia_id)
@@ -276,7 +228,6 @@ def api_cerrar_instancia(id):
 @ErrorHandler.handle_api_error
 def api_estado_instancia(id):
     """API para obtener el estado de una instancia"""
-    # Validar ID
     instancia_id = safe_int_conversion(id, 'ID de la instancia')
     
     instancia = InstanciaCurso.obtener_por_id(instancia_id)

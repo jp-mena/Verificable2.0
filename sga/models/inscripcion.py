@@ -10,7 +10,6 @@ class Inscripcion:
     
     @classmethod
     def crear(cls, alumno_id, instancia_curso_id, fecha_inscripcion=None):
-        """Crea una nueva inscripción"""
         print(f"Debug crear: alumno_id={alumno_id}, instancia_curso_id={instancia_curso_id}, fecha_inscripcion={fecha_inscripcion}")
         
         if fecha_inscripcion:
@@ -27,7 +26,6 @@ class Inscripcion:
 
     @classmethod
     def obtener_todos(cls):
-        """Obtiene todas las inscripciones"""
         query = """
         SELECT i.id, i.alumno_id, i.instancia_curso_id, i.fecha_inscripcion,
                a.nombre as alumno_nombre, a.correo as alumno_correo,
@@ -57,7 +55,6 @@ class Inscripcion:
 
     @classmethod
     def obtener_por_curso(cls, instancia_curso_id):
-        """Obtiene todas las inscripciones de un curso específico"""
         query = """
         SELECT i.id, i.alumno_id, i.fecha_inscripcion,
                a.nombre, a.correo
@@ -73,8 +70,8 @@ class Inscripcion:
                 'alumno_id': fila[1],
                 'fecha_inscripcion': fila[2],
                 'nombre': fila[3],
-                'apellido': '',  # No existe en BD, campo vacío por compatibilidad
-                'rut': '',       # No existe en BD, campo vacío por compatibilidad
+                'apellido': '',
+                'rut': '',
                 'email': fila[4]
             }
             for fila in resultados
@@ -82,7 +79,6 @@ class Inscripcion:
 
     @classmethod
     def obtener_alumnos_no_inscritos(cls, instancia_curso_id):
-        """Obtiene alumnos que no están inscritos en el curso"""
         query = """
         SELECT a.id, a.nombre, a.correo
         FROM alumnos a
@@ -105,13 +101,11 @@ class Inscripcion:
 
     @classmethod
     def eliminar(cls, id):
-        """Elimina una inscripción"""
         query = "DELETE FROM inscripciones WHERE id = %s"
         execute_query(query, (id,))
 
     @classmethod
     def esta_inscrito(cls, alumno_id, instancia_curso_id):
-        """Verifica si un alumno está inscrito en un curso"""
         query = "SELECT COUNT(*) FROM inscripciones WHERE alumno_id = %s AND instancia_curso_id = %s"
         resultado = execute_query(query, (alumno_id, instancia_curso_id))
         return resultado[0][0] > 0
