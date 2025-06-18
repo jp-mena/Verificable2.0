@@ -55,10 +55,13 @@ def crear_nota_simple():
     """Crear nota en una sola pantalla con dropdowns dinámicos"""
     if request.method == 'POST':
         try:
+            print(f"DEBUG: Datos del formulario: {request.form}")
             instancia_curso_id = int(request.form['instancia_curso_id'])
             alumno_id = int(request.form['alumno_id'])
             instancia_topico_id = int(request.form['instancia_topico_id'])
             nota_valor = float(request.form['nota'])
+            
+            print(f"DEBUG: Valores extraídos - instancia_curso_id: {instancia_curso_id}, alumno_id: {alumno_id}, instancia_topico_id: {instancia_topico_id}, nota_valor: {nota_valor}")
             
             # Validaciones
             if nota_valor < 1.0 or nota_valor > 7.0:
@@ -66,23 +69,28 @@ def crear_nota_simple():
                 return redirect(url_for('nota.crear_nota_simple'))
               
             # Validar que la instancia no esté cerrada
+            print(f"DEBUG: Obteniendo instancia curso {instancia_curso_id}")
             instancia = InstanciaCurso.obtener_por_id(instancia_curso_id)
             if not instancia:
                 flash('Instancia de curso no encontrada', 'error')
                 return redirect(url_for('nota.crear_nota_simple'))
             
+            print(f"DEBUG: Instancia obtenida: {instancia}")
             if getattr(instancia, 'cerrado', False):
                 flash('No se pueden agregar notas a un curso cerrado', 'error')
                 return redirect(url_for('nota.crear_nota_simple'))
             
             # Validar que el alumno esté inscrito
+            print(f"DEBUG: Verificando inscripción del alumno {alumno_id} en instancia {instancia_curso_id}")
             from sga.models.inscripcion import Inscripcion
             if not Inscripcion.esta_inscrito(alumno_id, instancia_curso_id):
                 flash('El alumno no está inscrito en esta instancia', 'error')
                 return redirect(url_for('nota.crear_nota_simple'))
             
             # Crear la nota
+            print(f"DEBUG: Creando nota - alumno_id: {alumno_id}, instancia_topico_id: {instancia_topico_id}, nota_valor: {nota_valor}")
             Nota.crear(alumno_id, instancia_topico_id, nota_valor)
+            print(f"DEBUG: Nota creada exitosamente")
             flash('Nota creada exitosamente', 'success')
             return redirect(url_for('nota.listar_notas'))
             

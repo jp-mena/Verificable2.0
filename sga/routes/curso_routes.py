@@ -89,13 +89,16 @@ def editar_curso(id):
         
         # Obtener requisitos seleccionados (pueden ser múltiples)
         requisitos_list = request.form.getlist('requisitos')
-        
-        # Validar requisitos (no puede ser prerrequisito de sí mismo)
+          # Validar requisitos (no puede ser prerrequisito de sí mismo)
         if requisitos_list:
             Curso.validate_requisitos(requisitos_list, codigo)
         
-        # Actualizar el curso
-        Curso.update(curso_id, codigo, nombre, creditos, requisitos_list)
+        # Actualizar el curso - crear instancia y actualizar
+        curso_data.codigo = codigo
+        curso_data.nombre = nombre
+        curso_data.creditos = creditos
+        curso_data.requisitos = curso_data._process_requisitos(requisitos_list)
+        curso_data.update()
         
         flash('Curso actualizado exitosamente', 'success')
         return redirect(url_for('curso.listar_cursos'))
@@ -146,10 +149,10 @@ def get_cursos():
     cursos_list = []
     for curso in cursos:
         cursos_list.append({
-            'id': curso[0],
-            'codigo': curso[1],
-            'nombre': curso[2],
-            'requisitos': curso[3]
+            'id': getattr(curso, 'id', None),
+            'codigo': curso.codigo,
+            'nombre': curso.nombre,
+            'requisitos': curso.requisitos
         })
     return jsonify({'cursos': cursos_list}), 200
 

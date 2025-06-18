@@ -1,4 +1,5 @@
 # filepath: models/reporte.py
+from decimal import Decimal
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, safe_int_conversion
 
@@ -336,10 +337,9 @@ class Reporte:
                     'total_estudiantes': 0,
                     'promedio': None,
                     'aprobados': 0,
-                    'reprobados': 0
-                }
+                    'reprobados': 0                }
                 
-            notas_validas = [n for n in notas if n.get('nota_final') is not None and isinstance(n.get('nota_final'), (int, float))]
+            notas_validas = [n for n in notas if n.get('nota_final') is not None and isinstance(n.get('nota_final'), (int, float, Decimal))]
             total_estudiantes = len(notas)
             
             if not notas_validas:
@@ -350,9 +350,9 @@ class Reporte:
                     'reprobados': 0
                 }
             
-            promedio = sum(n['nota_final'] for n in notas_validas) / len(notas_validas)
-            aprobados = len([n for n in notas_validas if n['nota_final'] >= 4.0])
-            reprobados = len([n for n in notas_validas if n['nota_final'] < 4.0])
+            promedio = sum(float(n['nota_final']) for n in notas_validas) / len(notas_validas)
+            aprobados = len([n for n in notas_validas if float(n['nota_final']) >= 4.0])
+            reprobados = len([n for n in notas_validas if float(n['nota_final']) < 4.0])
             
             return {
                 'total_estudiantes': total_estudiantes,

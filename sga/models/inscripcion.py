@@ -6,7 +6,9 @@ class Inscripcion:
         self.id = id
         self.alumno_id = alumno_id
         self.instancia_curso_id = instancia_curso_id
-        self.fecha_inscripcion = fecha_inscripcion    @classmethod
+        self.fecha_inscripcion = fecha_inscripcion
+    
+    @classmethod
     def crear(cls, alumno_id, instancia_curso_id, fecha_inscripcion=None):
         """Crea una nueva inscripción"""
         print(f"Debug crear: alumno_id={alumno_id}, instancia_curso_id={instancia_curso_id}, fecha_inscripcion={fecha_inscripcion}")

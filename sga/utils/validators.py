@@ -45,19 +45,24 @@ def validate_float_range(value, min_val=1.0, max_val=7.0, field_name="Nota"):
     except (ValueError, TypeError):
         raise ValidationError(f"{field_name} debe ser un número válido")
 
-def validate_email(email):
+def validate_email(email, max_length=100):
     """Valida formato de email"""
     if not email or not email.strip():
         raise ValidationError("Email es requerido")
     
     email = email.strip()
+    
+    # Validar longitud máxima
+    if len(email) > max_length:
+        raise ValidationError(f"El email no puede exceder {max_length} caracteres")
+    
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(pattern, email):
         raise ValidationError("Formato de email inválido")
     
     return email
 
-def validate_required_string(value, field_name="Campo"):
+def validate_required_string(value, field_name="Campo", max_length=255):
     """Valida que el valor sea una cadena requerida no vacía"""
     if value is None:
         raise ValidationError(f"{field_name} es requerido")
@@ -69,6 +74,10 @@ def validate_required_string(value, field_name="Campo"):
     
     if not value:
         raise ValidationError(f"{field_name} no puede estar vacío")
+    
+    # Validar longitud máxima
+    if len(value) > max_length:
+        raise ValidationError(f"{field_name} no puede exceder {max_length} caracteres")
     
     # Validar que no contenga solo espacios o caracteres especiales
     if not re.match(r'^[a-zA-Z0-9\s\-_.,áéíóúÁÉÍÓÚñÑ]+$', value):

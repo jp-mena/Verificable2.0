@@ -1,3 +1,5 @@
+import logging
+import traceback
 from flask import Flask, jsonify, render_template, flash, redirect, url_for, request
 from sga.db.database import init_database
 from sga.routes.curso_routes import curso_bp
@@ -13,6 +15,16 @@ from sga.routes.json_routes import json_bp
 from sga.routes.reporte_routes import reporte_bp
 from sga.config.settings import FLASK_HOST, FLASK_PORT, FLASK_DEBUG
 from sga.utils.validators import ValidationError
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('server.log'),
+        logging.StreamHandler()
+    ]
+)
 
 def create_app():
     """Factory function para crear la aplicación Flask"""
@@ -38,12 +50,11 @@ def create_app():
             return jsonify({'error': 'Recurso no encontrado'}), 404
         else:
             flash('Página no encontrada', 'error')
-            return render_template('error.html', error_code=404, error_message='Página no encontrada'), 404
-
-    @app.errorhandler(500)
+            return render_template('error.html', error_code=404, error_message='Página no encontrada'), 404    @app.errorhandler(500)
     def handle_internal_error(e):
         """Maneja errores internos del servidor"""
-        print(f"Error interno del servidor: {e}")
+        app.logger.error(f"Error interno del servidor: {e}")
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
         if request.is_json:
             return jsonify({'error': 'Error interno del servidor'}), 500
         else:

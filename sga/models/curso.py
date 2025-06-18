@@ -5,20 +5,31 @@ import re
 class Curso:
     def __init__(self, codigo, nombre, creditos=4, requisitos=None):
         self.codigo = self._validate_codigo(codigo)
-        self.nombre = validate_required_string(nombre, "nombre")
+        self.nombre = validate_required_string(nombre, "nombre", 100)  # Máximo 100 caracteres
         self.creditos = self._validate_creditos(creditos)
         self.requisitos = self._process_requisitos(requisitos)
     
     def _validate_codigo(self, codigo):
         """Valida el código del curso"""
-        codigo = validate_required_string(codigo, "código")
+        codigo = validate_required_string(codigo, "código", 20)  # Máximo 20 caracteres
+        
+        # Validar longitud máxima (evitar códigos excesivamente largos)
+        if len(codigo) > 20:
+            raise ValidationError("El código del curso no puede exceder 20 caracteres")
+        
+        # Validar que no contenga espacios
+        if ' ' in codigo:
+            raise ValidationError("El código del curso no puede contener espacios")
+        
+        # Validar que solo contenga caracteres alfanuméricos
+        if not re.match(r'^[A-Za-z0-9]+$', codigo):
+            raise ValidationError("El código del curso solo puede contener letras y números")
         
         # Validar formato del código (letras seguidas de números, ej: ICC3030)
-        if not re.match(r'^[A-Z]{2,5}\d{4}$', codigo.upper()):
-            raise ValidationError("Código debe tener formato: 2-5 letras seguidas de 4 números (ej: ICC3030)")
+        if not re.match(r'^[A-Z]{2,5}\d{3,4}$', codigo.upper()):
+            raise ValidationError("Código debe tener formato: 2-5 letras seguidas de 3-4 números (ej: ICC3030, TEST101)")
         
         return codigo.upper()
-    
     def _validate_creditos(self, creditos):
         """Valida la cantidad de créditos"""
         if creditos is None:
@@ -58,8 +69,15 @@ class Curso:
     def save(self):
         """Guarda un nuevo curso en la base de datos"""
         try:
+            # Verificar que no exista un curso con el mismo código
+            existing_curso = self.get_by_codigo(self.codigo)
+            if existing_curso:
+                raise ValidationError(f"Ya existe un curso con el código {self.codigo}")
+            
             query = "INSERT INTO cursos (codigo, nombre, creditos, requisitos) VALUES (%s, %s, %s, %s)"
             return execute_query(query, (self.codigo, self.nombre, self.creditos, self.requisitos))
+        except ValidationError:
+            raise
         except Exception as e:
             raise ValidationError(f"Error al guardar curso: {str(e)}")
     
@@ -169,7 +187,6 @@ class Curso:
     
     def __repr__(self):
         return f"Curso(codigo='{self.codigo}', nombre='{self.nombre}', creditos={self.creditos})"
-    
     @classmethod
     def get_prerequisitos_disponibles(cls):
         """Obtiene todos los cursos disponibles como prerequisitos"""
@@ -197,8 +214,7 @@ class Curso:
             # No puede ser prerrequisito de sí mismo
             if curso_codigo and codigo.upper() == curso_codigo.upper():
                 raise ValidationError(f"Un curso no puede ser prerrequisito de sí mismo")
-                
-            # Verificar que el curso existe
+                  # Verificar que el curso existe
             existing = Curso.get_by_codigo(codigo)
             if not existing:
                 raise ValidationError(f"El curso prerrequisito {codigo} no existe")

@@ -2,9 +2,13 @@
 """
 Sistema centralizado de manejo de errores para el SGA
 """
+import logging
+import traceback
 from functools import wraps
 from flask import flash, redirect, url_for, request, jsonify
 from sga.utils.validators import ValidationError
+
+logger = logging.getLogger(__name__)
 
 class ErrorHandler:
     """Clase para manejo centralizado de errores"""
@@ -17,11 +21,15 @@ class ErrorHandler:
             try:
                 return func(*args, **kwargs)
             except ValidationError as e:
+                logger.warning(f"Error de validación en {func.__name__}: {e}")
                 flash(str(e), 'error')
                 # Redirigir a la página anterior o a la lista principal
                 return ErrorHandler._get_safe_redirect(func.__name__)
             except Exception as e:
-                print(f"Error inesperado en {func.__name__}: {e}")
+                logger.error(f"Error inesperado en {func.__name__}: {e}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                logger.error(f"Request args: {request.args}")
+                logger.error(f"Request form: {request.form}")                
                 flash('Ha ocurrido un error inesperado. Por favor, intente nuevamente.', 'error')
                 return ErrorHandler._get_safe_redirect(func.__name__)
         return wrapper
@@ -34,9 +42,11 @@ class ErrorHandler:
             try:
                 return func(*args, **kwargs)
             except ValidationError as e:
+                logger.warning(f"Error de validación en API {func.__name__}: {e}")
                 return jsonify({'error': str(e)}), 400
             except Exception as e:
-                print(f"Error inesperado en API {func.__name__}: {e}")
+                logger.error(f"Error inesperado en API {func.__name__}: {e}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
                 return jsonify({'error': 'Error interno del servidor'}), 500
         return wrapper
     

@@ -1,13 +1,36 @@
 # filepath: models/instancia_curso.py
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError
+from sga.utils.validators import ValidationError, safe_int_conversion
+from datetime import datetime
 
 class InstanciaCurso:
-    def __init__(self, id=None, semestre=None, anio=None, curso_id=None):
+    def __init__(self, id=None, semestre=None, anio=None, curso_id=None, cerrado=False):
         self.id = id
-        self.semestre = semestre
-        self.anio = anio
+        self.semestre = self._validate_semestre(semestre) if semestre is not None else None
+        self.anio = self._validate_anio(anio) if anio is not None else None
         self.curso_id = curso_id
+        self.cerrado = cerrado
+    
+    def _validate_semestre(self, semestre):
+        """Valida que el semestre esté en el rango correcto"""
+        try:
+            semestre_int = int(semestre)
+            if semestre_int not in [1, 2]:
+                raise ValidationError("El semestre debe ser 1 o 2")
+            return semestre_int
+        except (ValueError, TypeError):
+            raise ValidationError("El semestre debe ser un número válido")
+    
+    def _validate_anio(self, anio):
+        """Valida que el año esté en un rango razonable"""
+        try:
+            anio_int = int(anio)
+            anio_actual = datetime.now().year
+            if anio_int < 2000 or anio_int > anio_actual + 5:
+                raise ValidationError(f"El año debe estar entre 2000 y {anio_actual + 5}")
+            return anio_int
+        except (ValueError, TypeError):
+            raise ValidationError("El año debe ser un número válido")
 
     @classmethod
     def crear(cls, semestre, anio, curso_id):
@@ -84,8 +107,9 @@ class InstanciaCurso:
             
             query = "UPDATE instancias_curso SET semestre = %s, anio = %s, curso_id = %s WHERE id = %s"
             execute_query(query, (self.semestre, self.anio, self.curso_id, self.id))
-        except Exception as e:
-            raise ValidationError(f"Error al actualizar la instancia de curso: {str(e)}")    @classmethod
+        except Exception as e:            raise ValidationError(f"Error al actualizar la instancia de curso: {str(e)}")
+    
+    @classmethod
     def eliminar(cls, id):
         """Elimina una instancia de curso"""
         try:
@@ -126,48 +150,124 @@ class InstanciaCurso:
 
     @classmethod
     def cerrar_curso(cls, instancia_id):
-        """Cierra un curso y calcula las notas finales de todos los alumnos"""
+        """Cierra un curso y calcula las notas finales"""
         try:
-            from datetime import datetime
+            instancia_id = safe_int_conversion(instancia_id)
+            if instancia_id is None or instancia_id <= 0:
+                raise ValidationError("ID de instancia debe ser un entero positivo")
             
-            if not instancia_id:
-                return False
-            
-            # Verificar que no esté ya cerrado
+            # Verificar que la instancia existe
             instancia = cls.obtener_por_id(instancia_id)
-            if not instancia or getattr(instancia, 'cerrado', False):
-                return False
+            if not instancia:
+                raise ValidationError("La instancia de curso no existe")
+              # Verificar que no esté ya cerrada
+            if instancia.esta_cerrado():
+                raise ValidationError("El curso ya está cerrado")
             
-            # Obtener todos los alumnos inscritos en el curso
-            alumnos = cls.obtener_alumnos_curso(instancia_id)
+            # Verificar que todas las evaluaciones tengan notas
+            if not cls._verificar_notas_completas(instancia_id):
+                raise ValidationError("No se puede cerrar el curso: faltan notas por asignar")
             
-            # Calcular y guardar nota final para cada alumno
-            for alumno in alumnos:
-                try:
-                    nota_final = cls.calcular_nota_final_alumno(instancia_id, alumno['id'])
-                      # Guardar nota final en la tabla notas_finales
-                    query_nota = """
-                    REPLACE INTO notas_finales (instancia_curso_id, alumno_id, nota_final, fecha_calculo)
-                    VALUES (%s, %s, %s, %s)
-                    """
-                    execute_query(query_nota, (instancia_id, alumno['id'], nota_final, datetime.now()))
-                except Exception as e:
-                    print(f"Error al calcular nota final para alumno {alumno['id']}: {e}")
-                    continue
+            # Verificar que la suma de porcentajes sea 100%
+            if not cls._verificar_porcentajes_completos(instancia_id):
+                raise ValidationError("No se puede cerrar el curso: la suma de porcentajes de evaluaciones no es 100%")
             
-            # Marcar el curso como cerrado
-            query_cerrar = """
-            UPDATE instancias_curso 
-            SET cerrado = 1, fecha_cierre = %s
-            WHERE id = %s
-            """
-            execute_query(query_cerrar, (datetime.now(), instancia_id))        
+            # Calcular notas finales
+            cls._calcular_notas_finales(instancia_id)
+            
+            # Marcar como cerrado
+            query = "UPDATE instancias_curso SET cerrado = 1, fecha_cierre = %s WHERE id = %s"
+            fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            execute_query(query, (fecha_actual, instancia_id))
+            
             return True
-            
+        except ValidationError:
+            raise
         except Exception as e:
-            print(f"Error al cerrar curso {instancia_id}: {e}")
+            raise ValidationError(f"Error al cerrar curso: {str(e)}")
+    
+    @classmethod
+    def _verificar_notas_completas(cls, instancia_id):
+        """Verifica que todas las evaluaciones tengan notas para todos los alumnos inscritos"""
+        try:
+            query = """
+            SELECT COUNT(*) as faltantes FROM (
+                SELECT i.alumno_id, it.id as instancia_topico_id
+                FROM inscripciones i
+                JOIN secciones s ON i.instancia_curso_id = s.instancia_id
+                JOIN evaluaciones e ON s.id = e.seccion_id
+                JOIN instancias_topico it ON e.id = it.evaluacion_id
+                WHERE i.instancia_curso_id = %s
+                EXCEPT
+                SELECT n.alumno_id, n.instancia_topico_id
+                FROM notas n
+                JOIN instancias_topico it ON n.instancia_topico_id = it.id
+                JOIN evaluaciones e ON it.evaluacion_id = e.id
+                JOIN secciones s ON e.seccion_id = s.id
+                WHERE s.instancia_id = %s
+            ) as faltantes
+            """
+            resultado = execute_query(query, (instancia_id, instancia_id))
+            return resultado[0][0] == 0
+        except Exception:
             return False
-
+    
+    @classmethod
+    def _verificar_porcentajes_completos(cls, instancia_id):
+        """Verifica que la suma de porcentajes de evaluaciones sea 100%"""
+        try:
+            query = """
+            SELECT SUM(e.porcentaje) as suma_total
+            FROM evaluaciones e
+            JOIN secciones s ON e.seccion_id = s.id
+            WHERE s.instancia_id = %s
+            GROUP BY s.instancia_id
+            """
+            resultado = execute_query(query, (instancia_id,))
+            if not resultado:
+                return False
+            suma_total = float(resultado[0][0] or 0)
+            return abs(suma_total - 100.0) < 0.01  # Tolerar diferencias de redondeo
+        except Exception:
+            return False
+    
+    @classmethod
+    def _calcular_notas_finales(cls, instancia_id):
+        """Calcula las notas finales de todos los alumnos"""
+        try:
+            # Obtener todos los alumnos inscritos
+            query_alumnos = """
+            SELECT DISTINCT i.alumno_id, a.nombre
+            FROM inscripciones i
+            JOIN alumnos a ON i.alumno_id = a.id
+            WHERE i.instancia_curso_id = %s
+            """
+            alumnos = execute_query(query_alumnos, (instancia_id,))
+            
+            for alumno_id, nombre in alumnos:
+                # Calcular nota final para cada alumno
+                query_notas = """
+                SELECT n.nota, e.porcentaje
+                FROM notas n
+                JOIN instancias_topico it ON n.instancia_topico_id = it.id
+                JOIN evaluaciones e ON it.evaluacion_id = e.id
+                JOIN secciones s ON e.seccion_id = s.id                WHERE n.alumno_id = %s AND s.instancia_id = %s
+                """
+                notas_data = execute_query(query_notas, (alumno_id, instancia_id))
+                
+                if notas_data:
+                    nota_final = sum(float(nota) * (float(porcentaje) / 100.0) for nota, porcentaje in notas_data)
+                    nota_final = round(nota_final, 1)
+                      # Guardar o actualizar nota final
+                    query_final = """
+                    INSERT INTO notas_finales (alumno_id, instancia_curso_id, nota_final) 
+                    VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE nota_final = %s
+                    """
+                    execute_query(query_final, (alumno_id, instancia_id, nota_final, nota_final))
+        except Exception as e:
+            raise ValidationError(f"Error al calcular notas finales: {str(e)}")
+    
     @classmethod
     def obtener_alumnos_curso(cls, instancia_id):
         """Obtiene todos los alumnos inscritos en un curso a través de la tabla inscripciones"""

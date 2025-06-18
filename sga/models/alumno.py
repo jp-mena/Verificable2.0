@@ -3,12 +3,19 @@ from sga.utils.validators import ValidationError, safe_int_conversion, validate_
 import re
 from datetime import datetime
 
-class Alumno:
+class Alumno:    
     def __init__(self, nombre, correo, fecha_ingreso):
+        # Validar longitud del nombre
+        if len(nombre) > 100:
+            raise ValidationError("El nombre no puede exceder 100 caracteres")
+        
+        # Validar longitud del email
+        if len(correo) > 100:
+            raise ValidationError("El email no puede exceder 100 caracteres")
+            
         self.nombre = validate_required_string(nombre, "nombre")
         self.correo = validate_email(correo)
         self.fecha_ingreso = self._validate_fecha_ingreso(fecha_ingreso)
-    
     def _validate_fecha_ingreso(self, fecha):
         """Valida el formato de fecha de ingreso"""
         if not fecha:
@@ -23,7 +30,16 @@ class Alumno:
         
         try:
             # Verificar que sea una fecha válida
-            datetime.strptime(fecha_str, '%Y-%m-%d')
+            fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d')
+            
+            # Validar que no sea muy antigua (después de 1950)
+            if fecha_obj.year < 1950:
+                raise ValidationError("La fecha de ingreso no puede ser anterior a 1950")
+                
+            # Validar que no sea futura
+            if fecha_obj > datetime.now():
+                raise ValidationError("La fecha de ingreso no puede ser futura")
+                
             return fecha_str
         except ValueError:
             raise ValidationError("Fecha de ingreso no es válida")

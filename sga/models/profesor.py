@@ -1,16 +1,26 @@
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, safe_int_conversion, validate_email, validate_required_string
 
-class Profesor:
+class Profesor:      
     def __init__(self, nombre, correo):
-        self.nombre = validate_required_string(nombre, "nombre")
+        self.nombre = validate_required_string(nombre, "nombre", 100)  # Máximo 100 caracteres
         self.correo = validate_email(correo)
     
     def save(self):
         """Guarda un nuevo profesor en la base de datos"""
         try:
+            # Validar longitud de email
+            if len(self.correo) > 100:
+                raise ValidationError("El email no puede exceder 100 caracteres")
+              # Verificar que no exista un profesor con el mismo email
+            existing_profesor = self.get_by_correo(self.correo)
+            if existing_profesor:
+                raise ValidationError(f"Ya existe un profesor con el email {self.correo}")
+            
             query = "INSERT INTO profesores (nombre, correo) VALUES (%s, %s)"
             return execute_query(query, (self.nombre, self.correo))
+        except ValidationError:
+            raise
         except Exception as e:
             raise ValidationError(f"Error al guardar profesor: {str(e)}")
     

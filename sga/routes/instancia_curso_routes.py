@@ -44,16 +44,15 @@ def crear_instancia():
         InstanciaCurso.crear(semestre, anio, curso_id)
         flash('Instancia de curso creada exitosamente', 'success')
         return redirect(url_for('instancia_curso.listar_instancias'))
-    
-    # Obtener cursos para el formulario
+      # Obtener cursos para el formulario
     try:
         cursos = Curso.get_all()
-        cursos_list = [{'id': c[0], 'codigo': c[1], 'nombre': c[2]} for c in cursos]
+        # Los cursos ya son objetos, no necesitamos convertirlos
     except Exception:
-        cursos_list = []
+        cursos = []
         flash('Error al cargar la lista de cursos', 'warning')
     
-    return render_template('instancias_curso/crear.html', cursos=cursos_list)
+    return render_template('instancias_curso/crear.html', cursos=cursos)
 
 @instancia_curso_bp.route('/instancias-curso/<int:id>/editar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
@@ -96,16 +95,15 @@ def editar_instancia(id):
         
         flash('Instancia de curso actualizada exitosamente', 'success')
         return redirect(url_for('instancia_curso.listar_instancias'))
-    
-    # Obtener cursos para el formulario
+      # Obtener cursos para el formulario
     try:
         cursos = Curso.get_all()
-        cursos_list = [{'id': c[0], 'codigo': c[1], 'nombre': c[2]} for c in cursos]
+        # Los cursos ya son objetos, no necesitamos convertirlos
     except Exception:
-        cursos_list = []
+        cursos = []
         flash('Error al cargar la lista de cursos', 'warning')
     
-    return render_template('instancias_curso/editar.html', instancia=instancia, cursos=cursos_list)
+    return render_template('instancias_curso/editar.html', instancia=instancia, cursos=cursos)
 
 @instancia_curso_bp.route('/instancias-curso/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error
