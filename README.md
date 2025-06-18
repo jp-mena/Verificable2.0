@@ -19,14 +19,29 @@ python -m venv venv
 
 # macOS/Linux  
 source venv/bin/activate
-```
 
-### 2. Instalar dependencias
+# windows 
+.\venv\Scripts\Activate.ps1
+```
+### 2. Crear .env con credenciales
+
+Debes tener un archivo .env en la raíz con al menos:
+```bash
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=tu_clave
+DB_NAME=sga_db
+```
+reemplazando `tu_clave` por tu clave real de mysql
+
+
+### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Ejecutar aplicación
+### 4. Ejecutar aplicación
 ```bash
 python app.py
 ```
