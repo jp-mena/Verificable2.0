@@ -19,27 +19,12 @@ python -m venv venv
 
 # macOS/Linux  
 source venv/bin/activate
-
-# windows 
-.\venv\Scripts\Activate.ps1
 ```
 
 ### 2. Instalar dependencias
 ```bash
 pip install -r requirements.txt
 ```
-
-### 2. Crear .env con credenciales
-
-Debes tener un archivo .env en la raíz con al menos:
-```bash
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=tu_clave
-DB_NAME=sga_db
-```
-reemplazando `tu_clave` por tu clave real de mysql
 
 ### 3. Ejecutar aplicación
 ```bash
@@ -60,7 +45,6 @@ La aplicación estará disponible en: **http://127.0.0.1:5000**
 - **Cursos** (`/cursos`) - Crear, listar, editar, eliminar cursos
 - **Profesores** (`/profesores`) - Gestión completa de profesores  
 - **Alumnos** (`/alumnos`) - Registro y gestión de estudiantes
-- **Salas** (`/salas`) - CRUD de salas
 - **Instancias de Curso** (`/instancias-curso`) - Semestres/años con asignación de profesores
 - **Secciones** (`/secciones`) - Organización de estudiantes e inscripciones
 - **Evaluaciones** (`/evaluaciones`) - Tipos de evaluación con porcentajes
@@ -70,7 +54,6 @@ La aplicación estará disponible en: **http://127.0.0.1:5000**
 
 **3. Funcionalidades especiales:**
 - **Carga JSON** (`/cargar-json`) - Importación masiva de datos
-- **Generacion de Horarios** (`/horarios*`) - Genera horarios con las secciones y salas existentes.
 - **API REST** (`/api/*`) - Endpoints para todas las entidades
 
 ### Flujo recomendado para pruebas:
@@ -104,10 +87,6 @@ Verificable2.0/
 
 ## 🔧 Solución de Problemas
 
-### Error de permisos en Windows:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
 
 ### Error "Module not found":
 ```bash
@@ -115,5 +94,3 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install -r requirements.txt
 ```
 
-### Puerto ocupado:
-Cambiar puerto en `app.py`: `app.run(debug=True, port=5001)`
