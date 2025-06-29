@@ -1,5 +1,5 @@
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, validate_float_range, safe_int_conversion
+from sga.utils.validators import ValidationError, validate_float_range, parse_integer_field
 
 class Nota:
     def __init__(self, id=None, alumno_id=None, instancia_topico_id=None, nota=None):
@@ -39,8 +39,8 @@ class Nota:
     @classmethod
     def crear(cls, alumno_id, instancia_topico_id, nota):
         try:
-            alumno_id = safe_int_conversion(alumno_id)
-            instancia_topico_id = safe_int_conversion(instancia_topico_id)
+            alumno_id = parse_integer_field(alumno_id)
+            instancia_topico_id = parse_integer_field(instancia_topico_id)
             
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")

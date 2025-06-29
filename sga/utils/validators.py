@@ -132,7 +132,21 @@ def validate_form_data(form_data, validations):
     
     return validated_data
 
-def safe_int_conversion(value, field_name="Campo", allow_none=False):
+def parse_integer_field(value, field_name="Campo", allow_none=False):
+    """
+    Convierte un valor a entero validando el formato y nulidad.
+    
+    Args:
+        value: Valor a convertir
+        field_name: Nombre del campo para mensajes de error
+        allow_none: Si permite valores nulos
+        
+    Returns:
+        int: Valor convertido a entero o None si se permite
+        
+    Raises:
+        ValidationError: Si el valor no es convertible o está vacío cuando no se permite
+    """
     if value is None or value == '':
         if allow_none:
             return None
@@ -150,7 +164,21 @@ def safe_int_conversion(value, field_name="Campo", allow_none=False):
     except (ValueError, TypeError):
         raise ValidationError(f"{field_name} debe ser un número entero válido")
 
-def safe_float_conversion(value, field_name="Campo", allow_none=False):
+def parse_decimal_field(value, field_name="Campo", allow_none=False):
+    """
+    Convierte un valor a decimal validando el formato y nulidad.
+    
+    Args:
+        value: Valor a convertir
+        field_name: Nombre del campo para mensajes de error
+        allow_none: Si permite valores nulos
+        
+    Returns:
+        float: Valor convertido a decimal o None si se permite
+        
+    Raises:
+        ValidationError: Si el valor no es convertible o está vacío cuando no se permite
+    """
     if value is None or value == '':
         if allow_none:
             return None
@@ -170,7 +198,7 @@ def safe_float_conversion(value, field_name="Campo", allow_none=False):
 
 def validate_id_exists(id_value, check_function, field_name="ID", entity_name="registro"):
     try:
-        id_int = safe_int_conversion(id_value, field_name)
+        id_int = parse_integer_field(id_value, field_name)
         if not check_function(id_int):
             raise ValidationError(f"El {entity_name} seleccionado no existe")
         return id_int
@@ -180,19 +208,19 @@ def validate_id_exists(id_value, check_function, field_name="ID", entity_name="r
         raise ValidationError(f"Error al validar {field_name}: {str(e)}")
 
 def validate_percentage(value, field_name="Porcentaje"):
-    float_value = safe_float_conversion(value, field_name)
+    float_value = parse_decimal_field(value, field_name)
     if float_value < 0 or float_value > 100:
         raise ValidationError(f"{field_name} debe estar entre 0 y 100")
     return float_value
 
 def validate_semester(value, field_name="Semestre"):
-    int_value = safe_int_conversion(value, field_name)
+    int_value = parse_integer_field(value, field_name)
     if int_value not in [1, 2]:
         raise ValidationError(f"{field_name} debe ser 1 o 2")
     return int_value
 
 def validate_year(value, field_name="Año", min_year=2000, max_year=2030):
-    int_value = safe_int_conversion(value, field_name)
+    int_value = parse_integer_field(value, field_name)
     if int_value < min_year or int_value > max_year:
         raise ValidationError(f"{field_name} debe estar entre {min_year} y {max_year}")
     return int_value

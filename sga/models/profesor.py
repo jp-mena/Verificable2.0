@@ -1,5 +1,5 @@
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, safe_int_conversion, validate_email, validate_required_string
+from sga.utils.validators import ValidationError, parse_integer_field, validate_email, validate_required_string
 
 class Profesor:      
     def __init__(self, nombre, correo):
@@ -37,7 +37,7 @@ class Profesor:
     def crear(cls, nombre, correo):
         try:
             profesor = cls(nombre, correo)
-            profesor_id = profesor.save()
+            profesor.save()
             return profesor
         except ValidationError:
             raise
@@ -47,7 +47,7 @@ class Profesor:
     @staticmethod
     def get_by_id(profesor_id):
         try:
-            profesor_id = safe_int_conversion(profesor_id)
+            profesor_id = parse_integer_field(profesor_id)
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             
@@ -89,7 +89,7 @@ class Profesor:
     @staticmethod
     def update(profesor_id, nombre, correo):
         try:
-            profesor_id = safe_int_conversion(profesor_id)
+            profesor_id = parse_integer_field(profesor_id)
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             
@@ -107,7 +107,7 @@ class Profesor:
     @staticmethod
     def delete(profesor_id):
         try:
-            profesor_id = safe_int_conversion(profesor_id)
+            profesor_id = parse_integer_field(profesor_id)
             if profesor_id is None or profesor_id <= 0:
                 raise ValidationError("ID de profesor debe ser un entero positivo")
             

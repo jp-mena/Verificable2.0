@@ -1,9 +1,9 @@
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, safe_int_conversion, validate_required_string
+from sga.utils.validators import ValidationError, parse_integer_field, validate_required_string
 
 class Topico:
     def __init__(self, id=None, nombre=None, tipo=None):
-        self.id = safe_int_conversion(id) if id is not None else None
+        self.id = parse_integer_field(id) if id is not None else None
         self.nombre = validate_required_string(nombre, "nombre") if nombre else None
         if tipo:
             self.tipo = self._validate_tipo(tipo)
@@ -53,7 +53,7 @@ class Topico:
     @classmethod
     def obtener_por_id(cls, id):
         try:
-            id = safe_int_conversion(id)
+            id = parse_integer_field(id)
             if id is None or id <= 0:
                 raise ValidationError("ID de tópico debe ser un entero positivo")
             
@@ -101,7 +101,7 @@ class Topico:
     @classmethod
     def eliminar(cls, id):
         try:
-            id = safe_int_conversion(id)
+            id = parse_integer_field(id)
             if id is None or id <= 0:
                 raise ValidationError("ID de tópico debe ser un entero positivo")
             

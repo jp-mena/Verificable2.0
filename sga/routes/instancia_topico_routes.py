@@ -27,10 +27,18 @@ def _verificar_instancia_curso_cerrada(instancia_id):
         return bool(resultado[0][0])
     return False
 
+def _obtener_instancias_topico_para_listado():
+    """Query: Obtiene todas las instancias de tópico"""
+    return InstanciaTopico.obtener_todos()
+
+def _renderizar_listado_instancias_topico(instancias):
+    """Command: Renderiza la vista de listado de instancias de tópico"""
+    return render_template('instancias_topico/listar.html', instancias=instancias)
+
 @instancia_topico_bp.route('/instancias-topico')
 def listar_instancias():
-    instancias = InstanciaTopico.obtener_todos()
-    return render_template('instancias_topico/listar.html', instancias=instancias)
+    instancias = _obtener_instancias_topico_para_listado()
+    return _renderizar_listado_instancias_topico(instancias)
 
 @instancia_topico_bp.route('/instancias-topico/crear', methods=['GET', 'POST'])
 def crear_instancia():

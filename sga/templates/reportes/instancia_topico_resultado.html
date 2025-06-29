@@ -10,7 +10,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('reporte.index_reportes') }}">Reportes</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.reporte_instancia_topico') }}">Instancia de Tópico</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('reporte.generar_reporte_notas_por_instancia_topico') }}">Instancia de Tópico</a></li>
                     <li class="breadcrumb-item active">Resultado</li>
                 </ol>
             </nav>
@@ -59,14 +59,14 @@
     <!-- Acciones -->
     <div class="row mb-3">
         <div class="col-md-12">
-            <form method="POST" action="{{ url_for('reporte.reporte_instancia_topico') }}" style="display: inline;">
+            <form method="POST" action="{{ url_for('reporte.generar_reporte_notas_por_instancia_topico') }}" style="display: inline;">
                 <input type="hidden" name="instancia_topico_id" value="{{ notas[0].instancia_topico_id if notas else '' }}">
                 <input type="hidden" name="formato" value="csv">
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-file-csv"></i> Descargar CSV
                 </button>
             </form>
-            <a href="{{ url_for('reporte.reporte_instancia_topico') }}" class="btn btn-secondary">
+            <a href="{{ url_for('reporte.generar_reporte_notas_por_instancia_topico') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Nueva Consulta
             </a>
             <button onclick="window.print()" class="btn btn-info">

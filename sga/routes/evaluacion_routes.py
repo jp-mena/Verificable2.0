@@ -2,14 +2,14 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from sga.models.evaluacion import Evaluacion
 from sga.models.seccion import Seccion
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, validate_text_field, validate_percentage, safe_int_conversion
+from sga.utils.validators import ValidationError, validate_text_field, validate_percentage, parse_integer_field
 from sga.utils.error_handlers import ErrorHandler, safe_form_data, validate_required_fields
 
 evaluacion_bp = Blueprint('evaluacion', __name__)
 
 def _verificar_seccion_cerrada(seccion_id):
     try:
-        seccion_id = safe_int_conversion(seccion_id, 'ID de sección')
+        seccion_id = parse_integer_field(seccion_id, 'ID de sección')
         query = """
         SELECT ic.cerrado
         FROM secciones s
@@ -26,7 +26,7 @@ def _verificar_seccion_cerrada(seccion_id):
 def _verificar_instancia_curso_cerrada(instancia_id):
     """Verifica si una instancia de curso está cerrada"""
     try:
-        instancia_id = safe_int_conversion(instancia_id, 'ID de instancia')
+        instancia_id = parse_integer_field(instancia_id, 'ID de instancia')
         query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
         resultado = execute_query(query, (instancia_id,))
         if resultado:
@@ -35,14 +35,26 @@ def _verificar_instancia_curso_cerrada(instancia_id):
     except Exception:
         return True
 
+def _obtener_evaluaciones_para_listado():
+    """Query: Obtiene todas las evaluaciones"""
+    return Evaluacion.obtener_todos()
+
+def _renderizar_listado_evaluaciones(evaluaciones):
+    """Command: Renderiza la vista de listado de evaluaciones"""
+    return render_template('evaluaciones/listar.html', evaluaciones=evaluaciones)
+
+def _renderizar_listado_evaluaciones_con_error():
+    """Command: Renderiza la vista de listado con error"""
+    flash('Error al cargar las evaluaciones', 'error')
+    return render_template('evaluaciones/listar.html', evaluaciones=[])
+
 @evaluacion_bp.route('/evaluaciones')
 def listar_evaluaciones():
     try:
-        evaluaciones = Evaluacion.obtener_todos()
-        return render_template('evaluaciones/listar.html', evaluaciones=evaluaciones)
+        evaluaciones = _obtener_evaluaciones_para_listado()
+        return _renderizar_listado_evaluaciones(evaluaciones)
     except Exception as e:
-        flash('Error al cargar las evaluaciones', 'error')
-        return render_template('evaluaciones/listar.html', evaluaciones=[])
+        return _renderizar_listado_evaluaciones_con_error()
 
 @evaluacion_bp.route('/evaluaciones/crear', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
@@ -54,7 +66,7 @@ def crear_evaluacion():
         
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
         porcentaje = validate_percentage(data['porcentaje'])
-        seccion_id = safe_int_conversion(data['seccion_id'], 'Sección')
+        seccion_id = parse_integer_field(data['seccion_id'], 'Sección')
         
         seccion = Seccion.obtener_por_id(seccion_id)
         if not seccion:
@@ -83,7 +95,7 @@ def crear_evaluacion():
 @ErrorHandler.handle_route_error
 def editar_evaluacion(id):
     """Edita una evaluación"""
-    evaluacion_id = safe_int_conversion(id, 'ID de la evaluación')
+    evaluacion_id = parse_integer_field(id, 'ID de la evaluación')
     
     evaluacion = Evaluacion.obtener_por_id(evaluacion_id)
     if not evaluacion:
@@ -99,7 +111,7 @@ def editar_evaluacion(id):
         
         nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
         porcentaje = validate_percentage(data['porcentaje'])
-        nueva_seccion_id = safe_int_conversion(data['seccion_id'], 'Sección')
+        nueva_seccion_id = parse_integer_field(data['seccion_id'], 'Sección')
         
         seccion = Seccion.obtener_por_id(nueva_seccion_id)
         if not seccion:
@@ -131,7 +143,7 @@ def editar_evaluacion(id):
 @evaluacion_bp.route('/evaluaciones/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error
 def eliminar_evaluacion(id):
-    evaluacion_id = safe_int_conversion(id, 'ID de la evaluación')
+    evaluacion_id = parse_integer_field(id, 'ID de la evaluación')
     
     evaluacion = Evaluacion.obtener_por_id(evaluacion_id)
     if not evaluacion:

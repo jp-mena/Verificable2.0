@@ -11,108 +11,116 @@ reporte_bp = Blueprint('reporte', __name__)
 def index_reportes():
     return render_template('reportes/index.html')
 
+def _obtener_instancias_topico_disponibles():
+    """Query: Obtiene las instancias de tópico disponibles"""
+    return Reporte.obtener_instancias_topico_disponibles()
+
+def _obtener_notas_instancia_topico(instancia_topico_id):
+    """Query: Obtiene las notas de una instancia de tópico"""
+    return Reporte.obtener_notas_instancia_topico(instancia_topico_id)
+
+def _validar_instancia_topico_id(form_data):
+    """Query: Valida y extrae el ID de instancia de tópico"""
+    if 'instancia_topico_id' not in form_data or not form_data['instancia_topico_id'].strip():
+        raise ValueError('Debe seleccionar una instancia de tópico')
+    
+    try:
+        instancia_topico_id = int(form_data['instancia_topico_id'])
+        if instancia_topico_id <= 0:
+            raise ValueError("ID debe ser positivo")
+        return instancia_topico_id
+    except (ValueError, TypeError):
+        raise ValueError('ID de instancia de tópico inválido')
+
+def _renderizar_formulario_reporte_instancia_topico():
+    """Command: Renderiza el formulario del reporte"""
+    instancias_disponibles = _obtener_instancias_topico_disponibles()
+    return render_template('reportes/instancia_topico.html', 
+                         instancias_disponibles=instancias_disponibles)
+
+def _renderizar_resultado_reporte_instancia_topico(notas, contexto):
+    """Command: Renderiza el resultado del reporte"""
+    return render_template('reportes/instancia_topico_resultado.html', 
+                         notas=notas, 
+                         contexto=contexto)
+
+def _procesar_error_validacion(mensaje):
+    """Command: Procesa errores de validación"""
+    flash(mensaje, 'error')
+    return redirect(url_for('reporte.reporte_instancia_topico'))
+
+def _procesar_error_sin_datos():
+    """Command: Procesa cuando no hay datos"""
+    flash('No se encontraron notas para la instancia de tópico seleccionada', 'warning')
+    return redirect(url_for('reporte.reporte_instancia_topico'))
+
 @reporte_bp.route('/reportes/instancia-topico', methods=['GET', 'POST'])
-def reporte_instancia_topico():
+def generar_reporte_notas_por_instancia_topico():
+    """Genera reporte de notas de alumnos para una instancia específica de tópico"""
     if request.method == 'POST':
         try:
-            if 'instancia_topico_id' not in request.form or not request.form['instancia_topico_id'].strip():
-                flash('Debe seleccionar una instancia de tópico', 'error')
-                return redirect(url_for('reporte.reporte_instancia_topico'))
-            
-            try:
-                instancia_topico_id = int(request.form['instancia_topico_id'])
-                if instancia_topico_id <= 0:
-                    raise ValueError("ID debe ser positivo")
-            except (ValueError, TypeError):
-                flash('ID de instancia de tópico inválido', 'error')
-                return redirect(url_for('reporte.reporte_instancia_topico'))
+            instancia_topico_id = _validar_instancia_topico_id(request.form)
             
             formato = request.form.get('formato', 'html')
             if formato not in ['html', 'csv']:
                 formato = 'html'
             
-            notas = Reporte.obtener_notas_instancia_topico(instancia_topico_id)
+            notas = _obtener_notas_instancia_topico(instancia_topico_id)
             
             if not notas:
-                flash('No se encontraron notas para la instancia de tópico seleccionada', 'warning')
-                return redirect(url_for('reporte.reporte_instancia_topico'))
+                return _procesar_error_sin_datos()
             
             contexto = notas[0] if notas else {}
             
             if formato == 'csv':
                 return _generar_csv_instancia_topico(notas, contexto)
             
-            return render_template('reportes/instancia_topico_resultado.html', 
-                                 notas=notas, 
-                                 contexto=contexto)
+            return _renderizar_resultado_reporte_instancia_topico(notas, contexto)
                                  
         except ValueError as ve:
-            flash(f'Error de validación: {str(ve)}', 'error')
+            return _procesar_error_validacion(str(ve))
         except Exception as e:
-            flash(f'Error inesperado al generar el reporte: {str(e)}', 'error')
+            return _procesar_error_validacion(f'Error inesperado al generar el reporte: {str(e)}')
     
-    instancias_disponibles = Reporte.obtener_instancias_topico_disponibles()
-    return render_template('reportes/instancia_topico.html', 
-                         instancias_disponibles=instancias_disponibles)
+    return _renderizar_formulario_reporte_instancia_topico()
 
 @reporte_bp.route('/reportes/notas-finales-seccion', methods=['GET', 'POST'])
-def reporte_notas_finales_seccion():
-    """Reporte de notas finales de una sección de curso cerrado"""
+def generar_reporte_resumen_final_seccion():
+    """Genera reporte resumen con notas finales de una sección de curso cerrado"""
     if request.method == 'POST':
         try:
-            if 'instancia_curso_id' not in request.form or not request.form['instancia_curso_id'].strip():
-                flash('Debe seleccionar un curso', 'error')
-                return redirect(url_for('reporte.reporte_notas_finales_seccion'))
-            
-            if 'seccion_numero' not in request.form or not request.form['seccion_numero'].strip():
-                flash('Debe seleccionar una sección', 'error')
-                return redirect(url_for('reporte.reporte_notas_finales_seccion'))
-            
-            try:
-                instancia_curso_id = int(request.form['instancia_curso_id'])
-                seccion_numero = int(request.form['seccion_numero'])
-                if instancia_curso_id <= 0 or seccion_numero <= 0:
-                    raise ValueError("Los IDs deben ser positivos")
-            except (ValueError, TypeError):
-                flash('Los datos del curso y sección deben ser números válidos', 'error')
-                return redirect(url_for('reporte.reporte_notas_finales_seccion'))
+            instancia_curso_id, seccion_numero = _validar_datos_reporte_notas_finales(request.form)
             
             formato = request.form.get('formato', 'html')
             if formato not in ['html', 'csv']:
                 formato = 'html'
             
-            notas = Reporte.obtener_notas_finales_seccion(instancia_curso_id, seccion_numero)
+            notas = _obtener_notas_finales_seccion(instancia_curso_id, seccion_numero)
             if not notas:
-                flash('No se encontraron notas finales para la sección seleccionada', 'warning')
-                return redirect(url_for('reporte.reporte_notas_finales_seccion'))
+                return _procesar_error_sin_notas_finales()
             
             seccion_info = notas[0] if notas else {}
-            estadisticas = Reporte.calcular_estadisticas_seccion(notas)
+            estadisticas = _calcular_estadisticas_seccion(notas)
             
             if formato == 'csv':
                 return _generar_csv_notas_finales(notas, seccion_info)
             
-            return render_template('reportes/notas_finales_resultado.html', 
-                                 notas=notas, 
-                                 seccion_info=seccion_info,
-                                 estadisticas=estadisticas)
-        except ValueError:
-            flash('Error en los datos seleccionados', 'error')
+            return _renderizar_resultado_reporte_notas_finales(notas, seccion_info, estadisticas)
+        except ValueError as ve:
+            return _procesar_error_reporte_notas_finales(str(ve))
         except Exception as e:
-            flash(f'Error al generar el reporte: {str(e)}', 'error')
+            return _procesar_error_reporte_notas_finales(f'Error al generar el reporte: {str(e)}')
     
-    cursos_cerrados = Reporte.obtener_cursos_cerrados()
-    return render_template('reportes/notas_finales_seccion.html', 
-                         cursos_cerrados=cursos_cerrados)
+    return _renderizar_formulario_reporte_notas_finales()
 
 @reporte_bp.route('/reportes/certificado-notas', methods=['GET', 'POST'])
-def reporte_certificado_notas():
-    """Certificado de notas de un alumno - todos los cursos cerrados"""
+def generar_certificado_academico_alumno():
+    """Genera certificado académico completo con notas de todos los cursos cerrados de un alumno"""
     if request.method == 'POST':
         try:
             if 'alumno_id' not in request.form or not request.form['alumno_id'].strip():
                 flash('Debe seleccionar un alumno', 'error')
-                return redirect(url_for('reporte.reporte_certificado_notas'))
+                return redirect(url_for('reporte.generar_certificado_academico_alumno'))
             
             try:
                 alumno_id = int(request.form['alumno_id'])
@@ -120,7 +128,7 @@ def reporte_certificado_notas():
                     raise ValueError("ID debe ser positivo")
             except (ValueError, TypeError):
                 flash('ID de alumno inválido', 'error')
-                return redirect(url_for('reporte.reporte_certificado_notas'))
+                return redirect(url_for('reporte.generar_certificado_academico_alumno'))
             
             formato = request.form.get('formato', 'html')
             if formato not in ['html', 'csv']:
@@ -129,7 +137,7 @@ def reporte_certificado_notas():
             alumno = Alumno.obtener_por_id(alumno_id)
             if not alumno:
                 flash('Alumno no encontrado', 'error')
-                return redirect(url_for('reporte.reporte_certificado_notas'))
+                return redirect(url_for('reporte.generar_certificado_academico_alumno'))
             
             certificado = Reporte.obtener_certificado_notas_alumno(alumno_id)
             
@@ -157,7 +165,8 @@ def reporte_certificado_notas():
                          alumnos_disponibles=alumnos)
 
 @reporte_bp.route('/api/reportes/secciones/<int:instancia_curso_id>')
-def api_obtener_secciones(instancia_curso_id):
+def obtener_secciones_por_instancia_curso(instancia_curso_id):
+    """Obtiene las secciones disponibles para una instancia de curso específica"""
     try:
         secciones = Reporte.obtener_secciones_curso_cerrado(instancia_curso_id)
         return jsonify(secciones)
@@ -297,3 +306,51 @@ def exportar_certificado_csv(alumno_id):
     except Exception as e:
         flash(f'Error al exportar: {str(e)}', 'error')
         return redirect(url_for('reporte.certificado_notas'))
+
+def _validar_datos_reporte_notas_finales(form_data):
+    """Query: Valida y extrae datos del formulario de notas finales"""
+    if 'instancia_curso_id' not in form_data or not form_data['instancia_curso_id'].strip():
+        raise ValueError('Debe seleccionar un curso')
+    
+    if 'seccion_numero' not in form_data or not form_data['seccion_numero'].strip():
+        raise ValueError('Debe seleccionar una sección')
+    
+    try:
+        instancia_curso_id = int(form_data['instancia_curso_id'])
+        seccion_numero = int(form_data['seccion_numero'])
+        if instancia_curso_id <= 0 or seccion_numero <= 0:
+            raise ValueError("Los IDs deben ser positivos")
+        return instancia_curso_id, seccion_numero
+    except (ValueError, TypeError):
+        raise ValueError('Los datos del curso y sección deben ser números válidos')
+
+def _obtener_notas_finales_seccion(instancia_curso_id, seccion_numero):
+    """Query: Obtiene notas finales de una sección"""
+    return Reporte.obtener_notas_finales_seccion(instancia_curso_id, seccion_numero)
+
+def _calcular_estadisticas_seccion(notas):
+    """Query: Calcula estadísticas de una sección"""
+    return Reporte.calcular_estadisticas_seccion(notas)
+
+def _renderizar_formulario_reporte_notas_finales():
+    """Command: Renderiza el formulario del reporte de notas finales"""
+    cursos_cerrados = Reporte.obtener_cursos_cerrados()
+    return render_template('reportes/notas_finales_seccion.html', 
+                         cursos_cerrados=cursos_cerrados)
+
+def _renderizar_resultado_reporte_notas_finales(notas, seccion_info, estadisticas):
+    """Command: Renderiza el resultado del reporte de notas finales"""
+    return render_template('reportes/notas_finales_resultado.html', 
+                         notas=notas, 
+                         seccion_info=seccion_info,
+                         estadisticas=estadisticas)
+
+def _procesar_error_sin_notas_finales():
+    """Command: Procesa cuando no se encuentran notas finales"""
+    flash('No se encontraron notas finales para la sección seleccionada', 'warning')
+    return redirect(url_for('reporte.reporte_notas_finales_seccion'))
+
+def _procesar_error_reporte_notas_finales(mensaje):
+    """Command: Procesa errores en el reporte de notas finales"""
+    flash(mensaje, 'error')
+    return redirect(url_for('reporte.reporte_notas_finales_seccion'))

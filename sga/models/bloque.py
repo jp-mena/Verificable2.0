@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from sga.db.database import execute_query
 from sga.utils.validators import (
-    ValidationError, safe_int_conversion, validate_required_string
+    ValidationError, parse_integer_field, validate_required_string
 )
 
 
@@ -12,7 +12,7 @@ TIME_RE  = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 
 class Bloque:
     def __init__(self, dia, inicio, fin, id=None):
-        self.dia    = safe_int_conversion(dia)
+        self.dia    = parse_integer_field(dia)
         if not 1 <= self.dia <= 6:
             raise ValidationError("El campo 'dia' debe ser 1-6 (lun-sáb).")
 

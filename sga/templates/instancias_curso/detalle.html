@@ -28,10 +28,10 @@
                     <i class="fas fa-chart-bar"></i> Reportes
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ url_for('reporte.reporte_notas_finales_seccion') }}">
+                    <li><a class="dropdown-item" href="{{ url_for('reporte.generar_reporte_resumen_final_seccion') }}">
                         <i class="fas fa-graduation-cap me-2"></i>Notas Finales de Sección
                     </a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('reporte.reporte_instancia_topico') }}">
+                    <li><a class="dropdown-item" href="{{ url_for('reporte.generar_reporte_notas_por_instancia_topico') }}">
                         <i class="fas fa-tasks me-2"></i>Notas por Tópico
                     </a></li>
                     <li><hr class="dropdown-divider"></li>

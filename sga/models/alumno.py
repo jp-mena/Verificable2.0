@@ -1,5 +1,5 @@
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, safe_int_conversion, validate_email, validate_required_string
+from sga.utils.validators import ValidationError, parse_integer_field, validate_email, validate_required_string
 import re
 from datetime import datetime
 
@@ -42,7 +42,7 @@ class Alumno:
         try:
             alumno = cls(nombre, correo, fecha_ingreso)
             query = "INSERT INTO alumnos (nombre, correo, fecha_ingreso) VALUES (%s, %s, %s)"
-            id_alumno = execute_query(query, (alumno.nombre, alumno.correo, alumno.fecha_ingreso))
+            execute_query(query, (alumno.nombre, alumno.correo, alumno.fecha_ingreso))
             return alumno
         except ValidationError:
             raise
@@ -75,7 +75,7 @@ class Alumno:
     @staticmethod
     def get_by_id(alumno_id):
         try:
-            alumno_id = safe_int_conversion(alumno_id)
+            alumno_id = parse_integer_field(alumno_id)
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             
@@ -90,7 +90,7 @@ class Alumno:
     @staticmethod
     def update(alumno_id, nombre, correo, fecha_ingreso):
         try:
-            alumno_id = safe_int_conversion(alumno_id)
+            alumno_id = parse_integer_field(alumno_id)
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             
@@ -116,7 +116,7 @@ class Alumno:
     @staticmethod
     def delete(alumno_id):
         try:
-            alumno_id = safe_int_conversion(alumno_id)
+            alumno_id = parse_integer_field(alumno_id)
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             

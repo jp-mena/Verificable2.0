@@ -1,4 +1,7 @@
-<!-- filepath: templates/reportes/certificado_resultado.html -->
+<!-- filepa                <a href="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>                {% if certificado %}
+                <form method="POST" action="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="d-inline">templates/reportes/certificado_resultado.html -->
 {% extends "base.html" %}
 
 {% block title %}Certificado de Notas - Resultados{% endblock %}
@@ -9,10 +12,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Reporte C: Certificado de Notas</h2>
             <div>
-                <a href="{{ url_for('reporte.reporte_certificado_notas') }}" class="btn btn-secondary">
+                <a href="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>                {% if notas %}
-                <form method="POST" action="{{ url_for('reporte.reporte_certificado_notas') }}" class="d-inline">
+                <form method="POST" action="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="d-inline">
                     <input type="hidden" name="alumno_id" value="{{ alumno_info['id'] }}">
                     <input type="hidden" name="formato" value="csv">
                     <button type="submit" class="btn btn-success">

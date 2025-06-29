@@ -226,163 +226,260 @@ def procesar_carga_entidad(entidad):
     return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
 
 def procesar_entidad_especifica(entidad, datos):
+    """
+    Procesa una entidad específica delegando a funciones especializadas.
+    Aplica el patrón Strategy para manejar diferentes tipos de entidades.
+    """
+    procesadores = {
+        'cursos': _procesar_cursos,
+        'profesores': _procesar_profesores,
+        'alumnos': _procesar_alumnos,
+        'instancias_curso': _procesar_instancias_curso,
+        'secciones': _procesar_secciones,
+        'topicos': _procesar_topicos,
+        'evaluaciones': _procesar_evaluaciones,
+        'instancias_topico': _procesar_instancias_topico,
+        'inscripciones': _procesar_inscripciones,
+        'notas': _procesar_notas
+    }
+    
+    if entidad not in procesadores:
+        return f"Error: Entidad '{entidad}' no soportada"
+    
+    try:
+        return procesadores[entidad](datos)
+    except Exception as e:
+        return f"Error general procesando {entidad}: {str(e)}"
+
+
+def _procesar_cursos(datos):
+    """Procesa la carga masiva de cursos"""
     total_procesados = 0
     errores = 0
     
-    try:
-        if entidad == 'cursos':
-            for item in datos:
-                try:
-                    curso = Curso(item['codigo'], item['nombre'], item.get('creditos', 4), item.get('requisitos', ''))
-                    curso.save()
-                    total_procesados += 1
-                except Exception as e:
-                    if "Duplicate entry" not in str(e):
-                        print(f"Error creando curso: {e}")
-                        errores += 1
-                    
-        elif entidad == 'profesores':
-            for item in datos:
-                try:
-                    Profesor.crear(item['nombre'], item['correo'])
-                    total_procesados += 1
-                except Exception as e:
-                    if "Duplicate entry" not in str(e):
-                        print(f"Error creando profesor: {e}")
-                        errores += 1
-                    
-        elif entidad == 'alumnos':
-            for item in datos:
-                try:
-                    Alumno.crear(item['nombre'], item['correo'], item.get('fecha_ingreso', None))
-                    total_procesados += 1
-                except Exception as e:
-                    if "Duplicate entry" not in str(e):
-                        print(f"Error creando alumno: {e}")
-                        errores += 1
-                    
-        elif entidad == 'instancias_curso':
-            for item in datos:
-                try:
-                    curso = Curso.get_by_codigo(item['curso_codigo'])
-                    if curso:
-                        InstanciaCurso.crear(item['semestre'], item['anio'], curso.id)
-                        total_procesados += 1
-                    else:
-                        print(f"Curso no encontrado: {item['curso_codigo']}")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando instancia de curso: {e}")
-                    errores += 1
-                    
-        elif entidad == 'secciones':
-            for item in datos:
-                try:
-                    instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
-                    profesor = Profesor.obtener_por_correo(item['profesor_correo'])
-                    
-                    if instancia and profesor:
-                        Seccion.crear(item['numero'], instancia.id, profesor.id)
-                        total_procesados += 1
-                    else:
-                        print(f"Instancia o profesor no encontrado para sección {item['numero']}")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando sección: {e}")
-                    errores += 1
-                    
-        elif entidad == 'topicos':
-            for item in datos:
-                try:
-                    Topico.crear(item['nombre'], item.get('tipo', 'control'))
-                    total_procesados += 1
-                except Exception as e:
-                    if "Duplicate entry" not in str(e):
-                        print(f"Error creando tópico: {e}")
-                        errores += 1
-                    
-        elif entidad == 'evaluaciones':
-            for item in datos:
-                try:
-                    seccion = _buscar_seccion(item['curso_codigo'], item['semestre'], item['anio'], item['seccion_numero'])
-                    
-                    if seccion:
-                        Evaluacion.crear(item['nombre'], item['porcentaje'], seccion.id)
-                        total_procesados += 1
-                    else:
-                        print(f"Sección no encontrada para evaluación {item['nombre']}")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando evaluación: {e}")
-                    errores += 1
-                    
-        elif entidad == 'instancias_topico':
-            for item in datos:
-                try:
-                    topico = Topico.obtener_por_nombre(item['topico_nombre'])
-                    if not topico:
-                        print(f"Tópico no encontrado: {item['topico_nombre']}")
-                        errores += 1
-                        continue
-                        
-                    evaluacion = _buscar_evaluacion(item['evaluacion_nombre'], item['curso_codigo'], item['semestre'], item['anio'])
-                    if not evaluacion:
-                        print(f"Evaluación no encontrada: {item['evaluacion_nombre']} para curso {item['curso_codigo']}")
-                        errores += 1
-                        continue
-                    
-                    if topico and evaluacion:
-                        InstanciaTopico.crear(item['nombre'], item['peso'], topico.id, evaluacion.id)
-                        total_procesados += 1
-                    else:
-                        print(f"Tópico o evaluación no encontrado para instancia de tópico {item['nombre']}")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando instancia de tópico: {e}")
-                    errores += 1
-                    
-        elif entidad == 'inscripciones':
-            for item in datos:
-                try:
-                    alumno = Alumno.obtener_por_correo(item['alumno_correo'])
-                    instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
-                    
-                    if alumno and instancia:
-                        Inscripcion.crear(alumno.id, instancia.id, item.get('fecha_inscripcion', None))
-                        total_procesados += 1
-                    else:
-                        print(f"Alumno o instancia no encontrado para inscripción")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando inscripción: {e}")
-                    errores += 1
-                    
-        elif entidad == 'notas':
-            for item in datos:
-                try:
-                    alumno = Alumno.obtener_por_correo(item['alumno_correo'])
-                    instancia_topico = _buscar_instancia_topico(
-                        item['instancia_topico_nombre'], 
-                        item['evaluacion_nombre'],
-                        item['curso_codigo'], 
-                        item['semestre'], 
-                        item['anio']
-                    )
-                    
-                    if alumno and instancia_topico:
-                        Nota.crear(alumno.id, instancia_topico.id, item['nota'])
-                        total_procesados += 1
-                    else:
-                        print(f"Alumno o instancia de tópico no encontrado para nota")
-                        errores += 1
-                except Exception as e:
-                    print(f"Error creando nota: {e}")
-                    errores += 1
-        
-        return f"{total_procesados} registros creados, {errores} errores"
-        
-    except Exception as e:
-        return f"Error general: {str(e)}"
+    for item in datos:
+        try:
+            curso = Curso(
+                item['codigo'], 
+                item['nombre'], 
+                item.get('creditos', 4), 
+                item.get('requisitos', '')
+            )
+            curso.save()
+            total_procesados += 1
+        except Exception as e:
+            if "Duplicate entry" not in str(e):
+                print(f"Error creando curso: {e}")
+                errores += 1
+    
+    return f"{total_procesados} cursos creados, {errores} errores"
+
+
+def _procesar_profesores(datos):
+    """Procesa la carga masiva de profesores"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            Profesor.crear(item['nombre'], item['correo'])
+            total_procesados += 1
+        except Exception as e:
+            if "Duplicate entry" not in str(e):
+                print(f"Error creando profesor: {e}")
+                errores += 1
+    
+    return f"{total_procesados} profesores creados, {errores} errores"
+
+
+def _procesar_alumnos(datos):
+    """Procesa la carga masiva de alumnos"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            Alumno.crear(item['nombre'], item['correo'], item.get('fecha_ingreso', None))
+            total_procesados += 1
+        except Exception as e:
+            if "Duplicate entry" not in str(e):
+                print(f"Error creando alumno: {e}")
+                errores += 1
+    
+    return f"{total_procesados} alumnos creados, {errores} errores"
+
+
+def _procesar_instancias_curso(datos):
+    """Procesa la carga masiva de instancias de curso"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            curso = Curso.get_by_codigo(item['curso_codigo'])
+            if curso:
+                InstanciaCurso.crear(item['semestre'], item['anio'], curso.id)
+                total_procesados += 1
+            else:
+                print(f"Curso no encontrado: {item['curso_codigo']}")
+                errores += 1
+        except Exception as e:
+            print(f"Error creando instancia de curso: {e}")
+            errores += 1
+    
+    return f"{total_procesados} instancias de curso creadas, {errores} errores"
+
+
+def _procesar_secciones(datos):
+    """Procesa la carga masiva de secciones"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
+            profesor = Profesor.obtener_por_correo(item['profesor_correo'])
+            
+            if instancia and profesor:
+                Seccion.crear(item['numero'], instancia.id, profesor.id)
+                total_procesados += 1
+            else:
+                print(f"Instancia o profesor no encontrado para sección {item['numero']}")
+                errores += 1
+        except Exception as e:
+            print(f"Error creando sección: {e}")
+            errores += 1
+    
+    return f"{total_procesados} secciones creadas, {errores} errores"
+
+
+def _procesar_topicos(datos):
+    """Procesa la carga masiva de tópicos"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            Topico.crear(item['nombre'], item.get('tipo', 'control'))
+            total_procesados += 1
+        except Exception as e:
+            if "Duplicate entry" not in str(e):
+                print(f"Error creando tópico: {e}")
+                errores += 1
+    
+    return f"{total_procesados} tópicos creados, {errores} errores"
+
+
+def _procesar_evaluaciones(datos):
+    """Procesa la carga masiva de evaluaciones"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            seccion = _buscar_seccion(
+                item['curso_codigo'], 
+                item['semestre'], 
+                item['anio'], 
+                item['seccion_numero']
+            )
+            
+            if seccion:
+                Evaluacion.crear(item['nombre'], item['porcentaje'], seccion.id)
+                total_procesados += 1
+            else:
+                print(f"Sección no encontrada para evaluación {item['nombre']}")
+                errores += 1
+        except Exception as e:
+            print(f"Error creando evaluación: {e}")
+            errores += 1
+    
+    return f"{total_procesados} evaluaciones creadas, {errores} errores"
+
+
+def _procesar_instancias_topico(datos):
+    """Procesa la carga masiva de instancias de tópico"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            topico = Topico.obtener_por_nombre(item['topico_nombre'])
+            if not topico:
+                print(f"Tópico no encontrado: {item['topico_nombre']}")
+                errores += 1
+                continue
+                
+            evaluacion = _buscar_evaluacion(
+                item['evaluacion_nombre'], 
+                item['curso_codigo'], 
+                item['semestre'], 
+                item['anio']
+            )
+            if not evaluacion:
+                print(f"Evaluación no encontrada: {item['evaluacion_nombre']} para curso {item['curso_codigo']}")
+                errores += 1
+                continue
+            
+            InstanciaTopico.crear(item['nombre'], item['peso'], topico.id, evaluacion.id)
+            total_procesados += 1
+        except Exception as e:
+            print(f"Error creando instancia de tópico: {e}")
+            errores += 1
+    
+    return f"{total_procesados} instancias de tópico creadas, {errores} errores"
+
+
+def _procesar_inscripciones(datos):
+    """Procesa la carga masiva de inscripciones"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            alumno = Alumno.obtener_por_correo(item['alumno_correo'])
+            instancia = _buscar_instancia_curso(item['curso_codigo'], item['semestre'], item['anio'])
+            
+            if alumno and instancia:
+                Inscripcion.crear(alumno.id, instancia.id, item.get('fecha_inscripcion', None))
+                total_procesados += 1
+            else:
+                print(f"Alumno o instancia no encontrado para inscripción")
+                errores += 1
+        except Exception as e:
+            print(f"Error creando inscripción: {e}")
+            errores += 1
+    
+    return f"{total_procesados} inscripciones creadas, {errores} errores"
+
+
+def _procesar_notas(datos):
+    """Procesa la carga masiva de notas"""
+    total_procesados = 0
+    errores = 0
+    
+    for item in datos:
+        try:
+            alumno = Alumno.obtener_por_correo(item['alumno_correo'])
+            instancia_topico = _buscar_instancia_topico(
+                item['instancia_topico_nombre'], 
+                item['evaluacion_nombre'],
+                item['curso_codigo'], 
+                item['semestre'], 
+                item['anio']
+            )
+            
+            if alumno and instancia_topico:
+                Nota.crear(alumno.id, instancia_topico.id, item['nota'])
+                total_procesados += 1
+            else:
+                print(f"Alumno o instancia de tópico no encontrado para nota")
+                errores += 1
+        except Exception as e:
+            print(f"Error creando nota: {e}")
+            errores += 1
+    
+    return f"{total_procesados} notas creadas, {errores} errores"
 
 def _buscar_instancia_curso(curso_codigo, semestre, anio):
     try:

@@ -1,5 +1,5 @@
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, safe_int_conversion, validate_required_string
+from sga.utils.validators import ValidationError, parse_integer_field, validate_required_string
 import re
 
 class Curso:
@@ -71,7 +71,7 @@ class Curso:
     @classmethod
     def get_by_id(cls, curso_id):
         try:
-            curso_id = safe_int_conversion(curso_id)
+            curso_id = parse_integer_field(curso_id)
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
@@ -125,7 +125,7 @@ class Curso:
     @staticmethod
     def update(curso_id, codigo, nombre, creditos=4, requisitos=None):
         try:
-            curso_id = safe_int_conversion(curso_id)
+            curso_id = parse_integer_field(curso_id)
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
@@ -142,7 +142,7 @@ class Curso:
     @staticmethod
     def delete(curso_id):
         try:
-            curso_id = safe_int_conversion(curso_id)
+            curso_id = parse_integer_field(curso_id)
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
@@ -176,8 +176,18 @@ class Curso:
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):
+        """
+        Valida una lista de códigos de requisitos.
+        
+        Args:
+            requisitos_list: Lista de códigos de cursos
+            curso_codigo: Código del curso actual (para evitar auto-referencia)
+            
+        Raises:
+            ValidationError: Si algún requisito es inválido
+        """
         if not requisitos_list:
-            return True
+            return
             
         for codigo in requisitos_list:
             if curso_codigo and codigo.upper() == curso_codigo.upper():
@@ -186,5 +196,3 @@ class Curso:
             existing = Curso.get_by_codigo(codigo)
             if not existing:
                 raise ValidationError(f"El curso prerrequisito {codigo} no existe")
-        
-        return True

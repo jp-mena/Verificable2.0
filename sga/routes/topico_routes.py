@@ -1,20 +1,32 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from sga.models.topico import Topico
-from sga.utils.validators import ValidationError, validate_text_field, validate_choice, safe_int_conversion
+from sga.utils.validators import ValidationError, validate_text_field, validate_choice, parse_integer_field
 from sga.utils.error_handlers import ErrorHandler, safe_form_data, validate_required_fields
 
 topico_bp = Blueprint('topico', __name__)
 
 TIPOS_TOPICO = ['teorico', 'practico', 'taller', 'laboratorio']
 
+def _obtener_topicos_para_listado():
+    """Query: Obtiene todos los tópicos"""
+    return Topico.obtener_todos()
+
+def _renderizar_listado_topicos(topicos):
+    """Command: Renderiza la vista de listado de tópicos"""
+    return render_template('topicos/listar.html', topicos=topicos)
+
+def _renderizar_listado_topicos_con_error():
+    """Command: Renderiza la vista de listado con error"""
+    flash('Error al cargar los tópicos', 'error')
+    return render_template('topicos/listar.html', topicos=[])
+
 @topico_bp.route('/topicos')
 def listar_topicos():
     try:
-        topicos = Topico.obtener_todos()
-        return render_template('topicos/listar.html', topicos=topicos)
+        topicos = _obtener_topicos_para_listado()
+        return _renderizar_listado_topicos(topicos)
     except Exception as e:
-        flash('Error al cargar los tópicos', 'error')
-        return render_template('topicos/listar.html', topicos=[])
+        return _renderizar_listado_topicos_con_error()
 
 @topico_bp.route('/topicos/crear', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
@@ -37,7 +49,7 @@ def crear_topico():
 @ErrorHandler.handle_route_error
 def editar_topico(id):
     """Edita un tópico"""
-    topico_id = safe_int_conversion(id, 'ID del tópico')
+    topico_id = parse_integer_field(id, 'ID del tópico')
     
     topico = Topico.obtener_por_id(topico_id)
     if not topico:
@@ -64,7 +76,7 @@ def editar_topico(id):
 @topico_bp.route('/topicos/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error
 def eliminar_topico(id):
-    topico_id = safe_int_conversion(id, 'ID del tópico')
+    topico_id = parse_integer_field(id, 'ID del tópico')
     
     topico = Topico.obtener_por_id(topico_id)
     if not topico:

@@ -1,6 +1,6 @@
 # filepath: models/evaluacion.py
 from sga.db.database import execute_query
-from sga.utils.validators import ValidationError, validate_required_string, safe_int_conversion
+from sga.utils.validators import ValidationError, validate_required_string, parse_integer_field
 
 class Evaluacion:
     def __init__(self, id=None, nombre=None, porcentaje=None, seccion_id=None):
@@ -26,7 +26,7 @@ class Evaluacion:
     @classmethod
     def crear(cls, nombre, porcentaje, seccion_id):
         try:
-            seccion_id = safe_int_conversion(seccion_id)
+            seccion_id = parse_integer_field(seccion_id)
             if seccion_id is None or seccion_id <= 0:
                 raise ValidationError("ID de sección debe ser un entero positivo")
             
