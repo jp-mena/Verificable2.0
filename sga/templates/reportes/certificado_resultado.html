@@ -1,7 +1,4 @@
-<!-- filepa                <a href="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>                {% if certificado %}
-                <form method="POST" action="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="d-inline">templates/reportes/certificado_resultado.html -->
+<!-- filepath: templates/reportes/certificado_resultado.html -->
 {% extends "base.html" %}
 
 {% block title %}Certificado de Notas - Resultados{% endblock %}
@@ -14,7 +11,8 @@
             <div>
                 <a href="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
-                </a>                {% if notas %}
+                </a>
+                {% if notas %}
                 <form method="POST" action="{{ url_for('reporte.generar_certificado_academico_alumno') }}" class="d-inline">
                     <input type="hidden" name="alumno_id" value="{{ alumno_info['id'] }}">
                     <input type="hidden" name="formato" value="csv">
@@ -33,7 +31,8 @@
                 <h5 class="mb-0">Información del Estudiante</h5>
             </div>
             <div class="card-body">
-                <div class="row">                    <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
                         <p><strong>ID:</strong> {{ alumno_info['id'] }}</p>
                         <p><strong>Nombre:</strong> {{ alumno_info['nombre'] }}</p>
                         <p><strong>Correo:</strong> {{ alumno_info['correo'] }}</p>

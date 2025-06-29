@@ -143,7 +143,7 @@ def generar_certificado_academico_alumno():
             
             if not certificado:
                 flash('El alumno seleccionado no tiene cursos cerrados', 'warning')
-                return redirect(url_for('reporte.reporte_certificado_notas'))
+                return redirect(url_for('reporte.generar_certificado_academico_alumno'))
             
             estadisticas = Reporte.calcular_estadisticas_alumno(certificado)
             
