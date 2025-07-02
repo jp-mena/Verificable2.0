@@ -8,7 +8,6 @@ from sga.db.database import init_database
 from sga.routes.json_routes import procesar_datos_json
 
 def test_carga_basica():
-    """Prueba la carga básica de datos JSON"""
     print("=== Probando Carga JSON Básica ===")
     
     datos_prueba = {
@@ -71,7 +70,6 @@ def test_validacion_errores():
         return False
 
 def test_archivo_ejemplo():
-    """Verifica que los archivos de ejemplo sean válidos"""
     print("\n=== Verificando Archivos de Ejemplo ===")
     
     archivos = [
@@ -92,13 +90,11 @@ def test_archivo_ejemplo():
             print(f"❌ {archivo}: Error - {e}")
 
 def limpiar_datos_prueba():
-    """Limpia los datos de prueba de la base de datos"""
     print("\n=== Limpiando Datos de Prueba ===")
     
     try:
         from sga.db.database import execute_query
         
-        # Eliminar datos de prueba
         queries = [
             "DELETE FROM notas WHERE id > 0",
             "DELETE FROM instancias_topico WHERE id > 0", 
@@ -119,7 +115,6 @@ def limpiar_datos_prueba():
         print(f"❌ Error limpiando datos: {e}")
 
 def main():
-    """Función principal"""
     print("🧪 Iniciando pruebas de carga JSON...\n")
     
     init_database()

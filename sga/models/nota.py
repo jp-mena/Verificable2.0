@@ -131,6 +131,5 @@ class Nota:
 
     @classmethod
     def eliminar(cls, id):
-        """Elimina una nota"""
         query = "DELETE FROM notas WHERE id = %s"
         execute_query(query, (id,))

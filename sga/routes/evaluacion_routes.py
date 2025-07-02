@@ -24,7 +24,6 @@ def _verificar_seccion_cerrada(seccion_id):
         return True
 
 def _verificar_instancia_curso_cerrada(instancia_id):
-    """Verifica si una instancia de curso está cerrada"""
     try:
         instancia_id = parse_integer_field(instancia_id, 'ID de instancia')
         query = "SELECT cerrado FROM instancias_curso WHERE id = %s"
@@ -36,15 +35,12 @@ def _verificar_instancia_curso_cerrada(instancia_id):
         return True
 
 def _obtener_evaluaciones_para_listado():
-    """Query: Obtiene todas las evaluaciones"""
     return Evaluacion.obtener_todos()
 
 def _renderizar_listado_evaluaciones(evaluaciones):
-    """Command: Renderiza la vista de listado de evaluaciones"""
     return render_template('evaluaciones/listar.html', evaluaciones=evaluaciones)
 
 def _renderizar_listado_evaluaciones_con_error():
-    """Command: Renderiza la vista de listado con error"""
     flash('Error al cargar las evaluaciones', 'error')
     return render_template('evaluaciones/listar.html', evaluaciones=[])
 
@@ -94,7 +90,6 @@ def crear_evaluacion():
 @evaluacion_bp.route('/evaluaciones/<int:id>/editar', methods=['GET', 'POST'])
 @ErrorHandler.handle_route_error
 def editar_evaluacion(id):
-    """Edita una evaluación"""
     evaluacion_id = parse_integer_field(id, 'ID de la evaluación')
     
     evaluacion = Evaluacion.obtener_por_id(evaluacion_id)

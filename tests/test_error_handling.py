@@ -25,7 +25,6 @@ def test_invalid_data():
         except Exception as e:
             print(f"   Test {i+1}: Error de conexión - {e}")
     
-    # Pruebas con datos inválidos para alumnos
     print("\n2. Pruebas con datos inválidos para alumnos:")
     invalid_student_data = [
         {},
@@ -46,7 +45,6 @@ def test_invalid_data():
         except Exception as e:
             print(f"   Test {i+1}: Error de conexión - {e}")
     
-    # Pruebas con IDs inválidos
     print("\n3. Pruebas con IDs inválidos:")
     invalid_ids = [-1, 0, 999999, "abc", "", None, "' OR 1=1 --"]
     
@@ -74,7 +72,6 @@ def test_invalid_data():
             print(f"   Test {i+1}: Error de conexión - {e}")
 
 def test_edge_cases():
-    """Prueba casos extremos"""
     print("\n=== PRUEBAS DE CASOS EXTREMOS ===\n")
     
     print("1. Datos extremadamente largos:")

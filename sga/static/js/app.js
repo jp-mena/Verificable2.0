@@ -1,29 +1,21 @@
-// Configuración de la API
 const API_BASE = '/api';
 
-// Variables globales
 let currentEditingId = null;
 let currentEditingType = null;
 
-// Función para cambiar entre secciones
 function showSection(sectionName) {
-    // Ocultar todas las secciones
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
     
-    // Remover active de todos los nav-links
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
     
-    // Mostrar la sección seleccionada
     document.getElementById(sectionName).classList.add('active');
     
-    // Activar el nav-link correspondiente
     event.target.classList.add('active');
     
-    // Cargar datos según la sección
     switch(sectionName) {
         case 'dashboard':
             loadDashboardData();
@@ -40,7 +32,6 @@ function showSection(sectionName) {
     }
 }
 
-// Función para mostrar alertas
 function showAlert(message, type = 'success') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -49,11 +40,9 @@ function showAlert(message, type = 'success') {
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
-    // Insertar al inicio del main-content
     const mainContent = document.querySelector('.main-content');
     mainContent.insertBefore(alertDiv, mainContent.firstChild);
     
-    // Auto-eliminar después de 5 segundos
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.remove();
@@ -61,7 +50,6 @@ function showAlert(message, type = 'success') {
     }, 5000);
 }
 
-// Funciones para el Dashboard
 async function loadDashboardData() {
     try {
         const [cursosRes, profesoresRes, alumnosRes] = await Promise.all([
@@ -82,7 +70,6 @@ async function loadDashboardData() {
     }
 }
 
-// Funciones para Cursos
 async function loadCursos() {
     try {
         const response = await fetch(`${API_BASE}/cursos`);
@@ -143,14 +130,12 @@ async function saveCurso() {
     try {
         let response;
         if (id) {
-            // Actualizar curso existente
             response = await fetch(`${API_BASE}/cursos/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(cursoData)
             });
         } else {
-            // Crear nuevo curso
             response = await fetch(`${API_BASE}/cursos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -211,7 +196,6 @@ async function deleteCurso(id) {
     }
 }
 
-// Funciones para Profesores
 async function loadProfesores() {
     try {
         const response = await fetch(`${API_BASE}/profesores`);
@@ -333,7 +317,6 @@ async function deleteProfesor(id) {
     }
 }
 
-// Funciones para Alumnos
 async function loadAlumnos() {
     try {
         const response = await fetch(`${API_BASE}/alumnos`);
@@ -458,7 +441,6 @@ async function deleteAlumno(id) {
     }
 }
 
-// Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
 });

@@ -125,12 +125,10 @@ EJEMPLOS_JSON = {
 
 @json_bp.route('/cargar-json')
 def mostrar_carga():
-    """Muestra la página principal de carga de JSON con las opciones por entidad"""
     return render_template('json/index.html')
 
 @json_bp.route('/cargar-json/<entidad>')
 def mostrar_carga_entidad(entidad):
-    """Muestra la página de carga para una entidad específica"""
     entidades_validas = list(EJEMPLOS_JSON.keys())
     
     if entidad not in entidades_validas:
@@ -146,7 +144,6 @@ def mostrar_carga_entidad(entidad):
 
 @json_bp.route('/api/validar-json', methods=['POST'])
 def api_validar_json():
-    """API endpoint para validar estructura JSON sin cargar datos"""
     try:
         if not request.is_json:
             return jsonify({'error': 'Content-Type debe ser application/json'}), 400
@@ -226,10 +223,7 @@ def procesar_carga_entidad(entidad):
     return redirect(url_for('json_load.mostrar_carga_entidad', entidad=entidad))
 
 def procesar_entidad_especifica(entidad, datos):
-    """
-    Procesa una entidad específica delegando a funciones especializadas.
-    Aplica el patrón Strategy para manejar diferentes tipos de entidades.
-    """
+
     procesadores = {
         'cursos': _procesar_cursos,
         'profesores': _procesar_profesores,
@@ -253,7 +247,6 @@ def procesar_entidad_especifica(entidad, datos):
 
 
 def _procesar_cursos(datos):
-    """Procesa la carga masiva de cursos"""
     total_procesados = 0
     errores = 0
     
@@ -276,7 +269,6 @@ def _procesar_cursos(datos):
 
 
 def _procesar_profesores(datos):
-    """Procesa la carga masiva de profesores"""
     total_procesados = 0
     errores = 0
     
@@ -293,7 +285,6 @@ def _procesar_profesores(datos):
 
 
 def _procesar_alumnos(datos):
-    """Procesa la carga masiva de alumnos"""
     total_procesados = 0
     errores = 0
     
@@ -310,7 +301,6 @@ def _procesar_alumnos(datos):
 
 
 def _procesar_instancias_curso(datos):
-    """Procesa la carga masiva de instancias de curso"""
     total_procesados = 0
     errores = 0
     
@@ -331,7 +321,6 @@ def _procesar_instancias_curso(datos):
 
 
 def _procesar_secciones(datos):
-    """Procesa la carga masiva de secciones"""
     total_procesados = 0
     errores = 0
     
@@ -354,7 +343,6 @@ def _procesar_secciones(datos):
 
 
 def _procesar_topicos(datos):
-    """Procesa la carga masiva de tópicos"""
     total_procesados = 0
     errores = 0
     
@@ -371,7 +359,6 @@ def _procesar_topicos(datos):
 
 
 def _procesar_evaluaciones(datos):
-    """Procesa la carga masiva de evaluaciones"""
     total_procesados = 0
     errores = 0
     
@@ -398,7 +385,6 @@ def _procesar_evaluaciones(datos):
 
 
 def _procesar_instancias_topico(datos):
-    """Procesa la carga masiva de instancias de tópico"""
     total_procesados = 0
     errores = 0
     
@@ -431,7 +417,6 @@ def _procesar_instancias_topico(datos):
 
 
 def _procesar_inscripciones(datos):
-    """Procesa la carga masiva de inscripciones"""
     total_procesados = 0
     errores = 0
     
@@ -454,7 +439,6 @@ def _procesar_inscripciones(datos):
 
 
 def _procesar_notas(datos):
-    """Procesa la carga masiva de notas"""
     total_procesados = 0
     errores = 0
     

@@ -12,11 +12,9 @@ def _verificar_instancia_curso_cerrada(instancia_id):
     return bool(res[0][0]) if res else False
 
 def _obtener_secciones_para_listado():
-    """Query: Obtiene todas las secciones"""
     return Seccion.obtener_todos()
 
 def _renderizar_listado_secciones(secciones):
-    """Command: Renderiza la vista de listado de secciones"""
     return render_template('secciones/listar.html', secciones=secciones)
 
 @seccion_bp.route('/secciones')
@@ -32,7 +30,6 @@ def crear_seccion():
     return _mostrar_formulario_crear_seccion()
 
 def _procesar_creacion_seccion():
-    """Procesa la creación de una nueva sección"""
     try:
         datos_validados = _validar_datos_nueva_seccion()
         _verificar_reglas_negocio_seccion(datos_validados)
@@ -46,7 +43,6 @@ def _procesar_creacion_seccion():
         return redirect(url_for('seccion.crear_seccion'))
 
 def _validar_datos_nueva_seccion():
-    """Valida y extrae los datos del formulario para nueva sección"""
     numero = int(request.form['numero'])
     instancia_id = int(request.form['instancia_id'])
     profesor_id = request.form.get('profesor_id')
@@ -59,7 +55,6 @@ def _validar_datos_nueva_seccion():
     }
 
 def _verificar_reglas_negocio_seccion(datos):
-    """Verifica las reglas de negocio para crear una sección"""
     if _verificar_instancia_curso_cerrada(datos['instancia_id']):
         raise ValueError('La instancia está cerrada')
     
@@ -70,23 +65,19 @@ def _verificar_reglas_negocio_seccion(datos):
         raise ValueError('Número repetido')
 
 def _verificar_numero_seccion_duplicado(instancia_id, numero):
-    """Verifica si ya existe una sección con el mismo número en la instancia"""
     secciones_existentes = Seccion.obtener_todos()
     return any(s['instancia_id'] == instancia_id and s['numero'] == numero 
               for s in secciones_existentes)
 
 def _mostrar_formulario_crear_seccion():
-    """Muestra el formulario para crear una nueva sección"""
     instancias = _obtener_instancias_abiertas()
     profesores = _obtener_profesores_disponibles()
     return render_template('secciones/crear.html', instancias=instancias, profesores=profesores)
 
 def _obtener_instancias_abiertas():
-    """Obtiene las instancias de curso que están abiertas"""
     return [i for i in InstanciaCurso.obtener_todos() if not i['cerrado']]
 
 def _obtener_profesores_disponibles():
-    """Obtiene la lista de profesores disponibles"""
     return [{'id': p[0], 'nombre': p[1], 'correo': p[2]} for p in Profesor.get_all()]
 
 @seccion_bp.route('/secciones/<int:id>/editar', methods=['GET', 'POST'])
@@ -99,7 +90,6 @@ def editar_seccion(id):
     return _mostrar_formulario_editar_seccion(seccion)
 
 def _validar_seccion_editable(id):
-    """Valida que la sección existe y se puede editar"""
     seccion = Seccion.obtener_por_id(id)
     if not seccion:
         flash('No encontrada', 'error')
@@ -112,7 +102,6 @@ def _validar_seccion_editable(id):
     return seccion
 
 def _procesar_edicion_seccion(seccion, id):
-    """Procesa la actualización de una sección"""
     try:
         datos_validados = _validar_datos_edicion_seccion()
         _actualizar_seccion_con_datos(seccion, datos_validados)
@@ -125,7 +114,6 @@ def _procesar_edicion_seccion(seccion, id):
         return redirect(url_for('seccion.editar_seccion', id=id))
 
 def _validar_datos_edicion_seccion():
-    """Valida los datos del formulario de edición"""
     numero = int(request.form['numero'])
     nuevo_inst = int(request.form['instancia_id'])
     profesor_id = request.form.get('profesor_id')
@@ -140,7 +128,6 @@ def _validar_datos_edicion_seccion():
     }
 
 def _verificar_reglas_edicion_seccion(numero, instancia_id):
-    """Verifica las reglas de negocio para editar una sección"""
     if _verificar_instancia_curso_cerrada(instancia_id):
         raise ValueError('Instancia destino cerrada')
     
@@ -148,14 +135,12 @@ def _verificar_reglas_edicion_seccion(numero, instancia_id):
         raise ValueError('Número inválido')
 
 def _actualizar_seccion_con_datos(seccion, datos_validados):
-    """Actualiza la sección con los datos validados"""
     seccion.numero = datos_validados['numero']
     seccion.instancia_id = datos_validados['instancia_id']
     seccion.profesor_id = datos_validados['profesor_id']
     seccion.actualizar()
 
 def _mostrar_formulario_editar_seccion(seccion):
-    """Muestra el formulario de edición de sección"""
     instancias = _obtener_instancias_abiertas()
     profesores = _obtener_profesores_disponibles()
     return render_template('secciones/editar.html', 

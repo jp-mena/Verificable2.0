@@ -16,7 +16,6 @@ from sga.models.nota import Nota
 def test_instancias_curso():
     print("=== Probando Instancias de Curso ===")
     
-    # Obtener cursos existentes
     cursos = Curso.obtener_todos()
     if not cursos:
         print("❌ No hay cursos disponibles. Ejecuta create_sample_data.py primero.")

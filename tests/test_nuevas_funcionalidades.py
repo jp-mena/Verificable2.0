@@ -17,7 +17,6 @@ from sga.models.nota import Nota
 def probar_nuevas_funcionalidades():
     print("🚀 Probando nuevas funcionalidades del SGA...")
     
-    # Inicializar BD
     init_database()
     print("✅ Base de datos inicializada")
     

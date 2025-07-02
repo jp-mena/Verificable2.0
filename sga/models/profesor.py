@@ -3,7 +3,7 @@ from sga.utils.validators import ValidationError, parse_integer_field, validate_
 
 class Profesor:      
     def __init__(self, nombre, correo):
-        self.nombre = validate_required_string(nombre, "nombre", 100)  # Máximo 100 caracteres
+        self.nombre = validate_required_string(nombre, "nombre", 100)
         self.correo = validate_email(correo)
     
     def save(self):

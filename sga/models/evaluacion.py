@@ -1,4 +1,3 @@
-# filepath: models/evaluacion.py
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, validate_required_string, parse_integer_field
 
@@ -19,7 +18,7 @@ class Evaluacion:
                 raise ValidationError("El porcentaje debe ser mayor que 0")
             if porcentaje_float > 100:
                 raise ValidationError("El porcentaje no puede ser mayor que 100")
-            return round(porcentaje_float, 2)  # Redondear a 2 decimales
+            return round(porcentaje_float, 2)
         except (ValueError, TypeError):
             raise ValidationError("El porcentaje debe ser un número válido")
     

@@ -74,7 +74,7 @@ class Topico:
             resultado = execute_query(query, (nombre,))
             if resultado:
                 fila = resultado[0]
-                topico = cls(fila[0], fila[1], fila[2])  # id, nombre, tipo
+                topico = cls(fila[0], fila[1], fila[2])
                 return topico
             return None
         except Exception as e:

@@ -6,7 +6,6 @@ from sga.utils.error_handlers import ErrorHandler, safe_form_data, validate_requ
 alumno_bp = Blueprint('alumno', __name__)
 
 def _obtener_alumnos_para_listado():
-    """Query: Obtiene todos los alumnos formateados para el listado"""
     alumnos = Alumno.get_all()
     alumnos_list = []
     for alumno in alumnos:
@@ -20,11 +19,9 @@ def _obtener_alumnos_para_listado():
     return alumnos_list
 
 def _renderizar_listado_alumnos(alumnos_list):
-    """Command: Renderiza la vista de listado de alumnos"""
     return render_template('alumnos/listar.html', alumnos=alumnos_list)
 
 def _renderizar_listado_alumnos_con_error():
-    """Command: Renderiza la vista de listado con error"""
     flash('Error al cargar la lista de alumnos', 'error')
     return render_template('alumnos/listar.html', alumnos=[])
 
@@ -57,7 +54,6 @@ def crear_alumno():
     return render_template('alumnos/crear.html')
 
 def _obtener_alumno_por_id(alumno_id):
-    """Query: Obtiene un alumno por ID y lo formatea"""
     alumno_data = Alumno.get_by_id(alumno_id)
     if not alumno_data:
         return None
@@ -70,7 +66,6 @@ def _obtener_alumno_por_id(alumno_id):
     }
 
 def _actualizar_alumno_validado(alumno_id, data):
-    """Command: Actualiza un alumno con datos validados"""
     validate_required_fields(data, ['nombre', 'correo', 'fecha_ingreso'])
     
     nombre = validate_text_field(data['nombre'], 'Nombre', min_length=2, max_length=100)
@@ -80,11 +75,9 @@ def _actualizar_alumno_validado(alumno_id, data):
     Alumno.update(alumno_id, nombre, correo, fecha_ingreso)
 
 def _renderizar_formulario_editar_alumno(alumno):
-    """Command: Renderiza el formulario de edición de alumno"""
     return render_template('alumnos/editar.html', alumno=alumno)
 
 def _procesar_actualizacion_exitosa_alumno():
-    """Command: Procesa una actualización exitosa"""
     flash('Alumno actualizado exitosamente', 'success')
     return redirect(url_for('alumno.listar_alumnos'))
 
@@ -107,7 +100,6 @@ def editar_alumno(id):
 @alumno_bp.route('/alumnos/<int:id>/eliminar', methods=['POST'])
 @ErrorHandler.handle_route_error
 def eliminar_alumno(id):
-    """Elimina un alumno"""
     alumno_id = parse_integer_field(id, 'ID del alumno')
     
     alumno_data = Alumno.get_by_id(alumno_id)
@@ -122,7 +114,6 @@ def eliminar_alumno(id):
 @alumno_bp.route('/api/alumnos', methods=['GET'])
 @ErrorHandler.handle_api_error
 def get_alumnos():
-    """Obtiene todos los alumnos (API)"""
     alumnos = Alumno.get_all()
     alumnos_list = []
     for alumno in alumnos:
@@ -137,7 +128,6 @@ def get_alumnos():
 @alumno_bp.route('/api/alumnos', methods=['POST'])
 @ErrorHandler.handle_api_error
 def create_alumno():
-    """Crea un nuevo alumno (API)"""
     data = request.get_json()
     if not data:
         raise ValidationError('No se recibieron datos')
@@ -154,11 +144,9 @@ def create_alumno():
     return jsonify({'id': alumno_id, 'mensaje': 'Alumno creado exitosamente'}), 201
 
 def _obtener_datos_alumno_brutos(alumno_id):
-    """Query: Obtiene datos brutos del alumno"""
     return Alumno.get_by_id(alumno_id)
 
 def _mapear_alumno_para_api(alumno_data):
-    """Mapper: Mapea datos de alumno para respuesta API"""
     return {
         'id': alumno_data[0],
         'nombre': alumno_data[1],
@@ -167,11 +155,9 @@ def _mapear_alumno_para_api(alumno_data):
     }
 
 def _crear_respuesta_alumno_no_encontrado():
-    """Response: Crea respuesta para alumno no encontrado"""
     return jsonify({'error': 'Alumno no encontrado'}), 404
 
 def _crear_respuesta_alumno_exitosa(alumno_mapeado):
-    """Response: Crea respuesta exitosa con datos del alumno"""
     return jsonify(alumno_mapeado), 200
 
 @alumno_bp.route('/api/alumnos/<int:alumno_id>', methods=['GET'])

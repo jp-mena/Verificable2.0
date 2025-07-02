@@ -1,4 +1,3 @@
-# filepath: models/inscripcion.py
 from sga.db.database import execute_query
 
 class Inscripcion:

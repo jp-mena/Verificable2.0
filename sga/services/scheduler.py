@@ -92,7 +92,6 @@ class SchedulerService:
                     )
 
     def _add_constraints(self):
-        # cada sección exactamente una asignación
         for s in self.secciones:
             self.model.Add(
                 sum(
@@ -102,7 +101,6 @@ class SchedulerService:
                 )
                 == 1
             )
-        # capacidad sala
         for s in self.secciones:
             for p in self.placements[s["id"]]:
                 for r in self.allowed_rooms[s["id"]]:
@@ -110,7 +108,6 @@ class SchedulerService:
                         self.X[(s["id"], p["plc"], r["id"])] * s["n_alumnos"]
                         <= r["capacidad"]
                     )
-        # topes sala / profesor / alumno por bloque
         for b in self.bloques:
             for r in self.salas:
                 self.model.Add(

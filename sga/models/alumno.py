@@ -94,11 +94,9 @@ class Alumno:
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             
-            # Validar datos
             nombre = validate_required_string(nombre, "nombre")
             correo = validate_email(correo)
             
-            # Validar fecha
             if not fecha_ingreso:
                 raise ValidationError("Fecha de ingreso es requerida")
             fecha_str = str(fecha_ingreso).strip()
@@ -120,7 +118,6 @@ class Alumno:
             if alumno_id is None or alumno_id <= 0:
                 raise ValidationError("ID de alumno debe ser un entero positivo")
             
-            # Verificar si el alumno existe
             existing = Alumno.get_by_id(alumno_id)
             if not existing:
                 raise ValidationError("Alumno no encontrado")

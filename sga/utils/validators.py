@@ -44,7 +44,6 @@ def validate_email(email, max_length=100):
     
     email = email.strip()
     
-    # Validar longitud máxima
     if len(email) > max_length:
         raise ValidationError(f"El email no puede exceder {max_length} caracteres")
     

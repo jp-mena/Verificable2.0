@@ -10,7 +10,6 @@ class Curso:
         self.requisitos = self._process_requisitos(requisitos)
     
     def _validate_codigo(self, codigo):
-        """Valida el código del curso"""
         codigo = validate_required_string(codigo, "código", 20)
         
         if len(codigo) > 20:
@@ -27,7 +26,6 @@ class Curso:
         
         return codigo.upper()
     def _validate_creditos(self, creditos):
-        """Valida la cantidad de créditos"""
         if creditos is None:
             return 4
             
@@ -40,7 +38,6 @@ class Curso:
             raise ValidationError("Los créditos deben ser un número entero")
     
     def _process_requisitos(self, requisitos):
-        """Procesa los requisitos: puede ser lista de códigos o string separado por comas"""
         if not requisitos:
             return None
             
@@ -189,16 +186,7 @@ class Curso:
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):
-        """
-        Valida una lista de códigos de requisitos.
-        
-        Args:
-            requisitos_list: Lista de códigos de cursos
-            curso_codigo: Código del curso actual (para evitar auto-referencia)
-            
-        Raises:
-            ValidationError: Si algún requisito es inválido
-        """
+
         if not requisitos_list:
             return
             

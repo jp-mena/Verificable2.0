@@ -12,15 +12,12 @@ def index_reportes():
     return render_template('reportes/index.html')
 
 def _obtener_instancias_topico_disponibles():
-    """Query: Obtiene las instancias de tópico disponibles"""
     return Reporte.obtener_instancias_topico_disponibles()
 
 def _obtener_notas_instancia_topico(instancia_topico_id):
-    """Query: Obtiene las notas de una instancia de tópico"""
     return Reporte.obtener_notas_instancia_topico(instancia_topico_id)
 
 def _validar_instancia_topico_id(form_data):
-    """Query: Valida y extrae el ID de instancia de tópico"""
     if 'instancia_topico_id' not in form_data or not form_data['instancia_topico_id'].strip():
         raise ValueError('Debe seleccionar una instancia de tópico')
     
@@ -33,30 +30,25 @@ def _validar_instancia_topico_id(form_data):
         raise ValueError('ID de instancia de tópico inválido')
 
 def _renderizar_formulario_reporte_instancia_topico():
-    """Command: Renderiza el formulario del reporte"""
     instancias_disponibles = _obtener_instancias_topico_disponibles()
     return render_template('reportes/instancia_topico.html', 
                          instancias_disponibles=instancias_disponibles)
 
 def _renderizar_resultado_reporte_instancia_topico(notas, contexto):
-    """Command: Renderiza el resultado del reporte"""
     return render_template('reportes/instancia_topico_resultado.html', 
                          notas=notas, 
                          contexto=contexto)
 
 def _procesar_error_validacion(mensaje):
-    """Command: Procesa errores de validación"""
     flash(mensaje, 'error')
     return redirect(url_for('reporte.reporte_instancia_topico'))
 
 def _procesar_error_sin_datos():
-    """Command: Procesa cuando no hay datos"""
     flash('No se encontraron notas para la instancia de tópico seleccionada', 'warning')
     return redirect(url_for('reporte.reporte_instancia_topico'))
 
 @reporte_bp.route('/reportes/instancia-topico', methods=['GET', 'POST'])
 def generar_reporte_notas_por_instancia_topico():
-    """Genera reporte de notas de alumnos para una instancia específica de tópico"""
     if request.method == 'POST':
         try:
             instancia_topico_id = _validar_instancia_topico_id(request.form)
@@ -86,7 +78,6 @@ def generar_reporte_notas_por_instancia_topico():
 
 @reporte_bp.route('/reportes/notas-finales-seccion', methods=['GET', 'POST'])
 def generar_reporte_resumen_final_seccion():
-    """Genera reporte resumen con notas finales de una sección de curso cerrado"""
     if request.method == 'POST':
         try:
             instancia_curso_id, seccion_numero = _validar_datos_reporte_notas_finales(request.form)
@@ -115,7 +106,6 @@ def generar_reporte_resumen_final_seccion():
 
 @reporte_bp.route('/reportes/certificado-notas', methods=['GET', 'POST'])
 def generar_certificado_academico_alumno():
-    """Genera certificado académico completo con notas de todos los cursos cerrados de un alumno"""
     if request.method == 'POST':
         try:
             if 'alumno_id' not in request.form or not request.form['alumno_id'].strip():
@@ -166,7 +156,6 @@ def generar_certificado_academico_alumno():
 
 @reporte_bp.route('/api/reportes/secciones/<int:instancia_curso_id>')
 def obtener_secciones_por_instancia_curso(instancia_curso_id):
-    """Obtiene las secciones disponibles para una instancia de curso específica"""
     try:
         secciones = Reporte.obtener_secciones_curso_cerrado(instancia_curso_id)
         return jsonify(secciones)
@@ -174,7 +163,6 @@ def obtener_secciones_por_instancia_curso(instancia_curso_id):
         return jsonify({'error': str(e)}), 500
 
 def _generar_csv_instancia_topico(notas, contexto):
-    """Genera archivo CSV para reporte de instancia de tópico"""
     output = io.StringIO()
     writer = csv.writer(output)
     
@@ -184,7 +172,7 @@ def _generar_csv_instancia_topico(notas, contexto):
     writer.writerow([f"Evaluación: {contexto.get('evaluacion_nombre', '')} ({contexto.get('porcentaje_evaluacion', '')}%)"])
     writer.writerow([f"Tópico: {contexto.get('topico_nombre', '')} - Peso: {contexto.get('peso_topico', '')}%"])
     writer.writerow([f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}"])
-    writer.writerow([])  # Línea vacía
+    writer.writerow([])
     
     writer.writerow(['Alumno', 'Correo', 'Nota'])
     
@@ -308,7 +296,6 @@ def exportar_certificado_csv(alumno_id):
         return redirect(url_for('reporte.certificado_notas'))
 
 def _validar_datos_reporte_notas_finales(form_data):
-    """Query: Valida y extrae datos del formulario de notas finales"""
     if 'instancia_curso_id' not in form_data or not form_data['instancia_curso_id'].strip():
         raise ValueError('Debe seleccionar un curso')
     
@@ -325,32 +312,26 @@ def _validar_datos_reporte_notas_finales(form_data):
         raise ValueError('Los datos del curso y sección deben ser números válidos')
 
 def _obtener_notas_finales_seccion(instancia_curso_id, seccion_numero):
-    """Query: Obtiene notas finales de una sección"""
     return Reporte.obtener_notas_finales_seccion(instancia_curso_id, seccion_numero)
 
 def _calcular_estadisticas_seccion(notas):
-    """Query: Calcula estadísticas de una sección"""
     return Reporte.calcular_estadisticas_seccion(notas)
 
 def _renderizar_formulario_reporte_notas_finales():
-    """Command: Renderiza el formulario del reporte de notas finales"""
     cursos_cerrados = Reporte.obtener_cursos_cerrados()
     return render_template('reportes/notas_finales_seccion.html', 
                          cursos_cerrados=cursos_cerrados)
 
 def _renderizar_resultado_reporte_notas_finales(notas, seccion_info, estadisticas):
-    """Command: Renderiza el resultado del reporte de notas finales"""
     return render_template('reportes/notas_finales_resultado.html', 
                          notas=notas, 
                          seccion_info=seccion_info,
                          estadisticas=estadisticas)
 
 def _procesar_error_sin_notas_finales():
-    """Command: Procesa cuando no se encuentran notas finales"""
     flash('No se encontraron notas finales para la sección seleccionada', 'warning')
     return redirect(url_for('reporte.reporte_notas_finales_seccion'))
 
 def _procesar_error_reporte_notas_finales(mensaje):
-    """Command: Procesa errores en el reporte de notas finales"""
     flash(mensaje, 'error')
     return redirect(url_for('reporte.reporte_notas_finales_seccion'))

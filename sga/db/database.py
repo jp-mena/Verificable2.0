@@ -14,10 +14,9 @@ DB_CONFIG = {
     "port":     int(os.getenv("DB_PORT", 3306)),
     "charset":  "utf8mb4",
     "autocommit": True,
-    "cursorclass": pymysql.cursors.Cursor      # o DictCursor si prefieres dicts
+    "cursorclass": pymysql.cursors.Cursor
 }
 
-# ------------------------------------------------------------------------
 def create_database_if_not_exists():
     try:
         cfg = DB_CONFIG.copy()
@@ -33,7 +32,6 @@ def create_database_if_not_exists():
     except MySQLError as e:
         print("❌ Error creando base de datos:", e)
 
-# ------------------------------------------------------------------------
 def get_connection():
     try:
         return pymysql.connect(**DB_CONFIG)
@@ -41,7 +39,6 @@ def get_connection():
         print("❌ Error conectando a MySQL:", e)
         return None
 
-# ------------------------------------------------------------------------
 def execute_query(sql: str, params: tuple | None = None):
     conn = get_connection()
     if conn is None:
@@ -253,7 +250,6 @@ def get_connection():
         print("❌ Error conectando a MySQL:", e)
         return None
 
-# ------------------------------------------------------------------------
 def execute_query(sql: str, params: tuple | None = None):
     conn = get_connection()
     if conn is None:

@@ -209,7 +209,7 @@ class InstanciaCurso:
             if not resultado:
                 return False
             suma_total = float(resultado[0][0] or 0)
-            return abs(suma_total - 100.0) < 0.01  # Tolerar diferencias de redondeo
+            return abs(suma_total - 100.0) < 0.01
         except Exception:
             return False
     
@@ -315,7 +315,6 @@ class InstanciaCurso:
 
     @classmethod
     def calcular_nota_final_alumno(cls, instancia_id, alumno_id):
-        """Calcula la nota final de un alumno en una instancia de curso"""
         try:
             if not cls._validar_parametros_calculo(instancia_id, alumno_id):
                 return 0.0
@@ -333,12 +332,10 @@ class InstanciaCurso:
     
     @classmethod
     def _validar_parametros_calculo(cls, instancia_id, alumno_id):
-        """Valida que los parámetros sean válidos para el cálculo"""
         return instancia_id is not None and alumno_id is not None
     
     @classmethod
     def _obtener_evaluaciones_instancia(cls, instancia_id):
-        """Obtiene las evaluaciones de una instancia de curso"""
         query = """
         SELECT DISTINCT e.id, e.porcentaje
         FROM evaluaciones e
@@ -349,7 +346,6 @@ class InstanciaCurso:
     
     @classmethod
     def _calcular_nota_por_evaluaciones(cls, evaluaciones, alumno_id):
-        """Calcula la nota ponderada por todas las evaluaciones"""
         nota_final = 0.0
         total_porcentaje = 0.0
         
@@ -365,7 +361,6 @@ class InstanciaCurso:
     
     @classmethod
     def _calcular_promedio_evaluacion(cls, evaluacion_id, alumno_id):
-        """Calcula el promedio ponderado de una evaluación específica"""
         query = """
         SELECT it.peso, n.nota
         FROM instancias_topico it
@@ -384,14 +379,12 @@ class InstanciaCurso:
     
     @classmethod
     def _normalizar_nota_final(cls, nota_final, total_porcentaje):
-        """Normaliza la nota final si el porcentaje total no es 100%"""
         if total_porcentaje > 0 and total_porcentaje != 100:
             nota_final = (nota_final * 100.0) / total_porcentaje
         return round(nota_final, 1)
 
     @classmethod
     def obtener_resumen_curso(cls, instancia_id):
-        """Obtiene un resumen completo del curso con alumnos y notas"""
         try:
             if not instancia_id:
                 return None
@@ -414,7 +407,6 @@ class InstanciaCurso:
     
     @classmethod
     def _construir_diccionario_instancia(cls, instancia):
-        """Construye el diccionario con los datos de la instancia"""
         return {
             'id': instancia.id,
             'semestre': instancia.semestre,
@@ -428,7 +420,6 @@ class InstanciaCurso:
     
     @classmethod
     def _obtener_alumnos_con_notas(cls, instancia_id, curso_cerrado):
-        """Obtiene los alumnos del curso con sus notas y calificaciones"""
         alumnos = cls.obtener_alumnos_curso(instancia_id)
         
         for alumno in alumnos:
@@ -438,7 +429,6 @@ class InstanciaCurso:
     
     @classmethod
     def _procesar_datos_alumno(cls, alumno, instancia_id, curso_cerrado):
-        """Procesa los datos de un alumno específico"""
         try:
             alumno['notas'] = cls.obtener_notas_alumno_curso(instancia_id, alumno['id'])
             

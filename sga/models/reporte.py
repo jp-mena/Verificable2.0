@@ -1,4 +1,3 @@
-# filepath: models/reporte.py
 from decimal import Decimal
 from sga.db.database import execute_query
 from sga.utils.validators import ValidationError, parse_integer_field
@@ -6,7 +5,6 @@ from sga.utils.validators import ValidationError, parse_integer_field
 class Reporte:
     @classmethod
     def _obtener_datos_brutos_notas_instancia_topico(cls, instancia_topico_id):
-        """Obtiene datos brutos de notas de instancia de tópico sin mapear"""
         query = """
         SELECT 
             a.id as alumno_id,
@@ -40,7 +38,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_notas_instancia_topico(cls, fila):
-        """Mapea una fila de datos brutos a diccionario estructurado"""
         return {
             'alumno_id': fila[0],
             'alumno_nombre': fila[1],
@@ -77,7 +74,6 @@ class Reporte:
         
     @classmethod
     def _obtener_datos_brutos_notas_finales_seccion(cls, instancia_curso_id, seccion_numero):
-        """Obtiene datos brutos de notas finales de sección sin mapear"""
         query = """
         SELECT 
             a.id as alumno_id,
@@ -107,7 +103,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_notas_finales_seccion(cls, fila):
-        """Mapea una fila de datos brutos de notas finales a diccionario estructurado"""
         return {
             'alumno_id': fila[0],
             'alumno_nombre': fila[1],
@@ -143,7 +138,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_notas_finales_seccion: {str(e)}")
     @classmethod
     def _obtener_datos_brutos_certificado_notas_alumno(cls, alumno_id):
-        """Obtiene datos brutos del certificado de notas sin mapear"""
         query = """
         SELECT 
             nf.nota_final,
@@ -170,7 +164,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_certificado_notas_alumno(cls, fila):
-        """Mapea una fila de datos brutos del certificado a diccionario estructurado"""
         return {
             'nota_final': fila[0],
             'curso_codigo': fila[1],
@@ -198,7 +191,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_certificado_notas_alumno: {str(e)}")
     @classmethod
     def _obtener_datos_brutos_instancias_topico_disponibles(cls):
-        """Obtiene datos brutos de instancias de tópico disponibles sin mapear"""
         query = """
         SELECT 
             it.id,
@@ -222,7 +214,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_instancias_topico_disponibles(cls, fila):
-        """Mapea una fila de datos brutos de instancias de tópico a diccionario estructurado"""
         return {
             'id': fila[0],
             'instancia_nombre': fila[1],
@@ -245,7 +236,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_instancias_topico_disponibles: {str(e)}")
     @classmethod
     def _obtener_datos_brutos_cursos_cerrados(cls):
-        """Obtiene datos brutos de cursos cerrados sin mapear"""
         query = """
         SELECT DISTINCT
             ic.id,
@@ -266,7 +256,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_cursos_cerrados(cls, fila):
-        """Mapea una fila de datos brutos de cursos cerrados a diccionario estructurado"""
         return {
             'id': fila[0],
             'curso_codigo': fila[1],
@@ -287,7 +276,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_cursos_cerrados: {str(e)}")
     @classmethod
     def _obtener_datos_brutos_secciones_curso_cerrado(cls, instancia_curso_id):
-        """Obtiene datos brutos de secciones de curso cerrado sin mapear"""
         query = """
         SELECT DISTINCT
             s.numero,
@@ -305,7 +293,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_secciones_curso_cerrado(cls, fila):
-        """Mapea una fila de datos brutos de secciones de curso cerrado a diccionario estructurado"""
         return {
             'numero': fila[0],
             'total_alumnos': fila[1] or 0
@@ -326,7 +313,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_secciones_curso_cerrado: {str(e)}")
     @classmethod
     def _obtener_datos_brutos_alumnos_con_cursos_cerrados(cls):
-        """Obtiene datos brutos de alumnos con cursos cerrados sin mapear"""
         query = """
         SELECT DISTINCT
             a.id,
@@ -344,7 +330,6 @@ class Reporte:
 
     @classmethod
     def _mapear_fila_alumnos_con_cursos_cerrados(cls, fila):
-        """Mapea una fila de datos brutos de alumnos con cursos cerrados a diccionario estructurado"""
         return {
             'id': fila[0],
             'nombre': fila[1],
@@ -362,7 +347,6 @@ class Reporte:
             raise ValidationError(f"Error en obtener_alumnos_con_cursos_cerrados: {str(e)}")
     @classmethod
     def calcular_estadisticas_seccion(cls, notas):
-        """Calcula estadísticas de rendimiento de una sección"""
         try:
             if not cls._validar_notas_input(notas):
                 return cls._crear_estadisticas_vacias()
@@ -380,12 +364,10 @@ class Reporte:
     
     @classmethod
     def _validar_notas_input(cls, notas):
-        """Valida que el input de notas sea válido"""
         return notas and isinstance(notas, list)
     
     @classmethod
     def _crear_estadisticas_vacias(cls):
-        """Crea estadísticas vacías para casos sin datos"""
         return {
             'total_estudiantes': 0,
             'promedio': None,
@@ -395,7 +377,6 @@ class Reporte:
     
     @classmethod
     def _filtrar_notas_validas(cls, notas):
-        """Filtra las notas que tienen valores válidos"""
         return [
             n for n in notas 
             if n.get('nota_final') is not None 
@@ -404,7 +385,6 @@ class Reporte:
     
     @classmethod
     def _crear_estadisticas_sin_notas(cls, total_estudiantes):
-        """Crea estadísticas cuando no hay notas válidas"""
         return {
             'total_estudiantes': total_estudiantes,
             'promedio': None,
@@ -414,7 +394,6 @@ class Reporte:
     
     @classmethod
     def _calcular_estadisticas_completas(cls, notas_validas, total_estudiantes):
-        """Calcula estadísticas completas con notas válidas"""
         promedio = cls._calcular_promedio(notas_validas)
         aprobados, reprobados = cls._contar_aprobados_reprobados(notas_validas)
         
@@ -427,20 +406,17 @@ class Reporte:
     
     @classmethod
     def _calcular_promedio(cls, notas_validas):
-        """Calcula el promedio de las notas válidas"""
         suma_notas = sum(float(n['nota_final']) for n in notas_validas)
         return suma_notas / len(notas_validas)
     
     @classmethod
     def _contar_aprobados_reprobados(cls, notas_validas):
-        """Cuenta los estudiantes aprobados y reprobados"""
         aprobados = len([n for n in notas_validas if float(n['nota_final']) >= 4.0])
         reprobados = len([n for n in notas_validas if float(n['nota_final']) < 4.0])
         return aprobados, reprobados
     
     @classmethod
     def calcular_estadisticas_alumno(cls, certificado):
-        """Calcula estadísticas académicas de un alumno"""
         try:
             if not cls._validar_certificado_input(certificado):
                 return cls._crear_estadisticas_alumno_vacias()
@@ -458,12 +434,10 @@ class Reporte:
     
     @classmethod
     def _validar_certificado_input(cls, certificado):
-        """Valida que el certificado sea válido"""
         return certificado and isinstance(certificado, list)
     
     @classmethod
     def _crear_estadisticas_alumno_vacias(cls):
-        """Crea estadísticas vacías para un alumno"""
         return {
             'total_cursos': 0,
             'promedio_general': None,
@@ -474,7 +448,6 @@ class Reporte:
     
     @classmethod
     def _filtrar_notas_validas_alumno(cls, certificado):
-        """Filtra las notas válidas del certificado del alumno"""
         return [
             c for c in certificado 
             if c.get('nota_final') is not None 
@@ -483,7 +456,6 @@ class Reporte:
     
     @classmethod
     def _crear_estadisticas_alumno_sin_notas(cls, total_cursos):
-        """Crea estadísticas cuando el alumno no tiene notas válidas"""
         return {
             'total_cursos': total_cursos,
             'promedio_general': None,
@@ -494,7 +466,6 @@ class Reporte:
     
     @classmethod
     def _calcular_estadisticas_alumno_completas(cls, certificado, notas_validas, total_cursos):
-        """Calcula estadísticas completas del alumno"""
         promedio_general = cls._calcular_promedio_general(notas_validas)
         cursos_aprobados, cursos_reprobados = cls._contar_cursos_aprobados_reprobados(notas_validas)
         creditos_totales = cls._calcular_creditos_totales(certificado)
@@ -509,18 +480,15 @@ class Reporte:
     
     @classmethod
     def _calcular_promedio_general(cls, notas_validas):
-        """Calcula el promedio general del alumno"""
         suma_notas = sum(c['nota_final'] for c in notas_validas)
         return suma_notas / len(notas_validas)
     
     @classmethod
     def _contar_cursos_aprobados_reprobados(cls, notas_validas):
-        """Cuenta los cursos aprobados y reprobados del alumno"""
         cursos_aprobados = len([c for c in notas_validas if c['nota_final'] >= 4.0])
         cursos_reprobados = len([c for c in notas_validas if c['nota_final'] < 4.0])
         return cursos_aprobados, cursos_reprobados
     
     @classmethod
     def _calcular_creditos_totales(cls, certificado):
-        """Calcula el total de créditos del alumno"""
         return sum(parse_integer_field(c.get('creditos', 0)) or 0 for c in certificado)

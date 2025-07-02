@@ -12,7 +12,6 @@ class Curso:
     def _validate_codigo(self, codigo):
         codigo = validate_required_string(codigo, "código")
         
-        # Validar formato del código (letras seguidas de números, ej: ICC3030)
         if not re.match(r'^[A-Z]{2,5}\d{4}$', codigo.upper()):
             raise ValidationError("Código debe tener formato: 2-5 letras seguidas de 4 números (ej: ICC3030)")
         
@@ -146,7 +145,6 @@ class Curso:
             if curso_id is None or curso_id <= 0:
                 raise ValidationError("ID de curso debe ser un entero positivo")
             
-            # Verificar si el curso existe
             existing = Curso.get_by_id(curso_id)
             if not existing:
                 raise ValidationError("Curso no encontrado")
@@ -176,16 +174,7 @@ class Curso:
     
     @staticmethod
     def validate_requisitos(requisitos_list, curso_codigo=None):
-        """
-        Valida una lista de códigos de requisitos.
-        
-        Args:
-            requisitos_list: Lista de códigos de cursos
-            curso_codigo: Código del curso actual (para evitar auto-referencia)
-            
-        Raises:
-            ValidationError: Si algún requisito es inválido
-        """
+       
         if not requisitos_list:
             return
             

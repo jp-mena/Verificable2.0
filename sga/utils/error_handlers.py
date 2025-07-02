@@ -17,7 +17,6 @@ class ErrorHandler:
             except ValidationError as e:
                 logger.warning(f"Error de validación en {func.__name__}: {e}")
                 flash(str(e), 'error')
-                # Redirigir a la página anterior o a la lista principal
                 return ErrorHandler._get_safe_redirect(func.__name__)
             except Exception as e:
                 logger.error(f"Error inesperado en {func.__name__}: {e}")
